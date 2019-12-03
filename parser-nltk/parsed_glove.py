@@ -2,24 +2,8 @@ import json
 import os
 import numpy as np
 
-# vector_file = '../glove/vectors.txt'
-# vectors_dict = 'glove_dict.json'
-# with open(vector_file, 'r') as f:
-#     vectors = f.readlines()
-#
-# vector_dict = {}
-# for v in vectors:
-#     v = v.strip()
-#     v = v.split(' ')
-#     vector_dict.update({v[0]: v[1:]})
-#
-# with open(vectors_dict, 'w') as f:
-#     json.dump(vector_dict, f)
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
-parsed_file = 'parsed_np.json'
-
-
+parsed_file = '/parsed_np.json'
 
 def loadGloveModel(gloveFile):
     print("Loading Glove Model")
@@ -35,7 +19,26 @@ def loadGloveModel(gloveFile):
 
 Model = loadGloveModel(dir_path + "/vectors.txt")
 
-with open(parsed_file, 'w') as f:
+with open(dir_path + parsed_file, 'r') as f:
     parsed_sentences_dict = json.load(f)
 
-
+for key in parsed_sentences_dict.keys():
+    for k in parsed_sentences_dict[key].keys():
+        np_glove = []
+        for NP in parsed_sentences_dict[key][k]['np']:
+            parsed = []
+            parsed = NP.split(' ')
+            glove = np.zeros(512)
+            count = 0
+            for i in range(len(parsed)):
+                try:
+                    glove += Model[parsed[i]]
+                    count += 1
+                except Exception as e:
+                    continue
+            glove = glove / count
+            np_glove.append(glove)
+        # parsed_sentences_dict[key][k].update({'glove': np_glove})
+        np_glove = np.asarray(np_glove)
+        np.save('gloves/' + key + '_' + k, np_glove)
+print ('Done')
