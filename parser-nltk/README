@@ -1,0 +1,3 @@
+vectors.txt is created with glove/demo.sh from conceptual captions datasets words.
+
+To get glove vectors use parser_glove.py
