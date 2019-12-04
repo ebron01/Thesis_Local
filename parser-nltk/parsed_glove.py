@@ -1,13 +1,21 @@
 import json
 import os
 import numpy as np
-import _pickle as pickle
+import sys
+
+try:
+    import _pickle as pickle
+except:
+    print ("Error: Please run code with Python 3.xx.\n")
+    sys.exit(1)
+
 import datetime
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 parsed_file = '/parsed_np_vp.json'
 option = 'pickle' # or 'numpy'
 start = datetime.datetime.now()
+
 def loadGloveModel(gloveFile):
     print("Loading Glove Model")
     with open(gloveFile,'r+', encoding='utf-8') as f:
