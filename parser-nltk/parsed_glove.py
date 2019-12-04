@@ -25,6 +25,7 @@ with open(dir_path + parsed_file, 'r') as f:
 for key in parsed_sentences_dict.keys():
     for k in parsed_sentences_dict[key].keys():
         np_glove = []
+        vp_glove = []
         for NP in parsed_sentences_dict[key][k]['np']:
             parsed = []
             parsed = NP.split(' ')
@@ -38,7 +39,22 @@ for key in parsed_sentences_dict.keys():
                     continue
             glove = glove / count
             np_glove.append(glove)
+        for VP in parsed_sentences_dict[key][k]['vp']:
+            parsed_v = []
+            parsed_v = VP.split(' ')
+            glove_v = np.zeros(512)
+            count_v = 0
+            for i in range(len(parsed_v)):
+                try:
+                    glove_v += Model[parsed_v[i]]
+                    count_v += 1
+                except Exception as e:
+                    continue
+            glove_v = glove_v / count_v
+            vp_glove.append(glove_v)
         # parsed_sentences_dict[key][k].update({'glove': np_glove})
         np_glove = np.asarray(np_glove)
-        np.save('gloves/' + key + '_' + k, np_glove)
+        np.save('gloves/' + key + '_' + k + '_np', np_glove)
+        vp_glove = np.asarray(vp_glove)
+        np.save('gloves/' + key + '_' + k + '_vp', vp_glove)
 print ('Done')
