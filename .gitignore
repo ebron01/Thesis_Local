@@ -7,4 +7,5 @@ glove/corpus.txt
 glove/vectors.txt
 parser-nltk/vectors.txt
 parser-nltk/parsed_np.json
+parser-nltk/gloves
 **.idea
