@@ -174,6 +174,8 @@ class DataLoader(data.Dataset):
         print('assigned %d videos to split val' % len(self.split_ix['val']))
         print('assigned %d videos to split test' % len(self.split_ix['test']))
 
+        self.aux_data = json.load(open(self.opt.input_json))
+
 
         self.iterators = {'train': 0, 'val': 0, 'test': 0}
 

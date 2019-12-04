@@ -18,6 +18,8 @@ def parse_opt():
                     help='path to the directory containing the boxes of att img feats (img)')
     parser.add_argument('--input_label_h5', type=str, default='activity_net/inputs/video_data_dense_label.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
+    parser.add_argument('--input_aux_glove', type=str, default='concap/inputs/',
+                        help='path to the h5file containing the preprocessed dataset (img/video)')
 
     parser.add_argument('--g_start_from', type=str, default=None,
                      help="""skip pre training step and continue training from saved generator model at this path.

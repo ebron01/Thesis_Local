@@ -9,7 +9,7 @@ import time
 <NN>? = "zero or one singular noun."
 '''
 
-parsed_file = 'parsed_np.json'
+parsed_file = 'parsed_np_vp.json'
 
 #this method tokenizes a document then creates part of speech tags from them and returns pos from documents.
 def ie_preprocess(document):
@@ -32,7 +32,8 @@ try:
             concap_dict = {}
             for k in data[key].keys():
                 #this part encodes sentences with 'utf-8'
-                normalized = data[key][k].encode('utf-8')
+                #normalized = data[key][k].encode('utf-8')
+                normalized = data[key][k]
                 sentences.append(ie_preprocess(normalized))
                 concap_dict.update({k : ie_preprocess(normalized)})
             sentences_dict.update({key: concap_dict})

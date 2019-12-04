@@ -6,6 +6,7 @@ adv-inf/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
 glove/corpus.txt
 glove/vectors.txt
 parser-nltk/vectors.txt
-parser-nltk/parsed_np.json
-parser-nltk/gloves
+parser-nltk/parsed_np_vp.json
+parser-nltk/gloves/*
+parser-nltk/*.pkl
 **.idea
