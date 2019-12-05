@@ -59,8 +59,10 @@ class MultiModalGenerator(CaptionModel):
         self.activity_encoding_size = opt.activity_encoding_size
 
         #auxilary words to use in generation
-        # self.use_aux = opt.use_aux
-        # self.aux_encoding_size = opt.aux_encoding_size
+        self.use_aux = opt.use_aux
+        self.aux_sequence_size = opt.aux_sequence_size
+        if self.use_aux is not 0:
+            self.aux_encoding_size = 512
 
         if self.use_activity_labels:
             self.activity_embed = nn.Linear(self.activity_size, self.activity_encoding_size)

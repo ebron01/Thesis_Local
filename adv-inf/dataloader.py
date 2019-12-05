@@ -7,7 +7,7 @@ import h5py
 import os
 import numpy as np
 import random
-
+import pickle
 import torch
 import torch.utils.data as data
 
@@ -144,37 +144,55 @@ class DataLoader(data.Dataset):
         count_val = 0
         count_test = 0
 
+
+        self.aux_glove = pickle.load(open(self.opt.input_aux_glove, 'rb'))
+        self.aux_sequence_size = opt.aux_sequence_size
+        if opt.use_aux is not 0:
+            self.aux_encoding_size = 512
+
+
+        self.aux_glove_vidids = []
+        for i in self.aux_glove.keys():
+            key = i.rsplit('_', 5)[0]
+            if key not in self.aux_glove_vidids:
+                self.aux_glove_vidids.append(key)
+
+        train_size = int(len(self.aux_glove_vidids) * 0.7)
+        val_size = int((len(self.aux_glove_vidids) - train_size) / 2)
+        test_size = len(self.aux_glove_vidids) - train_size - val_size
+
         for j in range(seq_size[0]):
             i = self.video_id[j]
             video = self.info['videos'][i]
-            if video['split'] == 'train':
-                if count_train < 80:
+            video_id = self.info['videos'][i]['id']
+            if video_id in self.aux_glove_vidids:
+                if video['split'] == 'train':
+                    if count_train < train_size:
+                        self.split_ix['train'].append(j)
+                        self.split_size['train']+=1
+                        self.ix_split[j] = 'train'
+                        #added for small dataset
+                        count_train += 1
+                elif video['split'] == 'val_2':
+                    if count_val < val_size:
+                        self.split_ix['val'].append(j)
+                        self.split_size['val']+=1
+                        self.ix_split[j] = 'val'
+                        count_val += 1
+                elif video['split'] == 'val_1':
+                    if count_test < test_size:
+                        self.split_ix['test'].append(j)
+                        self.split_size['test']+=1
+                        self.ix_split[j] = 'test'
+                        count_test += 1
+                elif opt.train_only: # restval
                     self.split_ix['train'].append(j)
                     self.split_size['train']+=1
-                    self.ix_split[j] = 'train'
-                    #added for small dataset
-                    count_train += 1
-            elif video['split'] == 'val_2':
-                if count_val < 10:
-                    self.split_ix['val'].append(j)
-                    self.split_size['val']+=1
-                    self.ix_split[j] = 'val'
-                    count_val += 1
-            elif video['split'] == 'val_1':
-                if count_test < 10:
-                    self.split_ix['test'].append(j)
-                    self.split_size['test']+=1
-                    self.ix_split[j] = 'test'
-                    count_test += 1
-            elif opt.train_only: # restval
-                self.split_ix['train'].append(j)
-                self.split_size['train']+=1
 
         print('assigned %d videos to split train' % len(self.split_ix['train']))
         print('assigned %d videos to split val' % len(self.split_ix['val']))
         print('assigned %d videos to split test' % len(self.split_ix['test']))
 
-        self.aux_data = json.load(open(self.opt.input_json))
 
 
         self.iterators = {'train': 0, 'val': 0, 'test': 0}
@@ -268,6 +286,7 @@ class DataLoader(data.Dataset):
         fc_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.fc_feat_size], dtype = 'float32')
         img_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.img_feat_size], dtype = 'float32')
         box_batch = np.zeros([batch_size, self.max_sent_num, self.nbox, self.opt.box_feat_size], dtype = 'float32')
+        aux_batch = np.zeros([batch_size, self.max_sent_num, self.aux_sequence_size, self.aux_encoding_size], dtype = 'float32')
 
         # negative inputs for discriminator
         mm_fc_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.fc_feat_size], dtype = 'float32')

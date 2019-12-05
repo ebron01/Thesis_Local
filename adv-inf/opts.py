@@ -4,7 +4,7 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     # Data input settings
 
-    '''python train.py --caption_model video --input_json activity_net/inputs/video_data_dense.json --input_fc_dir activity_net/feats/resnext101-64f/ 
+    '''python train.py --caption_model video --input_aux_glove ConCap/inputs/gloves.pkl --input_json activity_net/inputs/video_data_dense.json --input_fc_dir activity_net/feats/resnext101-64f/ 
     --input_img_dir activity_net/feats/resnet152/ --input_box_dir activity_net/feats/bottomup/ --input_label_h5 activity_net/inputs/video_data_dense_label.h5 --glove_npy activity_net/inputs/glove.npy
     --learning_rate 5e-4 --learning_rate_decay_start 0 --scheduled_sampling_start 0 --checkpoint_path video_ckpt --val_videos_use -1 --losses_print_every 10 --batch_size 16 --language_eval 1'''
 
@@ -18,8 +18,8 @@ def parse_opt():
                     help='path to the directory containing the boxes of att img feats (img)')
     parser.add_argument('--input_label_h5', type=str, default='activity_net/inputs/video_data_dense_label.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
-    parser.add_argument('--input_aux_glove', type=str, default='concap/inputs/',
-                        help='path to the h5file containing the preprocessed dataset (img/video)')
+    parser.add_argument('--input_aux_glove', type=str, default='ConCap/inputs/gloves.pkl',
+                        help='path to pickle containing the glove vectors for closest captions of Conceptual Captions')
 
     parser.add_argument('--g_start_from', type=str, default=None,
                      help="""skip pre training step and continue training from saved generator model at this path.
@@ -95,6 +95,10 @@ def parse_opt():
                         help='use bag of words for visual discriminator; otherwise, use lstm')
     parser.add_argument('--glove_npy', type=str, default=None,
                         help='npy containing glove vector associated with word_idx labels')
+    parser.add_argument('--use_aux', type=int, default=1,
+                        help='whether use auxiliary glove vectors or not')
+    parser.add_argument('--aux_sequence_size', type=int, default=5,
+                        help='how much aux glove vector to use')
 
     # video options
     parser.add_argument('--feat_type', type=str, default='resnext101-64f',
