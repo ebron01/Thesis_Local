@@ -52,17 +52,25 @@ def train(opt):
 
     # set up models
     gen, dis = models.setup(opt)
-    gen_model = gen.cuda()
+    if torch.cuda.is_available():
+        gen_model = gen.cuda()
+    else:
+        gen_model = gen
     gen_model.train()
-    dis_model = dis.cuda()
+    if torch.cuda.is_available():
+        dis_model = dis.cuda()
+    else:
+        dis_model = dis
     dis_model.train()
     gen_optimizer = utils.build_optimizer(gen_model.parameters(), opt)
     dis_optimizer = utils.build_optimizer(dis_model.parameters(), opt)
 
     # loss functions
     crit = utils.LanguageModelCriterion()
-    gan_crit = nn.BCELoss().cuda()
-
+    if torch.cuda.is_available():
+        gan_crit = nn.BCELoss().cuda()
+    else:
+        gan_crit = nn.BCELoss()
     # keep track of iteration
     g_iter = 0
     g_epoch = 0
@@ -120,7 +128,7 @@ def train(opt):
                 d_iter = infos['d_iter_' + d_start_epoch]
             print('loaded %s (epoch: %d iter: %d)' % (d_model_path, d_epoch, d_iter))
     infos['opt'] = opt
-    loader.iterators = infos.get('g_iterators', loader.iterators)
+    loader.iterators = infos.get('g_iterators', loader.iterators) #if infos has 'g_iterators' keys then .get will return that, else it will return loader.iterations
     dis_loader.iterators = infos.get('d_iterators', loader.iterators)
 
     # hybrid discriminator weight

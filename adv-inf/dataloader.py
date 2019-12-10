@@ -144,6 +144,7 @@ class DataLoader(data.Dataset):
         count_val = 0
         count_test = 0
 
+        self.use_aux = getattr(opt, 'use_aux', 0) or getattr(opt, 'd_use_aux', 0)
 
         self.aux_glove = pickle.load(open(self.opt.input_aux_glove, 'rb'))
         self.aux_sequence_size = opt.aux_sequence_size
@@ -192,7 +193,6 @@ class DataLoader(data.Dataset):
         print('assigned %d videos to split train' % len(self.split_ix['train']))
         print('assigned %d videos to split val' % len(self.split_ix['val']))
         print('assigned %d videos to split test' % len(self.split_ix['test']))
-
 
 
         self.iterators = {'train': 0, 'val': 0, 'test': 0}
@@ -272,6 +272,35 @@ class DataLoader(data.Dataset):
             box_features.append(feats[i*self.nbox:(i+1)*self.nbox])
         return box_features
 
+    def get_aux_batch(self, index):
+        if not self.use_aux:
+            return None
+        v_idx = self.video_id[index]
+        id = self.info['videos'][v_idx]['id']
+        sent_num = self.sent_num[index]
+        assert sent_num > 0, 'data should have at least one caption'
+        aux_features = []
+        split = self.ix_split[index]
+        if split == 'val':
+            split = 'val2'
+        elif split == 'test':
+            split = 'val1'
+        dir = os.path.join(self.input_box_dir,split)
+        aux_glove = pickle.load(open(self.opt.input_aux_glove, 'rb'))
+
+        feats = np.load(os.path.join(dir,id + '.npy'))
+        assert feats.shape[0] >= 3 * sent_num, 'weird feature for %s' % id
+
+        for i in range(sent_num):
+            #taking only one sample np or vp from closest captions of concap
+            for key in aux_glove.keys():
+                if (id + '_' + str(sent_num)) in key and 'np' in key:
+                    if aux_glove[key].shape[0] > 5:
+                        aux_glove[key] = aux_glove[key][:5]
+                    aux_features.append(aux_glove[key])
+                    break
+        return aux_features
+
     def set_negatives(self,mode):
         self.negatives = mode
 
@@ -292,6 +321,7 @@ class DataLoader(data.Dataset):
         mm_fc_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.fc_feat_size], dtype = 'float32')
         mm_img_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.img_feat_size], dtype = 'float32')
         mm_box_batch = np.zeros([batch_size, self.max_sent_num, self.nbox, self.opt.box_feat_size], dtype = 'float32')
+        mm_aux_batch = np.zeros([batch_size, self.max_sent_num, self.aux_sequence_size, self.aux_encoding_size], dtype='float32')
         act_batch = []
         mm_act_batch = []
         mm_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype = 'int')
@@ -307,6 +337,7 @@ class DataLoader(data.Dataset):
             fc_batch[i,:sent_num] = tmp_fcs[0]
             img_batch[i,:sent_num] = tmp_fcs[1]
             box_batch[i,:sent_num] = tmp_fcs[2]
+            aux_batch[i,:sent_num, :tmp_fcs[3][0].shape[0]] = tmp_fcs[3]
             sent_num_batch[i] = sent_num
             label_batch[i, :, 1 : self.seq_length + 1] = self.labels[ix]
             v_ix = self.video_id[ix]
@@ -327,16 +358,21 @@ class DataLoader(data.Dataset):
                     if m >= sent_num:
                         break
             else:  # get random caption (random negatives)
+                count = 0
                 while True:
-                    mmix = random.randint(0, len(self.split_ix[split]) - 1)
-                    if self.video_id[mmix] != v_ix and sent_num <= self.sent_num[mmix]:  # avoid getting the gt pair
+                    if self.opt.ordered == 1:
+                        mmix = random.randint(0, len(self.split_ix[split]) - 1)
+                    else:
+                        mmix = random.choice(self.split_ix[split])
+                    count += 1
+                    if self.video_id[mmix] == v_ix and sent_num == self.sent_num[mmix]:  # avoid getting the gt pair
                         mm_batch[i, :sent_num, 1:self.seq_length + 1] = self.labels[mmix, :sent_num, :]
                         mm_fc_batch[i, :sent_num] = self.get_seg_batch(mmix, "video")[:sent_num]
                         mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[
                                                      :sent_num] if self.use_img else None
                         mm_box_batch[i, :sent_num] = self.get_box_batch(mmix)[:sent_num] if self.use_box else None
                         break
-
+                    # print (count)
             if tmp_wrapped:
                 wrapped = True
 
@@ -361,12 +397,14 @@ class DataLoader(data.Dataset):
         data['fc_feats'] = np.array(fc_batch)
         data['img_feats'] = np.array(img_batch)
         data['box_feats'] = np.array(box_batch)
+        data['aux_feats'] = np.array(aux_batch)
         data['labels'] = np.array(label_batch)
         data['sent_num'] = np.array(sent_num_batch)
 
         data['mm_fc_feats'] = np.array(mm_fc_batch)
         data['mm_img_feats'] = np.array(mm_img_batch)
         data['mm_box_feats'] = np.array(mm_box_batch)
+        data['mm_aux_feats'] = np.array(mm_aux_batch)
         data['mm_labels'] = np.array(mm_batch)
         data['shufflelabels'] = np.array(shuffle_batch)
 
@@ -389,7 +427,7 @@ class DataLoader(data.Dataset):
         """This function returns a tuple that is further passed to collate_fn
         """
         return [self.get_seg_batch(index,"video"), self.get_seg_batch(index,"img"),
-                self.get_box_batch(index)], index
+                self.get_box_batch(index), self.get_aux_batch(index)], index
 
     def __len__(self):
         return len(self.info['videos'])

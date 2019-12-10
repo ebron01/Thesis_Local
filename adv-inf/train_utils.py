@@ -5,15 +5,15 @@ def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
     data = loader.get_batch('train')
     # torch.cuda.synchronize()
-    tmp = [data['fc_feats'], data['att_feats'], data['img_feats'], data['box_feats'],
+    tmp = [data['fc_feats'], data['att_feats'], data['img_feats'], data['box_feats'], data['aux_feats'],
            data['labels'], data['masks'], data['att_masks'], data['activities']]
     # tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-    fc_feats, att_feats, img_feats, box_feats, labels, masks, att_masks, activities = tmp
+    fc_feats, att_feats, img_feats, box_feats, aux_feats, labels, masks, att_masks, activities = tmp
     sent_num = data['sent_num']
     wrapped = data['bounds']['wrapped']
     gen_optimizer.zero_grad()
 
-    seq = gen_model(fc_feats, img_feats, box_feats, activities, labels)
+    seq = gen_model(fc_feats, img_feats, box_feats, aux_feats, activities, labels)
     seq = utils.align_seq(sent_num, seq)
     labels = utils.align_seq(sent_num, labels)
     masks = utils.align_seq(sent_num, masks)
@@ -41,6 +41,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     fc_feats, mm_fc_feats, img_feats, box_feats, att_feats, labels, mm_labels, att_masks, activities, \
     mm_img_feats, mm_box_feats, mm_activities = tmp
     # label = torch.zeros(sum(sent_num)).cuda()
+    label = torch.zeros(sum(sent_num))
     dis_v_loss = 0
     dis_l_loss = 0
     dis_p_loss = 0
@@ -66,7 +67,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
 
         # only gt sentence pair as pairwise negatives
         # neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels'])).cuda()
-
+        neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels']))
     # update visual discriminator with [gt (real), gt mismatch (fake), gen mismatch (fake)]
     if use_vis:
         dis_optimizer.zero_grad()

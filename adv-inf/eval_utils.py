@@ -189,11 +189,11 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         data = loader.get_batch(split)
         n = n + loader.batch_size
 
-        tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['mm_labels'],
-               data['masks'], data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
-        tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-        fc_feats, img_feats, box_feats, mm_fc_feats, att_feats, labels, mm_labels, masks, att_masks, activities, \
-        mm_img_feats, mm_box_feats, mm_activities = tmp
+        tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['aux_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['mm_labels'],
+               data['masks'], data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'],data['mm_aux_feats'], data['mm_activities']]
+        tmp = [_ if _ is None else torch.from_numpy(_) for _ in tmp]
+        fc_feats, img_feats, box_feats, aux_feats, mm_fc_feats, att_feats, labels, mm_labels, masks, att_masks, activities, \
+        mm_img_feats, mm_box_feats, mm_aux_feats, mm_activities = tmp
         sent_num = data['sent_num']
 
         torch.manual_seed(1234)
@@ -205,7 +205,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 mm_activities = utils.dense_classifier(sent_num, mm_fc_feats, mm_img_feats, classifier)
 
             # calculate loss
-            gen_seq = gen_model(fc_feats, img_feats, box_feats, activities, labels)
+            gen_seq = gen_model(fc_feats, img_feats, box_feats, aux_feats, activities, labels)
             gen_seq = utils.align_seq(sent_num, gen_seq)
             loss = crit(gen_seq, utils.align_seq(sent_num, labels)[:, 1:], utils.align_seq(sent_num, masks)[:, 1:]).item()
             losses.append(loss)
@@ -213,14 +213,14 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             # use greedy max for inference
             if sample_max:
                 eval_kwargs['sample_max'] = 1
-                seq, _ = gen_model(fc_feats, img_feats, box_feats, activities,
+                seq, _ = gen_model(fc_feats, img_feats, box_feats, aux_feats, activities,
                                opt=eval_kwargs, mode='sample')
 
             # use sampling for inference
             else:
                 sample_list = np.zeros((loader.batch_size, num_samples, loader.seq_length))
                 context_list = np.zeros((loader.batch_size, num_samples, 512))
-                seq_dummy = torch.zeros(loader.batch_size, 10, loader.seq_length).cuda()
+                seq_dummy = torch.zeros(loader.batch_size, 10, loader.seq_length)
                 best_context = None
                 best_seq = None
                 for s in range(max(sent_num)):
@@ -275,9 +275,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     # select the caption with highest score
                     inds = score_list.argsort(axis=1)[:, ::-1]
                     caption_list = torch.tensor(
-                        sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
+                        sample_list[np.arange(loader.batch_size)[:, None], inds]).long()
                     best_context = torch.tensor(
-                        context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
+                        context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).float()
                     best_seq = caption_list[:, 0, :]
                     seq_dummy[:, s] = best_seq
 
@@ -293,16 +293,16 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                                 opt=eval_kwargs, mode='sample')
                 mm_seq = torch.mul(mm_seq,utils.generate_paragraph_mask(sent_num, mm_seq))
 
-                neg_lang_labels = utils.get_neg_lang(sent_num, labels, seq.cuda())
-                neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels'])).cuda()
+                neg_lang_labels = utils.get_neg_lang(sent_num, labels, seq)
+                neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels']))
 
                 dis_loss = 0
 
-                v_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, seq.cuda())
+                v_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, seq)
                 v_gen_score = utils.align_seq(sent_num, v_gen_score)
-                l_gen_score = dis_model(seq.cuda(), mode='lang')
+                l_gen_score = dis_model(seq, mode='lang')
                 l_gen_score = utils.align_seq(sent_num, l_gen_score)
-                p_gen_score = dis_model(seq.cuda(), mode='par')
+                p_gen_score = dis_model(seq, mode='par')
                 p_gen_score = utils.align_seq(sent_num,p_gen_score)
                 scores['v_gen_scores'].extend(v_gen_score)
                 scores['l_gen_scores'].extend(l_gen_score)
@@ -322,7 +322,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
                 v_mm_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_labels[:,:,1:-1])
                 v_mm_score = utils.align_seq(sent_num, v_mm_score)
-                v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_seq.cuda())
+                v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_seq)
                 v_mm_gen_score = utils.align_seq(sent_num, v_mm_gen_score)
                 l_neg_score = dis_model(neg_lang_labels, mode='lang')
                 l_neg_score = utils.align_seq(sent_num, l_neg_score)

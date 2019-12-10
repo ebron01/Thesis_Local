@@ -3,6 +3,10 @@ turi/*.pptx
 glove/*.bin
 adv-inf/activity_net
 adv-inf/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
+adv-inf/ConCap/*
+adv-inf-master/activity_net
+adv-inf-master/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
+adv-inf-master/ConCap/*
 glove/corpus.txt
 glove/vectors.txt
 parser-nltk/vectors.txt
@@ -10,3 +14,5 @@ parser-nltk/parsed_np_vp.json
 parser-nltk/gloves/*
 parser-nltk/*.pkl
 **.idea
+.DS_Store
+

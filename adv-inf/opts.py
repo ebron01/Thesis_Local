@@ -99,6 +99,8 @@ def parse_opt():
                         help='whether use auxiliary glove vectors or not')
     parser.add_argument('--aux_sequence_size', type=int, default=5,
                         help='how much aux glove vector to use')
+    parser.add_argument('--ordered', type=int, default=0,
+                        help='if minimal dataset is in video id order')
 
     # video options
     parser.add_argument('--feat_type', type=str, default='resnext101-64f',
@@ -133,6 +135,7 @@ def parse_opt():
                         help='weight to paragraph discriminator reward')
     parser.add_argument('--ce_weight', type=float, default=0,
                         help='add ce loss during self-critical training')
+
 
     # classifier option
     parser.add_argument('--use_mean', type=int, default=0)
