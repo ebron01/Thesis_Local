@@ -103,8 +103,6 @@ def parse_opt():
                         help='how much aux glove vector to use')
     parser.add_argument('--ordered', type=int, default=0,
                         help='if minimal dataset is in video id order')
-    parser.add_argument('--dataset_size', type=int, default=0,
-                        help='if 0 minimal dataset else whole dataset')
 
     # video options
     parser.add_argument('--feat_type', type=str, default='resnext101-64f',
