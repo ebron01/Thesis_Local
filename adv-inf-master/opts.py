@@ -10,15 +10,15 @@ def parse_opt():
 
     parser.add_argument('--dataset_size', type=int, default=0, help='if 0 minimal dataset else whole dataset')
 
-    parser.add_argument('--input_json', type=str, default='activity_net/inputs/video_data_dense.json',
+    parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense.json',
                     help='path to the json file containing additional info and vocab (img/video)')
-    parser.add_argument('--input_fc_dir', type=str, default='activity_net/feats/resnext101-64f/',
+    parser.add_argument('--input_fc_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnext101-64f/',
                         help='path to the directory containing the preprocessed fc video features')
-    parser.add_argument('--input_img_dir', type=str, default='activity_net/feats/resnet152/',
+    parser.add_argument('--input_img_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnet152/',
                         help='path to the directory containing the image features')
-    parser.add_argument('--input_box_dir', type=str, default='activity_net/feats/bottomup/',
+    parser.add_argument('--input_box_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/bottomup/',
                     help='path to the directory containing the boxes of att img feats (img)')
-    parser.add_argument('--input_label_h5', type=str, default='activity_net/inputs/video_data_dense_label.h5',
+    parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense_label.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
     parser.add_argument('--input_aux_glove', type=str, default='ConCap/inputs/gloves.pkl',
                         help='path to pickle containing the glove vectors for closest captions of Conceptual Captions')
@@ -156,7 +156,7 @@ def parse_opt():
     # Optimization: General
     parser.add_argument('--g_pre_nepoch', type=int, default=50,
                     help='number of epochs to pre-train generator with cross entropy')
-    parser.add_argument('--batch_size', type=int, default=16,
+    parser.add_argument('--batch_size', type=int, default=8,
                     help='minibatch size')
     parser.add_argument('--grad_clip', type=float, default=0.1, #5.,
                     help='clip gradients at this value')
