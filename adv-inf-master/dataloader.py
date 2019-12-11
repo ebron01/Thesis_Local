@@ -92,15 +92,24 @@ class DataLoader(data.Dataset):
     def __init__(self, opt):
         self.opt = opt
         self.batch_size = self.opt.batch_size
-        self.input_fc_dir = self.opt.input_fc_dir
+        if self.opt.dataset_size == 1 :
+            self.input_fc_dir = '/data/shared/ActivityNet/advinf_activitynet/feats/resnext101-64f/'
+        else:
+            self.input_fc_dir = self.opt.input_fc_dir
 
         # use other features
         self.use_img = getattr(opt, 'use_img', 0) or getattr(opt, 'd_use_img', 0)
         if self.use_img:
-            self.input_img_dir = self.opt.input_img_dir
+            if self.opt.dataset_size == 1:
+                self.input_fc_dir = '/data/shared/ActivityNet/advinf_activitynet/feats/resnet152/'
+            else:
+                self.input_img_dir = self.opt.input_img_dir
         self.use_box = getattr(opt, 'use_box', 0) or getattr(opt, 'd_use_box', 0)
         if self.use_box:
-            self.input_box_dir = self.opt.input_box_dir
+            if self.opt.dataset_size == 1:
+                self.input_box_dir = '/data/shared/ActivityNet/advinf_activitynet/feats/bottomup/'
+            else:
+                self.input_box_dir = self.opt.input_box_dir
         self.feat_type = opt.feat_type
         self.nbox = 3
 
@@ -117,7 +126,11 @@ class DataLoader(data.Dataset):
 
         # open the hdf5 file containing visual features and captions
         print('DataLoader loading h5 file: ', opt.input_label_h5)
-        self.h5_label_file = h5py.File(self.opt.input_label_h5, 'r')
+
+        if self.opt.dataset_size == 1:
+            self.h5_label_file = h5py.File('/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label.h5', 'r')
+        else:
+            self.h5_label_file = h5py.File(self.opt.input_label_h5, 'r')
         self.labels = self.h5_label_file['labels'].value
         seq_size = self.labels.shape
         self.seq_length = seq_size[2]
