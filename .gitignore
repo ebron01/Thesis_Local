@@ -4,9 +4,11 @@ glove/*.bin
 adv-inf/activity_net
 adv-inf/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
 adv-inf/ConCap/*
+adv-inf/save/*
 adv-inf-master/activity_net
 adv-inf-master/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
 adv-inf-master/ConCap/*
+adv-inf-master/save/*
 glove/corpus.txt
 glove/vectors.txt
 parser-nltk/vectors.txt
