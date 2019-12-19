@@ -3,6 +3,7 @@ turi/*.pptx
 turi/midframeextractor/mid/*
 turi/reference_data_all.model/*
 turi/conceptualcaptions_0_2.sframe/*
+turi/env2/*
 glove/*.bin
 adv-inf/activity_net
 adv-inf/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
