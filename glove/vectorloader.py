@@ -5,7 +5,7 @@ Created on Wed Apr 17 23:11:25 2019
 https://stackoverflow.com/questions/37793118/load-pretrained-glove-vectors-in-python
 @author: emre
 """
-#%%This part prints assosiated glove vectors of a word.
+#%%This part creates assosiated glove vectors of a word.
 import numpy as np
 import os
 
