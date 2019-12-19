@@ -1,5 +1,6 @@
 turi/5.model
 turi/*.pptx
+turi/midframeextractor/mid/*
 glove/*.bin
 adv-inf/activity_net
 adv-inf/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
@@ -17,4 +18,3 @@ parser-nltk/gloves/*
 parser-nltk/*.pkl
 **.idea
 .DS_Store
-

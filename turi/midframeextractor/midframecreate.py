@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+#from sklearn.metrics.pairwise import cosine_similarity
 from PIL import Image
 import json
 import math
@@ -16,7 +16,7 @@ print('video_data_dense.json loaded')
 video_data = video_data['videos']
 # extracted frames of 10 sample videos from activitynet dataset just to have a good comparison
 # filenames_local = os.listdir('/Users/emre/Desktop/Tez/09ThesisCode/GitThesisCode/keras_rmac/ActVideos/frames/')
-filenames_server = os.listdir('frames')
+filenames_server = os.listdir('/data/shared/ActivityNet/Crawler/done_videos')
 #with open('filenames_server.txt', 'r') as f:
 #    filenames_server = f.readlines()
 filenames = filenames_server
@@ -28,18 +28,27 @@ for fn in filenames:
         if fn.strip() == str(vd['id']):
             vdata.update({vd['id']: vd})
 print('vdata info created')
-print(datetime.datetime.now())
+with open('vdata_info.json', 'w') as f:
+    json.dump(vdata, f)
+print('vdata saved to vdata_info.json')
 #this part counts frames in a dir of activitynet videos for each. This count will be used to decide which frame corresponds as middle frame of an event
 file_count = {}
 frame_path_local = '/Users/emre/Desktop/Tez/09ThesisCode/GitThesisCode/keras_rmac/ActVideos/frames/'
 frame_path_server = '/data/shared/ActivityNet/Crawler/done_videos/'
 frame_path = frame_path_server
 
-for fn in filenames:
-    file_count.update({fn: len([name for name in os.listdir(frame_path + fn) if os.path.isfile(frame_path + fn + '/' + name)])})
-with open('frame_counts.json', 'w') as f:
-    json.dump(file_count, f)
-print('frame_counts.json created')
+#must uncomment this part for a new frame counts json file
+#for fn in filenames:
+#    file_count.update({fn: len([name for name in os.listdir(frame_path + fn) if os.path.isfile(frame_path + fn + '/' + name)])})
+#with open('frame_counts.json', 'w') as f:
+#    json.dump(file_count, f)
+#print('frame_counts.json created')
+
+#must comment out this part for a new frame counts json file
+with open('frame_counts.json', 'r') as f:
+    file_count = json.load(f)
+print('frame_counts.json loaded')
+
 print(datetime.datetime.now())
 #TODO: there are missing videos when video_data and filenames are compared, find them
 #this part adds information about start, middle and end frame of each event in a video of activitynet dataset
@@ -57,7 +66,7 @@ for fn in vdata.keys():
         end_frame = min(end_frame, frames)
         middle_frame = int(math.floor((start_frame + end_frame) / 2))
         frame_locs.append([start_frame, middle_frame, end_frame])
-    vdata[fn].update({unicode('frame_locs'): frame_locs})
+    vdata[fn].update({str('frame_locs'): frame_locs})
 print('frame locs are added')
 print(datetime.datetime.now())
 #dump activitynet new information data to use while extracting middle frames' rmac vectors for each event to compare with Conceptual Captions
@@ -65,7 +74,7 @@ actnet_filename = '/data/shared/ConceptualCaptions/keras_rmac/data/activitynet_a
 with open(actnet_filename, 'w') as f:
     json.dump(vdata, f)
 print('actnet_video_details.json created')
-mid_fr_path = '/home/eboran/turi/midfrmextr/mid/'
+mid_fr_path = '~/Thesis_Local/turi/midframeextractor/mid/'
 image_path = '/data/shared/ActivityNet/Crawler/done_videos/'
 print(datetime.datetime.now())
 for vd in vdata.keys():
