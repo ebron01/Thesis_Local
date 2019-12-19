@@ -4,9 +4,9 @@ import json
 import csv
 tc.config.set_num_gpus(-1)
 #pdb.set_trace()
-reference_data=tc.load_sframe('../conceptualcaptions_0_2.sframe') #conceptualcaptions_0_2.sframe
-loaded_model = tc.load_model('../reference_data_all.model')
-act_data = tc.image_analysis.load_images('./mid/')
+reference_data=tc.load_sframe('conceptualcaptions_0_2.sframe') #conceptualcaptions_0_2.sframe
+loaded_model = tc.load_model('reference_data_all.model')
+act_data = tc.image_analysis.load_images('./midframeextractor/mid/')
 query = loaded_model.query(act_data[:], k=30)
 #pdb.set_trace()
 data = {}
@@ -72,4 +72,4 @@ for act_key in sorted(best_diff.keys()):
     upd_act.update({str(act_key) : sentence, str(act_key) + '_concap' : upd_concap})
 
 with open('updated_query_mid.json', 'w') as f:
-    json.dump(upd_act, f) 
+    json.dump(upd_act, f)
