@@ -28,6 +28,7 @@ from nltk.corpus import stopwords
 from nltk import download
 from datetime import datetime
 import numpy as np
+import json
 start_nb = datetime.now()
 download('stopwords')
 
@@ -68,12 +69,17 @@ def sortarray(distance,captions):
 start_embeddings = datetime.now()
 print('cell started at : ' + str(start_embeddings))
 
-if not os.path.exists('/Users/emre/Desktop/Tez/09ThesisCode/wmd/GoogleNews-vectors-negative300.bin'):
-    raise ValueError('you need to download the google news model')
-
 #this part loads a word2vec model    
-model= KeyedVectors.load_word2vec_format('/Users/emre/Desktop/Tez/09ThesisCode/wmd/GoogleNews-vectors-negative300.bin', binary=True)
+model= KeyedVectors.load_word2vec_format('./inputs/GoogleNews-vectors-negative300.bin', binary=True)
 model.init_sims(replace=True)  # Normalizes the vectors in the word2vec class.
+
+query = 'updated_query_mid.json'
+
+with open(query, 'w') as f:
+    query = json.load(f)
+
+for key in query.keys():
+    print ('Done')
 
 #this part creates the caption array to be reordered after a query on images from Conceptual Captions datasets retrieved images.
 base = ['a big door is being opened in a video game']
@@ -93,6 +99,3 @@ with open('reordered.txt','a+') as f:
     f.write('-------------------')
     f.write('\n')
 print('Cell took %s seconds to run.' % str(datetime.now()- start_embeddings))
-
-
-        

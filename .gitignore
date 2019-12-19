@@ -18,5 +18,6 @@ parser-nltk/vectors.txt
 parser-nltk/parsed_np_vp.json
 parser-nltk/gloves/*
 parser-nltk/*.pkl
+wmd_v2/inputs/*
 **.idea
 .DS_Store
