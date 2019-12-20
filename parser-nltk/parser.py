@@ -19,7 +19,7 @@ def ie_preprocess(document):
    return sentences
 
 #this part reads query for middle frame of selected videos.
-with open('updated_query_mid.json', 'r') as f:
+with open('ordered_query_mid.json', 'r') as f:
     data = json.load(f)
 
 sentences = []
