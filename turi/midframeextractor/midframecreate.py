@@ -9,37 +9,47 @@ import datetime
 import pdb
 print(datetime.datetime.now())
 #get information about whole ActivityNet Captions dataset(train,val_1,val_2) included
-with open('/data/shared/ConceptualCaptions/keras_rmac/data/activitynet_annotations/video_data_dense.json', 'r') as f:
+with open('video_data_dense.json', 'r') as f:
     video_data = json.load(f)
 print('video_data_dense.json loaded')
 #get video data details from json
 video_data = video_data['videos']
 # extracted frames of 10 sample videos from activitynet dataset just to have a good comparison
 # filenames_local = os.listdir('/Users/emre/Desktop/Tez/09ThesisCode/GitThesisCode/keras_rmac/ActVideos/frames/')
-filenames_server = os.listdir('/data/shared/ActivityNet/Crawler/done_videos')
+filenames_server = os.listdir('../actvideos_frames')
 #with open('filenames_server.txt', 'r') as f:
 #    filenames_server = f.readlines()
 filenames = filenames_server
 print(datetime.datetime.now())
-#get 10 video details
+
+#uncomment this part for new vdata file
 vdata = {}
-for fn in filenames:
-    for vd in video_data:
-        if fn.strip() == str(vd['id']):
-            vdata.update({vd['id']: vd})
-print('vdata info created')
-with open('vdata_info.json', 'w') as f:
-    json.dump(vdata, f)
-print('vdata saved to vdata_info.json')
+#for fn in filenames:
+#    for vd in video_data:
+#        if fn.strip() == str(vd['id']):
+#            vdata.update({vd['id']: vd})
+#print('vdata info created')
+#with open('vdata_info.json', 'w') as f:
+#    json.dump(vdata, f)
+#print('vdata saved to vdata_info.json')
+
+#comment this part for new vdata
+with open('vdata_info.json', 'r') as f:
+    vdata = json.load(f)
+print('vdata data loaded to vdata')
+
 #this part counts frames in a dir of activitynet videos for each. This count will be used to decide which frame corresponds as middle frame of an event
 file_count = {}
-frame_path_local = '/Users/emre/Desktop/Tez/09ThesisCode/GitThesisCode/keras_rmac/ActVideos/frames/'
-frame_path_server = '/data/shared/ActivityNet/Crawler/done_videos/'
+frame_path_server = '../actvideos_frames/'
 frame_path = frame_path_server
 
 #must uncomment this part for a new frame counts json file
+#count = 0
 #for fn in filenames:
 #    file_count.update({fn: len([name for name in os.listdir(frame_path + fn) if os.path.isfile(frame_path + fn + '/' + name)])})
+#    count +=1
+#    if count % 31 == 0:
+#        print(count)
 #with open('frame_counts.json', 'w') as f:
 #    json.dump(file_count, f)
 #print('frame_counts.json created')
@@ -70,12 +80,12 @@ for fn in vdata.keys():
 print('frame locs are added')
 print(datetime.datetime.now())
 #dump activitynet new information data to use while extracting middle frames' rmac vectors for each event to compare with Conceptual Captions
-actnet_filename = '/data/shared/ConceptualCaptions/keras_rmac/data/activitynet_annotations/actnet_video_details.json'
+actnet_filename = './actnet_video_details.json'
 with open(actnet_filename, 'w') as f:
     json.dump(vdata, f)
 print('actnet_video_details.json created')
-mid_fr_path = '~/Thesis_Local/turi/midframeextractor/mid/'
-image_path = '/data/shared/ActivityNet/Crawler/done_videos/'
+mid_fr_path = './mid/'
+image_path = '../actvideos_frames/'
 print(datetime.datetime.now())
 for vd in vdata.keys():
         #this frame locs gives info for all sample videos' start middle end frame info.
