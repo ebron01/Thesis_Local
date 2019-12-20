@@ -19,7 +19,7 @@ def ie_preprocess(document):
    return sentences
 
 #this part reads query for middle frame of selected videos.
-with open('ordered_query_mid.json', 'r') as f:
+with open('sorted_query_mid.json', 'r') as f:
     data = json.load(f)
 
 sentences = []
@@ -33,9 +33,10 @@ try:
             for k in data[key].keys():
                 #this part encodes sentences with 'utf-8'
                 #normalized = data[key][k].encode('utf-8')
-                normalized = data[key][k]
+                normalized = data[key][k]['caption']
+                order = data[key][k]['order']
                 sentences.append(ie_preprocess(normalized))
-                concap_dict.update({k : ie_preprocess(normalized)})
+                concap_dict.update({k: {'caption': ie_preprocess(normalized), 'order': order}})
             sentences_dict.update({key: concap_dict})
 except Exception as e:
     print(e)

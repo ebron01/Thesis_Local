@@ -66,7 +66,7 @@ def sortarray(distance,captions):
     sortedarray = np.array(captions)[sortindex.astype(int)]
     return sortedarray
 
-def _sortarray(distance, key_pairs, captions):
+def _sortarray(distance, key_pairs, raw_captions):
     summedarray = np.sum(distance, axis=1)
     sorted = np.sort(summedarray)
     sorted_index = []
@@ -76,7 +76,7 @@ def _sortarray(distance, key_pairs, captions):
     caption_ordered ={}
     for i in range(len(sorted_index)):
         key = key_pairs[i]['key']
-        caption = captions[key]
+        caption = raw_captions[key]
         caption_ordered.update({key: {'caption': caption, 'order': sorted_index[i]}})
     return caption_ordered
 
@@ -103,13 +103,14 @@ captions_ordered = {}
 for key in query.keys():
     base = {}
     if 'concap' not in key:
-        base.update({key : query[key]})
-        captions = query[key + '_concap']
-        captions = removestopwords(captions)
+        base.update({key: query[key]})
+        raw_base = base
+        raw_captions = query[key + '_concap']
+        captions = removestopwords(raw_captions)
         base = removestopwords(base)
         distance, key_pairs = _distance(base, captions, model)
-        caption_ordered = _sortarray(distance, key_pairs, captions)
-        captions_ordered.update({key: base, (key + '_concap'): caption_ordered})
+        caption_ordered = _sortarray(distance, key_pairs, raw_captions)
+        captions_ordered.update({key: raw_base, (key + '_concap'): caption_ordered})
     print (key)
 
 
@@ -118,6 +119,7 @@ with open('sorted_query_mid.json', 'w') as f:
 
 with open('../parser-nltk/sorted_query_mid.json', 'w') as f:
     json.dump(captions_ordered, f)
+
 # #this part creates the caption array to be reordered after a query on images from Conceptual Captions datasets retrieved images.
 # base = ['a big door is being opened in a video game']
 # captions = loader("v2.txt")
