@@ -116,6 +116,8 @@ for key in query.keys():
 with open('sorted_query_mid.json', 'w') as f:
     json.dump(captions_ordered, f)
 
+with open('../parser-nltk/sorted_query_mid.json', 'w') as f:
+    json.dump(captions_ordered, f)
 # #this part creates the caption array to be reordered after a query on images from Conceptual Captions datasets retrieved images.
 # base = ['a big door is being opened in a video game']
 # captions = loader("v2.txt")
