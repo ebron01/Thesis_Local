@@ -9,7 +9,7 @@ import time
 <NN>? = "zero or one singular noun."
 '''
 
-parsed_file = 'parsed_np_vp.json'
+parsed_file = 'sorted_parsed_np_vp.json'
 
 #this method tokenizes a document then creates part of speech tags from them and returns pos from documents.
 def ie_preprocess(document):
@@ -52,7 +52,8 @@ parsed_sentences_dict = {}
 for key in sentences_dict.keys():
     parsed_sentence = {}
     for k in sentences_dict[key].keys():
-        result = cp.parse(sentences_dict[key][k][0])
+        result = cp.parse(sentences_dict[key][k]['caption'][0])
+        order = sentences_dict[key][k]['order']
         sentence = []
         sentence_vp = []
         for a in result:
@@ -72,7 +73,7 @@ for key in sentences_dict.keys():
                     # print('vp ' + s.lstrip())
                     # time.sleep(1)
         if sentence != []:
-            parsed_sentence.update({k: {'np': sentence, 'vp': sentence_vp}})
+            parsed_sentence.update({k: {'np': sentence, 'vp': sentence_vp, 'order': order}})
     parsed_sentences_dict.update({key: parsed_sentence})
 
 with open(parsed_file, 'w') as f:
