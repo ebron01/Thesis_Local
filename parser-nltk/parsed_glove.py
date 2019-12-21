@@ -115,45 +115,6 @@ for key in parsed_sentences_dict.keys():
         vp_glove = np.asarray(vp_glove)
         parsed_sentences_dict[key][k].update({'np_glove': np_glove, 'vp_glove': vp_glove})
 
-# glove_dict = {}
-# for key in parsed_sentences_dict.keys():
-#     for k in parsed_sentences_dict[key].keys():
-#         np_glove = []
-#         vp_glove = []
-#         for NP in parsed_sentences_dict[key][k]['np']:
-#             parsed = []
-#             parsed = NP.split(' ')
-#             glove = np.zeros(512)
-#             count = 0
-#             for i in range(len(parsed)):
-#                 try:
-#                     glove += Model[parsed[i]]
-#                     count += 1
-#                 except Exception as e:
-#                     continue
-#             glove = glove / count
-#             np_glove.append(glove)
-#         for VP in parsed_sentences_dict[key][k]['vp']:
-#             parsed_v = []
-#             parsed_v = VP.split(' ')
-#             glove_v = np.zeros(512)
-#             count_v = 0
-#             for i in range(len(parsed_v)):
-#                 try:
-#                     glove_v += Model[parsed_v[i]]
-#                     count_v += 1
-#                 except Exception as e:
-#                     continue
-#             glove_v = glove_v / count_v
-#             vp_glove.append(glove_v)
-#         # parsed_sentences_dict[key][k].update({'glove': np_glove})
-#         np_glove = np.asarray(np_glove)
-#         vp_glove = np.asarray(vp_glove)
-#         if option == 'numpy':
-#             np.save('gloves/' + key + '_' + k + '_np', np_glove)
-#             np.save('gloves/' + key + '_' + k + '_vp', vp_glove)
-#         elif option == 'pickle':
-#             glove_dict.update({key + '_' + k + '_vp': vp_glove, key + '_' + k + '_np': np_glove})
 end = datetime.datetime.now()
 print(end - start)
 
