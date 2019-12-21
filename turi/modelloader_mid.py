@@ -7,7 +7,7 @@ tc.config.set_num_gpus(-1)
 reference_data=tc.load_sframe('conceptualcaptions_0_2.sframe') #conceptualcaptions_0_2.sframe
 loaded_model = tc.load_model('reference_data_all.model')
 act_data = tc.image_analysis.load_images('./midframeextractor/mid/')
-query = loaded_model.query(act_data[:], k=30)
+query = loaded_model.query(act_data[:], k=10)
 #pdb.set_trace()
 data = {}
 key_data = {}
@@ -26,10 +26,10 @@ for i in range(len(query)):
    # data.update({query[i]['query_label']: {query[i]['reference_label'] : query[i]['distance']}})
 #{'query_label': 33, 'reference_label': 20276, 'distance': 16.396196788098376, 'rank': 30}
 print(len(data))
-with open('query_mid.json', 'w') as f:
+with open('query_mid_closest10.json', 'w') as f:
         json.dump(data, f)
 
-with open('query_mid.json', 'r') as f:
+with open('query_mid_closest10.json', 'r') as f:
     best_diff = json.load(f)
 
 #these are splits in ActivityNet detail json to get captions for videos.
@@ -71,5 +71,5 @@ for act_key in sorted(best_diff.keys()):
         upd_concap.update({str(concat_key[0]) : concat_sentence})
     upd_act.update({str(act_key) : sentence, str(act_key) + '_concap' : upd_concap})
 
-with open('updated_query_mid.json', 'w') as f:
+with open('19k_10closest_updated_query_mid.json', 'w') as f:
     json.dump(upd_act, f)
