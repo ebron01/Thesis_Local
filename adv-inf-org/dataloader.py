@@ -131,9 +131,9 @@ class DataLoader(data.Dataset):
         for j in range(seq_size[0]):
             i = self.video_id[j]
             video = self.info['videos'][i]
-            print((str(video) + '.mp4'))
+            print((str(video['id']) + '.mp4'))
             pdb.set_trace()
-            if (str(video) + '.mp4') in self.act_video_ids:
+            if (str(video[id]) + '.mp4') in self.act_video_ids:
                 if video['split'] == 'train':
                     self.split_ix['train'].append(j)
                     self.split_size['train']+=1
