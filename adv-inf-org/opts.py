@@ -12,9 +12,9 @@ def parse_opt():
                     help='path to the json file containing additional info and vocab (img/video)')
     parser.add_argument('--input_fc_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnext101-64f/',
                         help='path to the directory containing the preprocessed fc video features')
-    parser.add_argument('--input_img_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnet152/'
+    parser.add_argument('--input_img_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnet152/',
                         help='path to the directory containing the image features')
-    parser.add_argument('--input_box_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/bottomup/'
+    parser.add_argument('--input_box_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/bottomup/',
                     help='path to the directory containing the boxes of att img feats (img)')
     parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense_label.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
