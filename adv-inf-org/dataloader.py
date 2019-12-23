@@ -109,8 +109,7 @@ class DataLoader(data.Dataset):
         for i in range(len(self.act_video_ids)):
             self.act_video_ids[i] = self.act_video_ids[i].strip()
 
-        print(len(self.act_video_ids))
-        print(self.act_video_ids[0])
+
         # for v in self.video_id:
         #     if (str(v) + '.mp4') not in self.act_video_ids:
         #         self.video_id.remove(v)
@@ -131,8 +130,6 @@ class DataLoader(data.Dataset):
         for j in range(seq_size[0]):
             i = self.video_id[j]
             video = self.info['videos'][i]
-            print((str(video['id']) + '.mp4'))
-            pdb.set_trace()
             if (str(video[id]) + '.mp4') in self.act_video_ids:
                 if video['split'] == 'train':
                     self.split_ix['train'].append(j)
@@ -153,7 +150,7 @@ class DataLoader(data.Dataset):
         print('assigned %d videos to split train' % len(self.split_ix['train']))
         print('assigned %d videos to split val' % len(self.split_ix['val']))
         print('assigned %d videos to split test' % len(self.split_ix['test']))
-
+        pdb.set_trace()
 
         self.iterators = {'train': 0, 'val': 0, 'test': 0}
 
