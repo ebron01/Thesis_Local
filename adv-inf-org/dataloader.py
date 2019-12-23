@@ -108,9 +108,9 @@ class DataLoader(data.Dataset):
             self.act_video_ids = f.readlines()
         for i in range(len(self.act_video_ids)):
             self.act_video_ids[i] = self.act_video_ids[i].strip()
-        for v in self.video_id:
-            if (str(v) + '.mp4') not in self.act_video_ids:
-                self.video_id.remove(v)
+        # for v in self.video_id:
+        #     if (str(v) + '.mp4') not in self.act_video_ids:
+        #         self.video_id.remove(v)
 
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
@@ -128,21 +128,22 @@ class DataLoader(data.Dataset):
         for j in range(seq_size[0]):
             i = self.video_id[j]
             video = self.info['videos'][i]
-            if video['split'] == 'train':
-                self.split_ix['train'].append(j)
-                self.split_size['train']+=1
-                self.ix_split[j] = 'train'
-            elif video['split'] == 'val_2':
-                self.split_ix['val'].append(j)
-                self.split_size['val']+=1
-                self.ix_split[j] = 'val'
-            elif video['split'] == 'val_1':
-                self.split_ix['test'].append(j)
-                self.split_size['test']+=1
-                self.ix_split[j] = 'test'
-            elif opt.train_only: # restval
-                self.split_ix['train'].append(j)
-                self.split_size['train']+=1
+            if (str(video) + '.mp4') in self.act_video_ids:
+                if video['split'] == 'train':
+                    self.split_ix['train'].append(j)
+                    self.split_size['train']+=1
+                    self.ix_split[j] = 'train'
+                elif video['split'] == 'val_2':
+                    self.split_ix['val'].append(j)
+                    self.split_size['val']+=1
+                    self.ix_split[j] = 'val'
+                elif video['split'] == 'val_1':
+                    self.split_ix['test'].append(j)
+                    self.split_size['test']+=1
+                    self.ix_split[j] = 'test'
+                elif opt.train_only: # restval
+                    self.split_ix['train'].append(j)
+                    self.split_size['train']+=1
 
         print('assigned %d videos to split train' % len(self.split_ix['train']))
         print('assigned %d videos to split val' % len(self.split_ix['val']))
