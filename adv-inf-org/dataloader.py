@@ -103,6 +103,11 @@ class DataLoader(data.Dataset):
         self.max_seg = opt.max_seg
         self.sent_num = self.h5_label_file['sent_num'].value
         self.video_id = self.h5_label_file['video_id'].value
+
+        with open(self.opt.frame_ids, 'r') as f:
+            self.act_video_ids = f.readlines()
+        for i in range(len(self.act_video_ids)):
+            self.act_video_ids[i] = self.act_video_ids[i].strip()
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
             self.activity = self.h5_label_file['activity'].value
