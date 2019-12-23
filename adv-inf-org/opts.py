@@ -8,15 +8,15 @@ def parse_opt():
     --input_img_dir activity_net/feats/resnet152/ --input_box_dir activity_net/feats/bottomup/ --input_label_h5 activity_net/inputs/video_data_dense_label.h5 --glove_npy activity_net/inputs/glove.npy
     --learning_rate 5e-4 --learning_rate_decay_start 0 --scheduled_sampling_start 0 --checkpoint_path video_ckpt --val_videos_use -1 --losses_print_every 10 --batch_size 16 --language_eval 1'''
 
-    parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense.json',
+    parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense.json',
                     help='path to the json file containing additional info and vocab (img/video)')
-    parser.add_argument('--input_fc_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnext101-64f/',
+    parser.add_argument('--input_fc_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/resnext101-64f/',
                         help='path to the directory containing the preprocessed fc video features')
-    parser.add_argument('--input_img_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnet152/',
+    parser.add_argument('--input_img_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/resnet152/',
                         help='path to the directory containing the image features')
     parser.add_argument('--input_box_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/bottomup/',
                     help='path to the directory containing the boxes of att img feats (img)')
-    parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense_label.h5',
+    parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
     parser.add_argument('--frame_ids', type=str,
                         default='/data/shared/ActivityNet/activity_net/inputs/2_filenames.txt',
