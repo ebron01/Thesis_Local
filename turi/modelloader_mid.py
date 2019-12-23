@@ -7,8 +7,9 @@ tc.config.set_num_gpus(-1)
 reference_data=tc.load_sframe('conceptualcaptions_0_2.sframe') #conceptualcaptions_0_2.sframe
 loaded_model = tc.load_model('reference_data_all.model')
 act_data = tc.image_analysis.load_images('./midframeextractor/mid/')
-query = loaded_model.query(act_data[:], k=10)
-#pdb.set_trace()
+#!!!!don't forget to define k
+k=5
+query = loaded_model.query(act_data[:], k=5)
 data = {}
 key_data = {}
 count = 0
@@ -18,20 +19,21 @@ for i in range(len(query)):
     query[i]['reference_label'] = reference_data[query[i]['reference_label']]['path']
     print(i)
     key_data.update({query[i]['reference_label'].split('/')[6].split('.')[0]: query[i]['distance']})
-    if i != 0 and count % 30 == 0:
-        data.update({query[i]['query_label'].split('/')[2].split('.')[0] : key_data})
+    if i != 0 and count % k == 0:
+        data.update({query[i]['query_label'].split('/')[3].split('.')[0] : key_data})
         key_data = {} 
         count = 0
     #data.append(query[i])
    # data.update({query[i]['query_label']: {query[i]['reference_label'] : query[i]['distance']}})
 #{'query_label': 33, 'reference_label': 20276, 'distance': 16.396196788098376, 'rank': 30}
 print(len(data))
-with open('query_mid_closest10.json', 'w') as f:
+json_name = 'query_mid_closest%d.json'%k
+with open(json_name, 'w') as f:
         json.dump(data, f)
 
-with open('query_mid_closest10.json', 'r') as f:
+with open(json_name, 'r') as f:
     best_diff = json.load(f)
-
+#pdb.set_trace()
 #these are splits in ActivityNet detail json to get captions for videos.
 split = {'train': 'train', 'val_1': 'val_1', 'val_2': 'val_2'}
 
@@ -44,7 +46,7 @@ for key in split.keys():
         vdata.update({key: data})
 
 #information about ActivityNet dataset
-actnet_filename = '/data/shared/ConceptualCaptions/keras_rmac/data/activitynet_annotations/actnet_video_details.json'
+actnet_filename = './midframeextractor/actnet_video_details.json'
 with open(actnet_filename, 'r') as f:
     actnet = json.load(f)
 
@@ -58,6 +60,7 @@ data = []
 for i in d:
     data.append(i)
 upd_act = {}
+pdb.set_trace()
 for act_key in sorted(best_diff.keys()):
     video_id = str(act_key.rsplit('_', 2)[0])
     event_count = int(act_key.rsplit('_', 2)[
@@ -70,6 +73,6 @@ for act_key in sorted(best_diff.keys()):
         concat_sentence = data[int(concat_key[0])][0]
         upd_concap.update({str(concat_key[0]) : concat_sentence})
     upd_act.update({str(act_key) : sentence, str(act_key) + '_concap' : upd_concap})
-
-with open('19k_10closest_updated_query_mid.json', 'w') as f:
+json_name = '%d_%dclosest_updated_query_mid.json'%(len(best_diff.keys()), k)
+with open(json_name, 'w') as f:
     json.dump(upd_act, f)
