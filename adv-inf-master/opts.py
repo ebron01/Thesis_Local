@@ -103,7 +103,8 @@ def parse_opt():
                         help='how much aux glove vector to use')
     parser.add_argument('--ordered', type=int, default=0,
                         help='if minimal dataset is in video id order')
-
+    parser.add_argument('--aux_glove_order', type=str, default='wmd'
+                        help='if selected glove vectors for nps and vps will be ordered according to wmd similarity or not')
     # video options
     parser.add_argument('--feat_type', type=str, default='resnext101-64f',
                         help='feat type for video (c3d, resnext101-64f)')

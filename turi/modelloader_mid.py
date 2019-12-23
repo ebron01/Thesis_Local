@@ -10,8 +10,8 @@ reference_data=tc.load_sframe('conceptualcaptions_0_2.sframe') #conceptualcaptio
 loaded_model = tc.load_model('reference_data_all.model')
 act_data = tc.image_analysis.load_images('./midframeextractor/mid/')
 #!!!!don't forget to define k
-k=5
-query = loaded_model.query(act_data[:], k=5)
+k=30
+query = loaded_model.query(act_data[:], k=30)
 data = {}
 key_data = {}
 count = 0

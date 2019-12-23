@@ -13,6 +13,10 @@ adv-inf-master/activity_net
 adv-inf-master/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
 adv-inf-master/ConCap/*
 adv-inf-master/save/*
+adv-inf-org/activity_net
+adv-inf-org/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
+adv-inf-org/ConCap/*
+adv-inf-org/save/*
 glove/corpus.txt
 glove/vectors.txt
 parser-nltk/vectors.txt

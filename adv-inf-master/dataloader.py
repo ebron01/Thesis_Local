@@ -159,7 +159,7 @@ class DataLoader(data.Dataset):
         self.aux_sequence_size = opt.aux_sequence_size
         if opt.use_aux is not 0:
             self.aux_encoding_size = 512
-
+        self.aux_glove_order = self.opt.aux_glove_order
 
         self.aux_glove_vidids = []
         for i in self.aux_glove.keys():
@@ -328,13 +328,30 @@ class DataLoader(data.Dataset):
         assert feats.shape[0] >= 3 * sent_num, 'weird feature for %s' % id
 
         for i in range(sent_num):
-            #taking only one sample np or vp from closest captions of concap
             for key in aux_glove.keys():
-                if (id + '_' + str(sent_num)) in key and 'np' in key:
-                    if aux_glove[key].shape[0] > 5:
-                        aux_glove[key] = aux_glove[key][:5]
-                    aux_features.append(aux_glove[key])
-                    break
+                if (id + '_' + str(sent_num)) in key:
+                    if self.aux_glove_order == 'wmd':
+                        order = 0
+                        for k in aux_glove[key].keys:
+                            if aux_glove[key][k]['order'] == count:
+                                aux_features.append(aux_glove[key][k]['np_glove'])
+                                if len(aux_features) > self.aux_sequence_size:
+                                    aux_glove[key][k]['np_glove'] = aux_glove[key][k]['np_glove'][:self.aux_sequence_size]
+                                    break
+                            order += 1
+                    else:
+                        #taking only one sample np or vp from closest captions of concap
+                        if aux_glove[key].shape[0] > 5:
+                            aux_glove[key] = aux_glove[key][:5]
+                        aux_features.append(aux_glove[key])
+                        break
+            #taking only one sample np or vp from closest captions of concap
+            #for key in aux_glove.keys():
+            #    if (id + '_' + str(sent_num)) in key and 'np' in key:
+            #        if aux_glove[key].shape[0] > 5:
+            #            aux_glove[key] = aux_glove[key][:5]
+            #        aux_features.append(aux_glove[key])
+            #        break
         return aux_features
 
     def set_negatives(self,mode):
