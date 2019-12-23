@@ -4,6 +4,8 @@ import json
 import csv
 tc.config.set_num_gpus(-1)
 #pdb.set_trace()
+
+
 reference_data=tc.load_sframe('conceptualcaptions_0_2.sframe') #conceptualcaptions_0_2.sframe
 loaded_model = tc.load_model('reference_data_all.model')
 act_data = tc.image_analysis.load_images('./midframeextractor/mid/')
@@ -21,7 +23,7 @@ for i in range(len(query)):
     key_data.update({query[i]['reference_label'].split('/')[6].split('.')[0]: query[i]['distance']})
     if i != 0 and count % k == 0:
         data.update({query[i]['query_label'].split('/')[3].split('.')[0] : key_data})
-        key_data = {} 
+        key_data = {}
         count = 0
     #data.append(query[i])
    # data.update({query[i]['query_label']: {query[i]['reference_label'] : query[i]['distance']}})
@@ -76,3 +78,4 @@ for act_key in sorted(best_diff.keys()):
 json_name = '%d_%dclosest_updated_query_mid.json'%(len(best_diff.keys()), k)
 with open(json_name, 'w') as f:
     json.dump(upd_act, f)
+

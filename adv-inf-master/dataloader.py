@@ -163,7 +163,7 @@ class DataLoader(data.Dataset):
 
         self.aux_glove_vidids = []
         for i in self.aux_glove.keys():
-            key = i.rsplit('_', 5)[0]
+            key = i.rsplit('_', 3)[0]
             if key not in self.aux_glove_vidids:
                 self.aux_glove_vidids.append(key)
 
@@ -172,22 +172,23 @@ class DataLoader(data.Dataset):
         if self.dataset_size == 1:
             for j in range(seq_size[0]):
                 i = self.video_id[j]
-                video = self.info['videos'][i]
-                if video['split'] == 'train':
-                    self.split_ix['train'].append(j)
-                    self.split_size['train']+=1
-                    self.ix_split[j] = 'train'
-                elif video['split'] == 'val_2':
-                    self.split_ix['val'].append(j)
-                    self.split_size['val']+=1
-                    self.ix_split[j] = 'val'
-                elif video['split'] == 'val_1':
-                    self.split_ix['test'].append(j)
-                    self.split_size['test']+=1
-                    self.ix_split[j] = 'test'
-                elif opt.train_only: # restval
-                    self.split_ix['train'].append(j)
-                    self.split_size['train']+=1
+                if self.info['videos'][i] in self.aux_glove_vidids:
+                    video = self.info['videos'][i]
+                    if video['split'] == 'train':
+                        self.split_ix['train'].append(j)
+                        self.split_size['train']+=1
+                        self.ix_split[j] = 'train'
+                    elif video['split'] == 'val_2':
+                        self.split_ix['val'].append(j)
+                        self.split_size['val']+=1
+                        self.ix_split[j] = 'val'
+                    elif video['split'] == 'val_1':
+                        self.split_ix['test'].append(j)
+                        self.split_size['test']+=1
+                        self.ix_split[j] = 'test'
+                    elif opt.train_only: # restval
+                        self.split_ix['train'].append(j)
+                        self.split_size['train']+=1
         else:
             count_train = 0
             count_val = 0
