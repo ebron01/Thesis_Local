@@ -329,7 +329,7 @@ class DataLoader(data.Dataset):
         print('id' + str(id))
         sent_num = self.sent_num[index]
         assert sent_num > 0, 'data should have at least one caption'
-        aux_features = []
+        aux_features = np.zeros((1,512))
         split = self.ix_split[index]
         if split == 'val':
             split = 'val2'
@@ -363,7 +363,7 @@ class DataLoader(data.Dataset):
             #            aux_glove[key] = aux_glove[key][:5]
             #        aux_features.append(aux_glove[key])
             #        break
-        return aux_features
+        return aux_features[1:]
 
     def set_negatives(self,mode):
         self.negatives = mode
