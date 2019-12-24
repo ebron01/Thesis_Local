@@ -18,6 +18,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 input_parsed_file = '/sorted_5closest_parsed_np_vp.json'
 output_parsed_glove = 'gloves_5closest.pkl'
 concurrence_filename = 'concurrence_np_vp_5closest.json'
+path_adv_inf_master = '../adv-inf-master/ConCap/inputs'
 option = 'pickle' # or 'numpy'
 
 start = datetime.datetime.now()
@@ -126,8 +127,11 @@ start = datetime.datetime.now()
 if option == 'pickle':
     with open(output_parsed_glove, mode="wb") as opened_file:
         pickle.dump(parsed_sentences_dict, opened_file)
+    with open(path_adv_inf_master, mode="wb") as f_opened_file:
+        pickle.dump(parsed_sentences_dict, f_opened_file)
     end = datetime.datetime.now()
     print(end - start)
+
 
 # with open("gloves.pkl", mode="rb") as opened_file:
 #     glove_dict1 = pickle.load(opened_file)
