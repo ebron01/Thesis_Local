@@ -149,7 +149,7 @@ def parse_opt():
     # Optimization: General
     parser.add_argument('--g_pre_nepoch', type=int, default=50,
                     help='number of epochs to pre-train generator with cross entropy')
-    parser.add_argument('--batch_size', type=int, default=4,
+    parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')
     # parser.add_argument('--batch_size', type=int, default=16,
     #                     help='minibatch size')

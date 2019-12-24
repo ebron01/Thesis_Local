@@ -2,11 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Apr 21 21:14:21 2019
-
 @author: emre
-"""
-
-"""
 Created on thursday 21th of april after thesis meeting.
 For wmd sentence comparison wmd can be used. To re-order the captions of retrieved images, wmd will be used over sentences.
 This tutorial is implemented to be able to understand and train myself on wmd more. 
@@ -94,7 +90,7 @@ start_embeddings = datetime.now()
 print ('normalizing vectors')
 print('cell started at : ' + str(start_embeddings))
 
-query = 'updated_query_mid.json'
+query = '../turi/results/49003_5closest_updated_query_mid.json'
 
 with open(query, 'r') as f:
     query = json.load(f)
