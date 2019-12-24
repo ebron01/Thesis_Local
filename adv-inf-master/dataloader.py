@@ -101,7 +101,7 @@ class DataLoader(data.Dataset):
         self.use_img = getattr(opt, 'use_img', 0) or getattr(opt, 'd_use_img', 0)
         if self.use_img:
             if self.opt.dataset_size == 1:
-                self.input_fc_dir = '/data/shared/ActivityNet/advinf_activitynet/feats/resnet152/'
+                self.input_img_dir = '/data/shared/ActivityNet/advinf_activitynet/feats/resnet152/'
             else:
                 self.input_img_dir = self.opt.input_img_dir
         self.use_box = getattr(opt, 'use_box', 0) or getattr(opt, 'd_use_box', 0)
