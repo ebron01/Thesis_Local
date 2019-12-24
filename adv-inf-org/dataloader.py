@@ -210,24 +210,27 @@ class DataLoader(data.Dataset):
         return np.array(features)
 
     def get_box_batch(self, index):
-        if not self.use_box:
-            return None
-        v_idx = self.video_id[index]
-        id = self.info['videos'][v_idx]['id']
-        sent_num = self.sent_num[index]
-        assert sent_num > 0, 'data should have at least one caption'
-        box_features = []
-        split = self.ix_split[index]
-        if split == 'val':
-            split = 'val2'
-        elif split == 'test':
-            split = 'val1'
-        dir = os.path.join(self.input_box_dir,split)
-        feats = np.load(os.path.join(dir,id + '.npy'))
-        assert feats.shape[0] >= 3 * sent_num, 'weird feature for %s' % id
-        for i in range(sent_num):
-            box_features.append(feats[i*self.nbox:(i+1)*self.nbox])
-        return box_features
+        try:
+            if not self.use_box:
+                return None
+            v_idx = self.video_id[index]
+            id = self.info['videos'][v_idx]['id']
+            sent_num = self.sent_num[index]
+            assert sent_num > 0, 'data should have at least one caption'
+            box_features = []
+            split = self.ix_split[index]
+            if split == 'val':
+                split = 'val2'
+            elif split == 'test':
+                split = 'val1'
+            dir = os.path.join(self.input_box_dir,split)
+            feats = np.load(os.path.join(dir,id + '.npy'))
+            assert feats.shape[0] >= 3 * sent_num, 'weird feature for %s' % id
+            for i in range(sent_num):
+                box_features.append(feats[i*self.nbox:(i+1)*self.nbox])
+            return box_features
+        except Exception as e:
+            print(e)
 
     def set_negatives(self,mode):
         self.negatives = mode
