@@ -324,7 +324,9 @@ class DataLoader(data.Dataset):
         if not self.use_aux:
             return None
         v_idx = self.video_id[index]
+        print(v_idx)
         id = self.info['videos'][v_idx]['id']
+        print(id)
         sent_num = self.sent_num[index]
         assert sent_num > 0, 'data should have at least one caption'
         aux_features = []
@@ -333,28 +335,25 @@ class DataLoader(data.Dataset):
             split = 'val2'
         elif split == 'test':
             split = 'val1'
-        dir = os.path.join(self.input_box_dir,split)
-        aux_glove = self.aux_glove
-
-        pdb.set_trace()
 
         for i in range(sent_num):
-            for key in aux_glove.keys():
+            for key in self.aux_glove.keys():
                 if (id + '_' + str(sent_num)) in key:
+                    print('buldu' + str(key))
                     if self.aux_glove_order == 'wmd':
                         order = 0
-                        for k in aux_glove[key].keys:
-                            if aux_glove[key][k]['order'] == order:
-                                aux_features.append(aux_glove[key][k]['np_glove'])
+                        for k in self.aux_glove[key].keys:
+                            if self.aux_glove[key][k]['order'] == order:
+                                aux_features.append(self.aux_glove[key][k]['np_glove'])
                                 if len(aux_features) > self.aux_sequence_size:
-                                    aux_glove[key][k]['np_glove'] = aux_glove[key][k]['np_glove'][:self.aux_sequence_size]
+                                    self.aux_glove[key][k]['np_glove'] = self.aux_glove[key][k]['np_glove'][:self.aux_sequence_size]
                                     break
                             order += 1
                     else:
                         #taking only one sample np or vp from closest captions of concap
-                        if aux_glove[key].shape[0] > 5:
-                            aux_glove[key] = aux_glove[key][:5]
-                        aux_features.append(aux_glove[key])
+                        if self.aux_glove[key].shape[0] > 5:
+                            self.aux_glove[key] = self.aux_glove[key][:5]
+                        aux_features.append(self.aux_glove[key])
                         break
             #taking only one sample np or vp from closest captions of concap
             #for key in aux_glove.keys():
