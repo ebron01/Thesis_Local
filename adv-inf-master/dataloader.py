@@ -366,7 +366,7 @@ class DataLoader(data.Dataset):
             #            aux_glove[key] = aux_glove[key][:5]
             #        aux_features.append(aux_glove[key])
             #        break
-        return aux_features[:, 1:, :]
+        return outaux_features[:, 1:, :]
 
     def set_negatives(self,mode):
         self.negatives = mode
