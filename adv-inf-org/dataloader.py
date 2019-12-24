@@ -288,7 +288,8 @@ class DataLoader(data.Dataset):
                         break
             else:  # get random caption (random negatives)
                 while True:
-                    mmix = random.randint(0, len(self.split_ix[split]) - 1)
+                    mmix = random.choice(self.split_ix[split])
+                    # mmix = random.randint(0, len(self.split_ix[split]) - 1)
                     if self.video_id[mmix] != v_ix and sent_num <= self.sent_num[mmix]:  # avoid getting the gt pair
                         mm_batch[i, :sent_num, 1:self.seq_length + 1] = self.labels[mmix, :sent_num, :]
                         mm_fc_batch[i, :sent_num] = self.get_seg_batch(mmix, "video")[:sent_num]
