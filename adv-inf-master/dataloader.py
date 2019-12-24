@@ -7,7 +7,7 @@ import h5py
 import os
 import numpy as np
 import random
-import pickle
+import cPickle
 import torch
 import torch.utils.data as data
 
@@ -166,7 +166,7 @@ class DataLoader(data.Dataset):
         self.use_aux = getattr(opt, 'use_aux', 0) or getattr(opt, 'd_use_aux', 0)
 
         print('Loading aux_glove')
-        self.aux_glove = pickle.load(open(self.opt.input_aux_glove, 'rb'))
+        self.aux_glove = cPickle.load(open(self.opt.input_aux_glove, 'rb'))
         print('Loaded')
         self.aux_sequence_size = opt.aux_sequence_size
         if opt.use_aux is not 0:
@@ -335,9 +335,8 @@ class DataLoader(data.Dataset):
             split = 'val1'
         dir = os.path.join(self.input_box_dir,split)
         aux_glove = self.aux_glove
+
         pdb.set_trace()
-        feats = np.load(os.path.join(dir,id + '.npy'))
-        assert feats.shape[0] >= 3 * sent_num, 'weird feature for %s' % id
 
         for i in range(sent_num):
             for key in aux_glove.keys():
