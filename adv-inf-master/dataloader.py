@@ -324,9 +324,9 @@ class DataLoader(data.Dataset):
         if not self.use_aux:
             return None
         v_idx = self.video_id[index]
-        print(v_idx)
+        print('v_idx' + str(v_idx))
         id = self.info['videos'][v_idx]['id']
-        print(id)
+        print('id' + str(id))
         sent_num = self.sent_num[index]
         assert sent_num > 0, 'data should have at least one caption'
         aux_features = []
@@ -339,10 +339,10 @@ class DataLoader(data.Dataset):
         for i in range(sent_num):
             for key in self.aux_glove.keys():
                 if (id + '_' + str(sent_num)) in key:
-                    print('buldu' + str(key))
+                    print('buldu key ' + str(key) + ' id ' + (str(id) + '_' + str(sent_num)))
                     if self.aux_glove_order == 'wmd':
                         order = 0
-                        for k in self.aux_glove[key].keys:
+                        for k in self.aux_glove[key].keys():
                             if self.aux_glove[key][k]['order'] == order:
                                 aux_features.append(self.aux_glove[key][k]['np_glove'])
                                 if len(aux_features) > self.aux_sequence_size:
