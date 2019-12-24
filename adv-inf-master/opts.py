@@ -21,7 +21,7 @@ def parse_opt():
                     help='path to the directory containing the boxes of att img feats (img)')
     parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense_label.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
-    parser.add_argument('--input_aux_glove', type=str, default='ConCap/inputs/gloves_5closest.pkl',
+    parser.add_argument('--input_aux_glove', type=str, default='ConCap/inputs/gloves_5closest_v2.pkl',
                         help='path to pickle containing the glove vectors for closest captions of Conceptual Captions')
     parser.add_argument('--frame_ids', type=str,
                         default='/data/shared/ActivityNet/activity_net/inputs/2_filenames.txt',
