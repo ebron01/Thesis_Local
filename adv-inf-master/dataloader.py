@@ -333,7 +333,7 @@ class DataLoader(data.Dataset):
             split = 'val1'
         dir = os.path.join(self.input_box_dir,split)
         aux_glove = pickle.load(open(self.opt.input_aux_glove, 'rb'))
-
+        pdb.set_trace()
         feats = np.load(os.path.join(dir,id + '.npy'))
         assert feats.shape[0] >= 3 * sent_num, 'weird feature for %s' % id
 
