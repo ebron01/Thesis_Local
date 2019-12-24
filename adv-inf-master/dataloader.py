@@ -329,7 +329,8 @@ class DataLoader(data.Dataset):
         print('id' + str(id))
         sent_num = self.sent_num[index]
         assert sent_num > 0, 'data should have at least one caption'
-        aux_features = np.zeros((1,512))
+        aux_features = np.zeros((1, self.aux_encoding_size))
+        outaux_features = np.zeros((sent_num, self.aux_sequence_size, self.aux_encoding_size))
         split = self.ix_split[index]
         if split == 'val':
             split = 'val2'
@@ -346,7 +347,7 @@ class DataLoader(data.Dataset):
                             if self.aux_glove[key][k]['order'] == order:
                                 aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
                                 print('aux features shape : ' + str(aux_features.shape))
-                                if len(aux_features) > self.aux_sequence_size:
+                                if len(aux_features) > self.aux_sequence_size + 1:
                                     aux_features = aux_features[:self.aux_sequence_size]
                                     break
                             order += 1
@@ -356,6 +357,8 @@ class DataLoader(data.Dataset):
                             self.aux_glove[key] = self.aux_glove[key][:5]
                         aux_features.append(self.aux_glove[key])
                         break
+            outaux_features[i] = aux_features
+
             #taking only one sample np or vp from closest captions of concap
             #for key in aux_glove.keys():
             #    if (id + '_' + str(sent_num)) in key and 'np' in key:
@@ -363,7 +366,7 @@ class DataLoader(data.Dataset):
             #            aux_glove[key] = aux_glove[key][:5]
             #        aux_features.append(aux_glove[key])
             #        break
-        return aux_features[1:]
+        return aux_features[:, 1:, :]
 
     def set_negatives(self,mode):
         self.negatives = mode
