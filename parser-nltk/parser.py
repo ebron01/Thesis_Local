@@ -8,18 +8,19 @@ import time
 <NNP>+ = "One or more proper nouns," followed by
 <NN>? = "zero or one singular noun."
 '''
+input_not_parsed_file = 'sorted_5closest_updated_query_mid.json'
+output_parsed_file = 'sorted_5closest_parsed_np_vp.json'
 
-parsed_file = 'sorted_parsed_np_vp.json'
-
-#this method tokenizes a document then creates part of speech tags from them and returns pos from documents.
+# this method tokenizes a document then creates part of speech tags from them and returns pos from documents.
 def ie_preprocess(document):
    sentences = nltk.sent_tokenize(document)
    sentences = [nltk.word_tokenize(sent) for sent in sentences]
    sentences = [nltk.pos_tag(sent) for sent in sentences]
    return sentences
 
-#this part reads query for middle frame of selected videos.
-with open('sorted_query_mid.json', 'r') as f:
+
+# this part reads query for middle frame of selected videos.
+with open(input_not_parsed_file, 'r') as f:
     data = json.load(f)
 
 sentences = []
@@ -27,12 +28,12 @@ sentences_dict = {}
 count = 0
 try:
     for key in data.keys():
-        #this part creates a dict of parsed part of speech tags from conceptual caption sentences
+        # this part creates a dict of parsed part of speech tags from conceptual caption sentences
         if 'concap' in str(key):
             concap_dict = {}
             for k in data[key].keys():
-                #this part encodes sentences with 'utf-8'
-                #normalized = data[key][k].encode('utf-8')
+                # this part encodes sentences with 'utf-8'
+                # normalized = data[key][k].encode('utf-8')
                 normalized = data[key][k]['caption']
                 order = data[key][k]['order']
                 sentences.append(ie_preprocess(normalized))
@@ -76,7 +77,7 @@ for key in sentences_dict.keys():
             parsed_sentence.update({k: {'np': sentence, 'vp': sentence_vp, 'order': order}})
     parsed_sentences_dict.update({key: parsed_sentence})
 
-with open(parsed_file, 'w') as f:
+with open(output_parsed_file, 'w') as f:
     json.dump(parsed_sentences_dict, f)
 
 print('Done')

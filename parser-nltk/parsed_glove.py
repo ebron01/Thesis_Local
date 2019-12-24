@@ -3,22 +3,30 @@ import os
 import numpy as np
 import datetime
 import sys
-
-'''
-run with CLAS env
-'''
 try:
     import _pickle as pickle
-except:
+except Exception as e:
     # import pickle
     # print ("Warning: You are running code with Python 2.xx.\n")
     print ("Error: Please run code with Python 3.xx.\n")
     sys.exit(1)
+'''
+run with CLAS env
+'''
 
-def loadGloveModel(gloveFile):
+dir_path = os.path.dirname(os.path.realpath(__file__))
+input_parsed_file = '/sorted_5closest_parsed_np_vp.json'
+output_parsed_glove = 'gloves_5closest.pkl'
+concurrence_filename = 'concurrence_np_vp_5closest.json'
+option = 'pickle' # or 'numpy'
+
+start = datetime.datetime.now()
+
+
+def loadglovemodel(glovefile):
     print("Loading Glove Model")
     # with open(gloveFile,'r+') as f:
-    with open(gloveFile, 'r+', encoding='utf-8') as f:
+    with open(glovefile, 'r+', encoding='utf-8') as f:
         data = f.readlines()
     model = {}
     try:
@@ -33,19 +41,15 @@ def loadGloveModel(gloveFile):
     return model
 
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-parsed_file = '/sorted_parsed_np_vp.json'
-option = 'pickle' # or 'numpy'
-start = datetime.datetime.now()
+Model = loadglovemodel(dir_path + "/vectors.txt")
 
-Model = loadGloveModel(dir_path + "/vectors.txt")
 
 # with open(dir_path + parsed_file, 'r+') as f:
-with open(dir_path + parsed_file, 'r', encoding='utf-8') as f:
+with open(dir_path + input_parsed_file, 'r', encoding='utf-8') as f:
     parsed_sentences_dict = json.load(f)
 print('Loaded parsed sentences of closest captions')
 
-#TODO:in progress:
+# TODO:in progress:
 concurrence_d = {}
 for key in parsed_sentences_dict.keys():
     np_list = []
@@ -76,11 +80,11 @@ for key in concurrence_d.keys():
         concur_vp.update({_VP: count})
     concurrence_count.update({key: {'np': concur_np, 'vp': concur_vp}})
 
-with open('concurrence_np_vp.json', 'w') as f:
+with open(concurrence_filename, 'w') as f:
     json.dump(concurrence_count, f)
 
 
-#TODO:in progress
+# TODO:in progress
 for key in parsed_sentences_dict.keys():
     for k in parsed_sentences_dict[key].keys():
         np_glove = []
@@ -120,11 +124,11 @@ print(end - start)
 
 start = datetime.datetime.now()
 if option == 'pickle':
-    with open("gloves.pkl", mode="wb") as opened_file:
+    with open(output_parsed_glove, mode="wb") as opened_file:
         pickle.dump(parsed_sentences_dict, opened_file)
     end = datetime.datetime.now()
     print(end - start)
 
-#with open("gloves.pkl", mode="rb") as opened_file:
-#    glove_dict1 = pickle.load(opened_file)
-#print('Done')
+# with open("gloves.pkl", mode="rb") as opened_file:
+#     glove_dict1 = pickle.load(opened_file)
+# print('Done')

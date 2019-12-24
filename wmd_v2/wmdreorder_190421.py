@@ -11,22 +11,22 @@ Tutorial is in this address:
 https://markroxor.github.io/gensim/static/notebooks/WMD_tutorial.html
 @author: emre
 """
-import pdb
-import logging
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s')
+from gensim.models import KeyedVectors
 from nltk.corpus import stopwords
 from nltk import download
 from pyemd import emd
 from gensim.similarities import WmdSimilarity
-import os
-from gensim.models import KeyedVectors
-from nltk.corpus import stopwords
-from nltk import download
 from datetime import datetime
+import pdb
+import os
 import numpy as np
 import json
+import logging
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s')
+
 start_nb = datetime.now()
 download('stopwords')
+
 
 def removestopwords(captions):
     stop_words = stopwords.words('english')
@@ -37,12 +37,14 @@ def removestopwords(captions):
         normcaptions[key] = line
     return normcaptions
 
+
 def distance(normcaptions, model):
     distance = np.zeros((len(normcaptions), len(normcaptions)))
     for i in range(len(normcaptions)):
         for j in range(len(normcaptions)):
             distance[i][j] = model.wmdistance(normcaptions[i], normcaptions[j])
     return distance
+
 
 def _distance(base, captions, model):
     distance = np.zeros((len(captions.keys()), len(captions.keys())))
@@ -55,12 +57,14 @@ def _distance(base, captions, model):
         key_pairs.update({i: {'key': i_key, 'compared_with': key_pair}})
     return distance, key_pairs
 
+
 def sortarray(distance,captions):
     summedarray = np.sum(distance, axis=1)
     sortindex = np.argsort(summedarray)
     summedarraysorted = np.array(summedarray)[sortindex.astype(int)]
     sortedarray = np.array(captions)[sortindex.astype(int)]
     return sortedarray
+
 
 def _sortarray(distance, key_pairs, raw_captions):
     summedarray = np.sum(distance, axis=1)
@@ -76,10 +80,11 @@ def _sortarray(distance, key_pairs, raw_captions):
         caption_ordered.update({key: {'caption': caption, 'order': sorted_index[i]}})
     return caption_ordered
 
+
 start_embeddings = datetime.now()
 print('cell started at : ' + str(start_embeddings))
 
-#this part loads a word2vec model
+# this part loads a word2vec model
 print('Loading model')
 model= KeyedVectors.load_word2vec_format('./inputs/GoogleNews-vectors-negative300.bin', binary=True)
 start_embeddings = datetime.now()
@@ -109,28 +114,13 @@ for key in query.keys():
         captions_ordered.update({key: raw_base, (key + '_concap'): caption_ordered})
     print (key)
 
-
-with open('sorted_query_mid.json', 'w') as f:
+sorted_filename = 'sorted_5closest_updated_query_mid.json'
+with open(sorted_filename, 'w') as f:
     json.dump(captions_ordered, f)
 
-with open('../parser-nltk/sorted_query_mid.json', 'w') as f:
+# saver for nltk-parser
+parser_filename = '../parser-nltk/' + sorted_filename
+with open(parser_filename, 'w') as f:
     json.dump(captions_ordered, f)
 
-# #this part creates the caption array to be reordered after a query on images from Conceptual Captions datasets retrieved images.
-# base = ['a big door is being opened in a video game']
-# captions = loader("v2.txt")
-# #base video caption is added to array t sort
-# captions = base + captions[40:50]
-# #this removes stopwords from the captions. Because these words do not have any effect on distance.
-# normcaptions = removestopwords(captions)
-#
-# distance = distance(captions, model)
-# sortedarray = sortarray(distance,captions)
-#
-# with open('reordered.txt','a+') as f:
-#     for i in range(len(sortedarray)):
-#         f.write(sortedarray[i])
-#         f.write('\n')
-#     f.write('-------------------')
-#     f.write('\n')
-# print('Cell took %s seconds to run.' % str(datetime.now()- start_embeddings))
+
