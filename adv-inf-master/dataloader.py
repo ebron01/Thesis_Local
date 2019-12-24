@@ -401,14 +401,8 @@ class DataLoader(data.Dataset):
             fc_batch[i,:sent_num] = tmp_fcs[0]
             img_batch[i,:sent_num] = tmp_fcs[1]
             box_batch[i,:sent_num] = tmp_fcs[2]
-            try:
-                print('len:' + str(len(tmp_fcs[3])))
-                print('shape:' + str(tmp_fcs[3].shape))
-                print('shape:' + str(tmp_fcs[3].shape()))
-                print('size:' + str(tmp_fcs[3].size))
-                aux_batch[i, :sent_num, :tmp_fcs[3][0].shape[0]] = tmp_fcs[3]
-            except Exception as e:
-                print(e)
+            # aux_batch[i, :sent_num] = tmp_fcs[3]
+            aux_batch[i, :sent_num, :tmp_fcs[3][0].shape[0]] = tmp_fcs[3]
             sent_num_batch[i] = sent_num
             label_batch[i, :, 1 : self.seq_length + 1] = self.labels[ix]
             v_ix = self.video_id[ix]
@@ -432,7 +426,7 @@ class DataLoader(data.Dataset):
                 while True:
                     if self.opt.ordered == 1:
                         mmix = random.randint(0, len(self.split_ix[split]) - 1)
-                        if self.video_id[mmix] != v_ix and sent_num <= self.sent_num[mmix]:  # avoid getting the gt pair
+                        if self.video_id[mmix] != v_ix and sent_num <= self.sent_num[mmix]:# avoid getting the gt pair
                             mm_batch[i, :sent_num, 1:self.seq_length + 1] = self.labels[mmix, :sent_num, :]
                             mm_fc_batch[i, :sent_num] = self.get_seg_batch(mmix, "video")[:sent_num]
                             mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[
@@ -442,7 +436,9 @@ class DataLoader(data.Dataset):
                     else:
                         mmix = random.choice(self.split_ix[split])
                         # mmix = random.randint(0, len(self.split_ix[split]) - 1)
-                        if self.video_id[mmix] != v_ix and sent_num != self.sent_num[mmix]:  # avoid getting the gt pair
+                        if self.video_id[mmix] != v_ix and sent_num <= self.sent_num[mmix]:  # avoid getting the gt pair
+                            print('sent_num : ' + str(sent_num))
+                            print('sent_num for wrong pair: ' + str(self.sent_num[mmix]))
                             mm_batch[i, :sent_num, 1:self.seq_length + 1] = self.labels[mmix, :sent_num, :]
                             mm_fc_batch[i, :sent_num] = self.get_seg_batch(mmix, "video")[:sent_num]
                             mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[
