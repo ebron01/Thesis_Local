@@ -23,6 +23,10 @@ def parse_opt():
                     help='path to the h5file containing the preprocessed dataset (img/video)')
     parser.add_argument('--input_aux_glove', type=str, default='ConCap/inputs/gloves_5closest.pkl',
                         help='path to pickle containing the glove vectors for closest captions of Conceptual Captions')
+    parser.add_argument('--frame_ids', type=str,
+                        default='/data/shared/ActivityNet/activity_net/inputs/2_filenames.txt',
+                        help='path to videos downloaded from activity_net for ConCap comparison')
+
 
     parser.add_argument('--g_start_from', type=str, default=None,
                      help="""skip pre training step and continue training from saved generator model at this path.
