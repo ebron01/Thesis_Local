@@ -62,7 +62,7 @@ data = []
 for i in d:
     data.append(i)
 upd_act = {}
-pdb.set_trace()
+#pdb.set_trace()
 for act_key in sorted(best_diff.keys()):
     video_id = str(act_key.rsplit('_', 2)[0])
     event_count = int(act_key.rsplit('_', 2)[
