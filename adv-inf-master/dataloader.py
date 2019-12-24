@@ -165,7 +165,9 @@ class DataLoader(data.Dataset):
 
         self.use_aux = getattr(opt, 'use_aux', 0) or getattr(opt, 'd_use_aux', 0)
 
+        print('Loading aux_glove')
         self.aux_glove = pickle.load(open(self.opt.input_aux_glove, 'rb'))
+        print('Loaded')
         self.aux_sequence_size = opt.aux_sequence_size
         if opt.use_aux is not 0:
             self.aux_encoding_size = 512
