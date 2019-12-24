@@ -8,7 +8,8 @@ def parse_opt():
     --input_img_dir activity_net/feats/resnet152/ --input_box_dir activity_net/feats/bottomup/ --input_label_h5 activity_net/inputs/video_data_dense_label.h5 --glove_npy activity_net/inputs/glove.npy
     --learning_rate 5e-4 --learning_rate_decay_start 0 --scheduled_sampling_start 0 --checkpoint_path video_ckpt --val_videos_use -1 --losses_print_every 10 --batch_size 16 --language_eval 1'''
 
-    parser.add_argument('--dataset_size', type=int, default=0, help='if 0 minimal dataset else whole dataset')
+    parser.add_argument('--dataset_size', type=int, default=1, help='if 0 minimal dataset else whole dataset')
+    parser.add_argument('--ordered', type=int, default=0, help='if minimal dataset is in video id order')
 
     parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense.json',
                     help='path to the json file containing additional info and vocab (img/video)')
@@ -101,10 +102,10 @@ def parse_opt():
                         help='whether use auxiliary glove vectors or not')
     parser.add_argument('--aux_sequence_size', type=int, default=5,
                         help='how much aux glove vector to use')
-    parser.add_argument('--ordered', type=int, default=0,
-                        help='if minimal dataset is in video id order')
-    parser.add_argument('--aux_glove_order', type=str, default='wmd'
+    parser.add_argument('--aux_glove_order', type=str, default='wmd',
                         help='if selected glove vectors for nps and vps will be ordered according to wmd similarity or not')
+
+
     # video options
     parser.add_argument('--feat_type', type=str, default='resnext101-64f',
                         help='feat type for video (c3d, resnext101-64f)')

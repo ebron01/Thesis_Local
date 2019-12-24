@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+import pdb
 import json
 import h5py
 import os
@@ -139,6 +139,16 @@ class DataLoader(data.Dataset):
         self.max_seg = opt.max_seg
         self.sent_num = self.h5_label_file['sent_num'].value
         self.video_id = self.h5_label_file['video_id'].value
+
+        with open(self.opt.frame_ids, 'r') as f:
+            self.act_video_ids = f.readlines()
+        for i in range(len(self.act_video_ids)):
+            self.act_video_ids[i] = self.act_video_ids[i].strip()
+
+        # for v in self.video_id:
+        #     if (str(v) + '.mp4') not in self.act_video_ids:
+        #         self.video_id.remove(v)
+
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
             self.activity = self.h5_label_file['activity'].value
@@ -172,23 +182,23 @@ class DataLoader(data.Dataset):
         if self.dataset_size == 1:
             for j in range(seq_size[0]):
                 i = self.video_id[j]
-                if self.info['videos'][i] in self.aux_glove_vidids:
-                    video = self.info['videos'][i]
+                video = self.info['videos'][i]
+                if (str(video['id']) + '.mp4') in self.act_video_ids:
                     if video['split'] == 'train':
                         self.split_ix['train'].append(j)
-                        self.split_size['train']+=1
+                        self.split_size['train'] += 1
                         self.ix_split[j] = 'train'
                     elif video['split'] == 'val_2':
                         self.split_ix['val'].append(j)
-                        self.split_size['val']+=1
+                        self.split_size['val'] += 1
                         self.ix_split[j] = 'val'
                     elif video['split'] == 'val_1':
                         self.split_ix['test'].append(j)
-                        self.split_size['test']+=1
+                        self.split_size['test'] += 1
                         self.ix_split[j] = 'test'
-                    elif opt.train_only: # restval
+                    elif opt.train_only:  # restval
                         self.split_ix['train'].append(j)
-                        self.split_size['train']+=1
+                        self.split_size['train'] += 1
         else:
             count_train = 0
             count_val = 0
@@ -333,7 +343,7 @@ class DataLoader(data.Dataset):
                     if self.aux_glove_order == 'wmd':
                         order = 0
                         for k in aux_glove[key].keys:
-                            if aux_glove[key][k]['order'] == count:
+                            if aux_glove[key][k]['order'] == order:
                                 aux_features.append(aux_glove[key][k]['np_glove'])
                                 if len(aux_features) > self.aux_sequence_size:
                                     aux_glove[key][k]['np_glove'] = aux_glove[key][k]['np_glove'][:self.aux_sequence_size]
@@ -411,7 +421,6 @@ class DataLoader(data.Dataset):
                     if m >= sent_num:
                         break
             else:  # get random caption (random negatives)
-                count = 0
                 while True:
                     if self.opt.ordered == 1:
                         mmix = random.randint(0, len(self.split_ix[split]) - 1)
@@ -424,8 +433,8 @@ class DataLoader(data.Dataset):
                             break
                     else:
                         mmix = random.choice(self.split_ix[split])
-                        count += 1
-                        if self.video_id[mmix] == v_ix and sent_num == self.sent_num[mmix]:  # avoid getting the gt pair
+                        # mmix = random.randint(0, len(self.split_ix[split]) - 1)
+                        if self.video_id[mmix] != v_ix and sent_num != self.sent_num[mmix]:  # avoid getting the gt pair
                             mm_batch[i, :sent_num, 1:self.seq_length + 1] = self.labels[mmix, :sent_num, :]
                             mm_fc_batch[i, :sent_num] = self.get_seg_batch(mmix, "video")[:sent_num]
                             mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[

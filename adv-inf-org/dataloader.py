@@ -7,7 +7,7 @@ import h5py
 import os
 import numpy as np
 import random
-
+import pickle
 import torch
 import torch.utils.data as data
 
@@ -109,7 +109,6 @@ class DataLoader(data.Dataset):
         for i in range(len(self.act_video_ids)):
             self.act_video_ids[i] = self.act_video_ids[i].strip()
 
-
         # for v in self.video_id:
         #     if (str(v) + '.mp4') not in self.act_video_ids:
         #         self.video_id.remove(v)
@@ -133,19 +132,19 @@ class DataLoader(data.Dataset):
             if (str(video['id']) + '.mp4') in self.act_video_ids:
                 if video['split'] == 'train':
                     self.split_ix['train'].append(j)
-                    self.split_size['train']+=1
+                    self.split_size['train'] += 1
                     self.ix_split[j] = 'train'
                 elif video['split'] == 'val_2':
                     self.split_ix['val'].append(j)
-                    self.split_size['val']+=1
+                    self.split_size['val'] += 1
                     self.ix_split[j] = 'val'
                 elif video['split'] == 'val_1':
                     self.split_ix['test'].append(j)
-                    self.split_size['test']+=1
+                    self.split_size['test'] += 1
                     self.ix_split[j] = 'test'
-                elif opt.train_only: # restval
+                elif opt.train_only:  # restval
                     self.split_ix['train'].append(j)
-                    self.split_size['train']+=1
+                    self.split_size['train'] += 1
 
         print('assigned %d videos to split train' % len(self.split_ix['train']))
         print('assigned %d videos to split val' % len(self.split_ix['val']))
@@ -210,28 +209,25 @@ class DataLoader(data.Dataset):
         return np.array(features)
 
     def get_box_batch(self, index):
-        try:
-            if not self.use_box:
-                return None
-            v_idx = self.video_id[index]
-            id = self.info['videos'][v_idx]['id']
-            sent_num = self.sent_num[index]
-            assert sent_num > 0, 'data should have at least one caption'
-            box_features = []
-            split = self.ix_split[index]
-            if split == 'val':
-                split = 'val2'
-            elif split == 'test':
-                split = 'val1'
-            dir = os.path.join(self.input_box_dir,split)
-            feats = np.load(os.path.join(dir,id + '.npy'))
-            assert feats.shape[0] >= 3 * sent_num, 'weird feature for %s' % id
-            for i in range(sent_num):
-                box_features.append(feats[i*self.nbox:(i+1)*self.nbox])
-            return box_features
-        except Exception as e:
-            print(e)
-            pdb.set_trace()
+        if not self.use_box:
+            return None
+        v_idx = self.video_id[index]
+        id = self.info['videos'][v_idx]['id']
+        sent_num = self.sent_num[index]
+        assert sent_num > 0, 'data should have at least one caption'
+        box_features = []
+        split = self.ix_split[index]
+        if split == 'val':
+            split = 'val2'
+        elif split == 'test':
+            split = 'val1'
+        dir = os.path.join(self.input_box_dir,split)
+        feats = np.load(os.path.join(dir,id + '.npy'))
+        assert feats.shape[0] >= 3 * sent_num, 'weird feature for %s' % id
+        for i in range(sent_num):
+            box_features.append(feats[i*self.nbox:(i+1)*self.nbox])
+        return box_features
+
 
     def set_negatives(self,mode):
         self.negatives = mode
@@ -297,7 +293,6 @@ class DataLoader(data.Dataset):
                                                      :sent_num] if self.use_img else None
                         mm_box_batch[i, :sent_num] = self.get_box_batch(mmix)[:sent_num] if self.use_box else None
                         break
-
             if tmp_wrapped:
                 wrapped = True
 
