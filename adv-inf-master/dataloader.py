@@ -346,7 +346,7 @@ class DataLoader(data.Dataset):
                             if self.aux_glove[key][k]['order'] == order:
                                 aux_features.append(self.aux_glove[key][k]['np_glove'])
                                 if len(aux_features) > self.aux_sequence_size:
-                                    self.aux_glove[key][k]['np_glove'] = self.aux_glove[key][k]['np_glove'][:self.aux_sequence_size]
+                                    aux_features = aux_features[:self.aux_sequence_size]
                                     break
                             order += 1
                     else:
@@ -400,7 +400,14 @@ class DataLoader(data.Dataset):
             fc_batch[i,:sent_num] = tmp_fcs[0]
             img_batch[i,:sent_num] = tmp_fcs[1]
             box_batch[i,:sent_num] = tmp_fcs[2]
-            aux_batch[i,:sent_num, :tmp_fcs[3][0].shape[0]] = tmp_fcs[3]
+            try:
+                print('len:' + str(len(tmp_fcs[3])))
+                print('shape:' + str(tmp_fcs[3].shape))
+                print('shape:' + str(tmp_fcs[3].shape()))
+                print('size:' + str(tmp_fcs[3].size))
+                aux_batch[i, :sent_num, :tmp_fcs[3][0].shape[0]] = tmp_fcs[3]
+            except Exception as e:
+                print(e)
             sent_num_batch[i] = sent_num
             label_batch[i, :, 1 : self.seq_length + 1] = self.labels[ix]
             v_ix = self.video_id[ix]
