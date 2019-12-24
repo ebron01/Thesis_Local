@@ -231,6 +231,7 @@ class DataLoader(data.Dataset):
             return box_features
         except Exception as e:
             print(e)
+            pdb.set_trace()
 
     def set_negatives(self,mode):
         self.negatives = mode
