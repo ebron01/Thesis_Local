@@ -349,7 +349,7 @@ class DataLoader(data.Dataset):
                             if self.aux_glove[key][k]['order'] == order:
                                 aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
                                 print('aux features shape after %s with order %s is %s' % (str(k), str(order), str(aux_features.shape)))
-                                if len(aux_features) > self.aux_sequence_size + 1:
+                                if aux_features.shape[0] > self.aux_sequence_size + 1:
                                     aux_features = aux_features[:self.aux_sequence_size+1]
                                     break
                             order += 1
