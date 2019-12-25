@@ -330,7 +330,7 @@ class DataLoader(data.Dataset):
         sent_num = self.sent_num[index]
         assert sent_num > 0, 'data should have at least one caption'
         aux_features = np.zeros((1, self.aux_encoding_size))
-        outaux_features = np.zeros((sent_num, self.aux_sequence_size, self.aux_encoding_size))
+        outaux_features = np.zeros((sent_num, self.aux_sequence_size+1, self.aux_encoding_size))
         split = self.ix_split[index]
         if split == 'val':
             split = 'val2'
