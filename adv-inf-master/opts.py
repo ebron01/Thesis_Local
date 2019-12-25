@@ -21,8 +21,16 @@ def parse_opt():
                     help='path to the directory containing the boxes of att img feats (img)')
     parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense_label.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
+
+    parser.add_argument('--load_aux', type=str, default='.pkl',
+                        help='load from pickle or npys')
     parser.add_argument('--input_aux_glove', type=str, default='ConCap/inputs/gloves_5closest_v2.pkl',
                         help='path to pickle containing the glove vectors for closest captions of Conceptual Captions')
+    parser.add_argument('--npy_path', type=str, default='ConCap/inputs/numpys_5',
+                        help='pat to numpys if load type for aux is selected .npy')
+    parser.add_argument('--input_parsed_sentence', type=str, default='Concap/inputs/sorted_5closest_parsed_np_vp.json',
+                        help='path to parsed np and vp json')
+
     parser.add_argument('--frame_ids', type=str,
                         default='/data/shared/ActivityNet/activity_net/inputs/2_filenames.txt',
                         help='path to videos downloaded from activity_net for ConCap comparison')

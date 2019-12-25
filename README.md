@@ -9,7 +9,8 @@ comparison as reference_data_all.model.
 3. Use modelloader_mid.py to get updated_query_all.json which has distance between comparisons of ConCap dataset and 
 ActivityNet dataset event middle frames. 
 
-4. use wmdreorder_190421.py to get wmd reordered sentences. YOu will have sorted_query_mid.json
+4. use wmdreorder_190421.py to get wmd reordered sentences. you must use output of 3 as 
+'xxxxx_xclosest_updated_query_mid.json' json with closest captions. You will have sorted_xclosest_query_mid.json
 
 5. Use parser-nltk/parser.py to get np and vp of closest captions of Concap according to grammer rules defined in parser.py.
 Use output of 4 in this process

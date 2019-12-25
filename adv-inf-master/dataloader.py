@@ -164,10 +164,23 @@ class DataLoader(data.Dataset):
         self.ix_split = {}
 
         self.use_aux = getattr(opt, 'use_aux', 0) or getattr(opt, 'd_use_aux', 0)
-
-        print('Loading aux_glove')
-        self.aux_glove = cPickle.load(open(self.opt.input_aux_glove, 'rb'))
-        print('Loaded')
+        
+        if opt.load_aux == '.npy':
+            self.npy_path = opt.npy_path
+            self.input_parsed_sentence = opt.input_parsed_sentence
+            with open(self.input_parsed_sentence, 'r', encoding='utf-8') as f:
+                parsed_sentences_dict_ = json.load(f)
+            for key in parsed_sentences_dict_.keys():
+                for k in parsed_sentences_dict_[key].keys():
+                    parsed_sentences_dict_[key][k].update({'np_glove': np.load(self.npy_path + '/%s_%s_np.npy' % (str(key), str(k))),
+                                                           'vp_glove': np.load(self.npy_path + '/%s_%s_vp.npy' % (str(key), str(k)))
+                                                           })
+            self.aux_glove = parsed_sentences_dict_
+            del parsed_sentences_dict_
+        elif opt.load_aux == '.pkl':
+            print('Loading aux_glove')
+            self.aux_glove = cPickle.load(open(self.opt.input_aux_glove, 'rb'))
+            print('Loaded')
         self.aux_sequence_size = opt.aux_sequence_size
         if opt.use_aux is not 0:
             self.aux_encoding_size = 512

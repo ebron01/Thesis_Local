@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
+************************************USE turi env**********************
 Created on Sun Apr 21 21:14:21 2019
 @author: emre
 Created on thursday 21th of april after thesis meeting.
@@ -95,7 +96,7 @@ start_embeddings = datetime.now()
 print ('normalizing vectors')
 print('cell started at : ' + str(start_embeddings))
 
-query = '../turi/results/49003_5closest_updated_query_mid.json'
+query = '../turi/results/49003_10closest_updated_query_mid.json'
 
 with open(query, 'r') as f:
     query = json.load(f)
@@ -114,7 +115,7 @@ for key in query.keys():
         captions_ordered.update({key: raw_base, (key + '_concap'): caption_ordered})
     print (key)
 
-sorted_filename = 'sorted_5closest_updated_query_mid.json'
+sorted_filename = 'sorted_10closest_updated_query_mid.json'
 with open(sorted_filename, 'w') as f:
     json.dump(captions_ordered, f)
 

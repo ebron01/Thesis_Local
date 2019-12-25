@@ -118,6 +118,10 @@ for key in parsed_sentences_dict.keys():
             vp_glove.append(glove_v)
         np_glove = np.asarray(np_glove)
         vp_glove = np.asarray(vp_glove)
+        if option == '.npy':
+            filename = 'numpys_10/' + str(key) + '_' + str(k)
+            np.save(filename + '_np', np_glove)
+            np.save(filename + '_vp', vp_glove)
         parsed_sentences_dict[key][k].update({'np_glove': np_glove, 'vp_glove': vp_glove})
 
 end = datetime.datetime.now()
@@ -131,7 +135,6 @@ if option == 'pickle':
         pickle.dump(parsed_sentences_dict, f_opened_file)
     end = datetime.datetime.now()
     print(end - start)
-
 
 # with open("gloves.pkl", mode="rb") as opened_file:
 #     glove_dict1 = pickle.load(opened_file)
