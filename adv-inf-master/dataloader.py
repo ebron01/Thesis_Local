@@ -346,9 +346,9 @@ class DataLoader(data.Dataset):
                         for k in self.aux_glove[key].keys():
                             print('Concap key:%s' % str(k))
                             if self.aux_glove[key][k]['order'] == order:
-                                print('order of Concap key %s is %s'%(str(k), str(order)))
+                                print('order of Concap key %s is %s' % (str(k), str(order)))
                                 aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
-                                print('aux features shape after %s with order %s is %s' (str(k), str(order), str(aux_features.shape)))
+                                print('aux features shape after %s with order %s is %s' % (str(k), str(order), str(aux_features.shape)))
                                 if len(aux_features) >= self.aux_sequence_size + 1:
                                     aux_features = aux_features[:self.aux_sequence_size+1]
                                     break
