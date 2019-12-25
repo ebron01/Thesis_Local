@@ -6,6 +6,12 @@ import torch.nn.functional as F
 class Attention(nn.Module):
     """
     Applies an attention mechanism on the output features from the decoder.
+
+    m = nn.Linear(20, 30)
+    input = torch.randn(128, 20)
+    output = m(input)
+    print(output.size())
+    torch.Size([128, 30])
     """
 
     def __init__(self, dim):

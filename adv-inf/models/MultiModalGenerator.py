@@ -62,7 +62,7 @@ class MultiModalGenerator(CaptionModel):
         self.use_aux = opt.use_aux
         self.aux_sequence_size = opt.aux_sequence_size
         if self.use_aux:
-            self.aux_encoding_size = 512
+            self.aux_encoding_size = opt.aux_encoding_size
             self.aux_embed = nn.Linear(self.aux_encoding_size, self.rnn_size)
             self.aux_attention = Attention(self.rnn_size)
 

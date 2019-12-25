@@ -116,6 +116,8 @@ def parse_opt():
                         help='how much aux glove vector to use')
     parser.add_argument('--aux_glove_order', type=str, default='wmd',
                         help='if selected glove vectors for nps and vps will be ordered according to wmd similarity or not')
+    parser.add_argument('--aux_encoding_size', type=int, default=512,
+                        help='size to encode glove vectors')
 
 
     # video options
