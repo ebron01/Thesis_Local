@@ -573,7 +573,6 @@ class BlobFetcher():
             self.reset()
 
         ix, wrapped = self._get_next_minibatch_inds()
-        print(ix)
         tmp = self.split_loader.next()
         if wrapped:
             self.reset()
