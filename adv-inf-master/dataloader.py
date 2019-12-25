@@ -360,7 +360,7 @@ class DataLoader(data.Dataset):
                         aux_features.append(self.aux_glove[key])
                         break
             print('shape of aux features to store is %s' % str(aux_features.shape))
-            outaux_features[i, 1:aux_features.shape[0]+1] = aux_features
+            outaux_features[i, 1:aux_features.shape[0]+1] = aux_features[1:]
 
             #taking only one sample np or vp from closest captions of concap
             #for key in aux_glove.keys():
@@ -379,7 +379,7 @@ class DataLoader(data.Dataset):
         batch_size = batch_size or self.batch_size
 
         # inputs for training
-        label_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype = 'int')
+        label_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype='int')
         mask_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype='float32')
         sent_num_batch = np.zeros(batch_size, dtype='int')
         fc_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.fc_feat_size], dtype = 'float32')
@@ -410,7 +410,7 @@ class DataLoader(data.Dataset):
             # aux_batch[i, :sent_num] = tmp_fcs[3]
             aux_batch[i, :sent_num, :tmp_fcs[3][0].shape[0]] = tmp_fcs[3]
             sent_num_batch[i] = sent_num
-            label_batch[i, :, 1 : self.seq_length + 1] = self.labels[ix]
+            label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
             v_ix = self.video_id[ix]
 
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
