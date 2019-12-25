@@ -219,6 +219,8 @@ class DataLoader(data.Dataset):
             with open('id_dict.json', 'w') as f:
                 json.dump(id_dict, f)
 
+            self.id_dict = id_dict
+
         else:
             count_train = 0
             count_val = 0
@@ -456,6 +458,7 @@ class DataLoader(data.Dataset):
                             mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[
                                                          :sent_num] if self.use_img else None
                             mm_box_batch[i, :sent_num] = self.get_box_batch(mmix)[:sent_num] if self.use_box else None
+                            mm_aux_batch[i, :sent_num] = self.get_seg_batch(mmix, "aux")[:sent_num]
                             break
                     else:
                         mmix = random.choice(self.split_ix[split])
@@ -468,6 +471,7 @@ class DataLoader(data.Dataset):
                             mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[
                                                          :sent_num] if self.use_img else None
                             mm_box_batch[i, :sent_num] = self.get_box_batch(mmix)[:sent_num] if self.use_box else None
+                            mm_aux_batch[i, :sent_num] = self.get_seg_batch(mmix, "aux")[:sent_num]
                             break
             if tmp_wrapped:
                 wrapped = True
@@ -573,6 +577,7 @@ class BlobFetcher():
         max_index = len(self.dataloader.split_ix[self.split])
         print('max_index : %d' % max_index)
         wrapped = False
+
 
         ri = self.dataloader.iterators[self.split]
         print ('ri : %d')
