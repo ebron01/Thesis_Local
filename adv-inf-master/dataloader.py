@@ -329,7 +329,7 @@ class DataLoader(data.Dataset):
         print('id' + str(id))
         sent_num = self.sent_num[index]
         assert sent_num > 0, 'data should have at least one caption'
-        outaux_features = np.zeros((sent_num, self.aux_sequence_size+1, self.aux_encoding_size))
+        outaux_features = np.zeros((sent_num, self.aux_sequence_size, self.aux_encoding_size))
         split = self.ix_split[index]
         if split == 'val':
             split = 'val2'
@@ -340,16 +340,16 @@ class DataLoader(data.Dataset):
             aux_features = np.zeros((1, self.aux_encoding_size))
             for key in self.aux_glove.keys():
                 if (id + '_' + str(sent_num)) in key:
-                    print('Found key of mid feature:%s, id of concap video is:%s ' % (str(key), (str(id)+'_'+str(sent_num))))
+                    # print('Found key of mid feature:%s, id of concap video is:%s ' % (str(key), (str(id)+'_'+str(sent_num))))
                     if self.aux_glove_order == 'wmd':
                         order = 0
                         for k in self.aux_glove[key].keys():
-                            print('Concap key:%s' % str(k))
-                            print('order of Concap key %s is %s' % (str(k), str(order)))
+                            # print('Concap key:%s' % str(k))
+                            # print('order of Concap key %s is %s' % (str(k), str(order)))
                             if self.aux_glove[key][k]['order'] == order:
                                 aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
-                                print('aux features shape after %s with order %s is %s' % (str(k), str(order), str(aux_features.shape)))
                                 if aux_features.shape[0] > self.aux_sequence_size + 1:
+                                    print('aux features shape after %s with order %s is %s' % (str(k), str(order), str(aux_features.shape)))
                                     aux_features = aux_features[:self.aux_sequence_size+1]
                                     break
                             order += 1
@@ -360,7 +360,7 @@ class DataLoader(data.Dataset):
                         aux_features.append(self.aux_glove[key])
                         break
             print('shape of aux features to store is %s' % str(aux_features.shape))
-            outaux_features[i, 1:aux_features.shape[0]+1] = aux_features[1:]
+            outaux_features[i, :aux_features.shape[0]] = aux_features[1:]
 
             #taking only one sample np or vp from closest captions of concap
             #for key in aux_glove.keys():
@@ -369,7 +369,7 @@ class DataLoader(data.Dataset):
             #            aux_glove[key] = aux_glove[key][:5]
             #        aux_features.append(aux_glove[key])
             #        break
-        return outaux_features[:, 1:, :]
+        return outaux_features
 
     def set_negatives(self,mode):
         self.negatives = mode
