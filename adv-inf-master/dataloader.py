@@ -214,6 +214,11 @@ class DataLoader(data.Dataset):
                     elif opt.train_only:  # restval
                         self.split_ix['train'].append(j)
                         self.split_size['train'] += 1
+            id_dict = {}
+            id_dict.update({'train': self.split_ix['train'], 'val_2': self.split_ix['val'], 'test': self.split_ix['test']})
+            with open('id_dict.json', 'w') as f:
+                json.dump(id_dict, f)
+
         else:
             count_train = 0
             count_val = 0
@@ -566,9 +571,11 @@ class BlobFetcher():
 
     def _get_next_minibatch_inds(self):
         max_index = len(self.dataloader.split_ix[self.split])
+        print('max_index : %d' % max_index)
         wrapped = False
 
         ri = self.dataloader.iterators[self.split]
+        print ('ri : %d')
         ix = self.dataloader.split_ix[self.split][ri]
 
         ri_next = ri + 1
@@ -591,7 +598,4 @@ class BlobFetcher():
             self.reset()
         assert tmp[1] == ix, "ix not equal"
 
-        try:
-            return tmp + [wrapped]
-        except Exception as e:
-            return tmp + tuple[wrapped]
+        return tmp + [wrapped]
