@@ -360,7 +360,7 @@ class DataLoader(data.Dataset):
                         aux_features.append(self.aux_glove[key])
                         break
             print('shape of aux features to store is %s' % str(aux_features.shape))
-            outaux_features[i, :aux_features.shape[0]] = aux_features[1:]
+            outaux_features[i, :(aux_features.shape[0]-1)] = aux_features[1:]
 
             #taking only one sample np or vp from closest captions of concap
             #for key in aux_glove.keys():
