@@ -340,14 +340,16 @@ class DataLoader(data.Dataset):
         for i in range(sent_num):
             for key in self.aux_glove.keys():
                 if (id + '_' + str(sent_num)) in key:
-                    print('buldu key ' + str(key) + ' id ' + (str(id) + '_' + str(sent_num)))
+                    print('Found key of mid feature:%s, id of concap video is:%s ' % (str(key), (str(id)+'_'+str(sent_num))))
                     if self.aux_glove_order == 'wmd':
                         order = 0
                         for k in self.aux_glove[key].keys():
+                            print('Concap key:%s' % str(k))
                             if self.aux_glove[key][k]['order'] == order:
+                                print('order of Concap key %s is %s'%(str(k), str(order)))
                                 aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
-                                print('aux features shape : ' + str(aux_features.shape))
-                                if len(aux_features) > self.aux_sequence_size + 1:
+                                print('aux features shape after %s with order %s is %s' (str(k), str(order), str(aux_features.shape)))
+                                if len(aux_features) >= self.aux_sequence_size + 1:
                                     aux_features = aux_features[:self.aux_sequence_size+1]
                                     break
                             order += 1
@@ -357,7 +359,8 @@ class DataLoader(data.Dataset):
                             self.aux_glove[key] = self.aux_glove[key][:5]
                         aux_features.append(self.aux_glove[key])
                         break
-            outaux_features[i] = aux_features
+            print('shape of aux features to store is %s', str(aux_features.shape))
+            outaux_features[i, 1:aux_features.shape[0]+1] = aux_features
 
             #taking only one sample np or vp from closest captions of concap
             #for key in aux_glove.keys():
