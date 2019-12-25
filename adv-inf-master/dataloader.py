@@ -324,9 +324,9 @@ class DataLoader(data.Dataset):
         if not self.use_aux:
             return None
         v_idx = self.video_id[index]
-        print('v_idx' + str(v_idx))
+        # print('v_idx' + str(v_idx))
         id = self.info['videos'][v_idx]['id']
-        print('id' + str(id))
+        # print('id' + str(id))
         sent_num = self.sent_num[index]
         assert sent_num > 0, 'data should have at least one caption'
         outaux_features = np.zeros((sent_num, self.aux_sequence_size, self.aux_encoding_size))
@@ -573,6 +573,7 @@ class BlobFetcher():
             self.reset()
 
         ix, wrapped = self._get_next_minibatch_inds()
+        print(ix)
         tmp = self.split_loader.next()
         if wrapped:
             self.reset()
