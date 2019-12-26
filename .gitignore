@@ -3,10 +3,6 @@ adv-inf-org/save1/*
 adv-inf-org/save_cont/*
 adv-inf-master/save*
 adv-inf-org/save*
-
-
-
-
 turi/5.model
 turi/*.pptx
 turi/midframeextractor/mid/*
@@ -40,5 +36,6 @@ parser-nltk/sorted_10closest_parsed_np_vp.json
 parser-nltk/sorted_10closest_updated_query_mid.json
 wmd_v2/sorted_10closest_updated_query_mid.json
 wmd_v2/inputs/*
+adv-inf-master/save_batchsize16_e30
 **.idea
 .DS_Store

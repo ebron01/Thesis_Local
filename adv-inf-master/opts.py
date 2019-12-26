@@ -170,7 +170,7 @@ def parse_opt():
                     help='If use box, do we normalize box feature')
 
     # Optimization: General
-    parser.add_argument('--g_pre_nepoch', type=int, default=50,
+    parser.add_argument('--g_pre_nepoch', type=int, default=30,
                     help='number of epochs to pre-train generator with cross entropy')
     parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')
@@ -188,7 +188,7 @@ def parse_opt():
     # Optimization: for the Language Model
     parser.add_argument('--optim', type=str, default='adam',
                     help='what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
-    parser.add_argument('--learning_rate', type=float, default=4e-4,
+    parser.add_argument('--learning_rate', type=float, default=5e-4,
                     help='learning rate')
     parser.add_argument('--learning_rate_decay_start', type=int, default=-1,
                     help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
@@ -223,7 +223,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='save1',
+    parser.add_argument('--checkpoint_path', type=str, default='save_batchsize16_e30',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
