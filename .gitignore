@@ -37,5 +37,6 @@ parser-nltk/sorted_10closest_updated_query_mid.json
 wmd_v2/sorted_10closest_updated_query_mid.json
 wmd_v2/inputs/*
 adv-inf-master/save_batchsize16_e30
+adv-inf-master/save_closest10
 **.idea
 .DS_Store

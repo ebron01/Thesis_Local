@@ -24,7 +24,7 @@ def parse_opt():
 
     parser.add_argument('--load_aux', type=str, default='.pkl',
                         help='load from pickle or npys')
-    parser.add_argument('--input_aux_glove', type=str, default='ConCap/inputs/gloves_5closest_v2.pkl',
+    parser.add_argument('--input_aux_glove', type=str, default='ConCap/inputs/gloves_10closest_v2.pkl',
                         help='path to pickle containing the glove vectors for closest captions of Conceptual Captions')
     parser.add_argument('--npy_path', type=str, default='ConCap/inputs/numpys_5',
                         help='pat to numpys if load type for aux is selected .npy')
@@ -223,7 +223,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='save_batchsize16_e30',
+    parser.add_argument('--checkpoint_path', type=str, default='save_closest10',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
