@@ -38,5 +38,16 @@ wmd_v2/sorted_10closest_updated_query_mid.json
 wmd_v2/inputs/*
 adv-inf-master/save_batchsize16_e30
 adv-inf-master/save_closest10
+adv-inf-master/save_closest10_encodesize10
+adv-inf-master/save_closest10_encodesize10_batchsize48
+adv-inf-master/slurm-*
+adv-inf-org/slurm-*
+adv-inf/slurm-*
+
+adv-inf-master/save*/slurm-*
+adv-inf-master/save*/slurm-*
+adv-inf-master/save*/slurm-*
+
+
 **.idea
 .DS_Store
