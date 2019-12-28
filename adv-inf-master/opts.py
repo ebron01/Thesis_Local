@@ -172,7 +172,7 @@ def parse_opt():
     # Optimization: General
     parser.add_argument('--g_pre_nepoch', type=int, default=30,
                     help='number of epochs to pre-train generator with cross entropy')
-    parser.add_argument('--batch_size', type=int, default=48,
+    parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')
     parser.add_argument('--grad_clip', type=float, default=0.1, #5.,
                     help='clip gradients at this value')
@@ -223,7 +223,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch')
-    parser.add_argument('--checkpoint_path', type=str, default='save_closest10_encodesize10i_batchsize48',
+    parser.add_argument('--checkpoint_path', type=str, default='save_closest10_encodesize10',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
