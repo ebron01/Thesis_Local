@@ -64,6 +64,7 @@ def train(opt):
             print('Using more than one gpu')
         else:
             gen_model = gen.cuda()
+
     else:
         gen_model = gen
     gen_model.train()
