@@ -53,29 +53,14 @@ def train(opt):
     # set up models
     gen, dis = models.setup(opt)
 
-    device_id = torch.cuda.device_count()
-    print('device_id: ' + str(device_id))
-    device = torch.cuda.get_device_name(range(device_id))
-
     if torch.cuda.is_available():
-        if torch.cuda.device_count() > 1:
-            gen_model = nn.DataParallel(gen)
-            gen_model = gen_model.to(device)
-            print('Using more than one gpu')
-        else:
-            gen_model = gen.cuda()
+        gen_model = gen.cuda()
 
     else:
         gen_model = gen
     gen_model.train()
     if torch.cuda.is_available():
-        if torch.cuda.device_count() > 1:
-            dis_model = nn.DataParallel(dis)
-            dis_model = dis_model.to(device)
-            print('Using more than one gpu')
-        else:
-            dis_model = dis.cuda()
-
+        dis_model = dis.cuda()
     else:
         dis_model = dis
     dis_model.train()
