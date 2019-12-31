@@ -224,7 +224,8 @@ def train(opt):
                                'language_eval': opt.language_eval,
                                'id' : opt.id,
                                'val_videos_use' : opt.val_videos_use,
-                               'remove' : 1} # remove generated caption
+                               'remove' : 1, # remove generated caption
+                               'dump_json' : 1}
                 # eval_kwargs.update(vars(opt))
                 val_loss, predictions, lang_stats, _, _ = eval_split(gen_model, crit, loader, eval_kwargs=eval_kwargs)
                 if opt.language_eval == 1:

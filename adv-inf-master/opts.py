@@ -10,9 +10,12 @@ def parse_opt():
 
     parser.add_argument('--dataset_size', type=int, default=1, help='if 0 minimal dataset else whole dataset')
     parser.add_argument('--ordered', type=int, default=0, help='if minimal dataset is in video id order')
-
+    parser.add_argument('--word_source', type=str, default='activity', help='activity or aux+activity: this param changes vocab information for model')
     parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense.json',
                     help='path to the json file containing additional info and vocab (img/video)')
+    parser.add_argument('--input_json_aux_activity', type=str,
+                        default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense_aux.json',
+                        help='this is used when vocab is used both from Concap and ActivityNet : path to the json file containing additional info and vocab (img/video) both Concap and ActNet')
     parser.add_argument('--input_fc_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnext101-64f/',
                         help='path to the directory containing the preprocessed fc video features')
     parser.add_argument('--input_img_dir', type=str, default='/data/shared/ActivityNet/activity_net/feats/resnet152/',

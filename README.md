@@ -16,9 +16,8 @@ ActivityNet dataset event middle frames.
 Use output of 4 in this process
 (pickle_converter.py is written for conversion from pickle3 to pickle2)
 
-
-5. then use parsed_glove.py to get glove.pickle to use as input in adv-inf.
-
+6. then use parsed_glove.py to get glove.pickle to use as input in adv-inf.
+7. use vocab creator.py to create new vocab to be usable in advinf when need is usage of both activity net and conceptual captions vocabularies.
 
 #TODO: reorder closest captions according to wmd distances.
 #TODO2: get best np and vp according to their occurrence counts.
