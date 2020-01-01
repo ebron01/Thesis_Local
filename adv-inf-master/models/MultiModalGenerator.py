@@ -325,8 +325,12 @@ class MultiModalGenerator(CaptionModel):
                 try:
                     if t == 0:
                         unfinished = it > 0
+                        print('unfinished_0')
+                        print(unfinished)
                     else:
                         unfinished = unfinished * (it > 0)
+                        print('unfinished')
+                        print(unfinished)
                 except:
                     print('problemli')
 
