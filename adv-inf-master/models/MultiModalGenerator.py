@@ -311,13 +311,15 @@ class MultiModalGenerator(CaptionModel):
                     try:
                         it = torch.multinomial(prob_prev, 1)
                         print(it)
-                    except:
+                    except Exception as e:
                         print('multinominal exception')
+                        print(e)
                     try:
                         sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
                         print(sampleLogprobs)
-                    except:
+                    except Exception as e:
                         print('samplelogprobs')
+                        print(e)
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
                 try:
