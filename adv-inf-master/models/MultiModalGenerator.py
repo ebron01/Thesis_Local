@@ -231,7 +231,9 @@ class MultiModalGenerator(CaptionModel):
 
     def _sample(self, fc_feats, img_feats, box_feats, aux_feats, activity_labels, opt={}):
         sample_max = opt.get('sample_max', 1)
+        print('_sample max : ' + str(sample_max))
         beam_size = opt.get('beam_size', 1)
+        print('_beam_size : ' + str(beam_size))
         temperature = opt.get('temperature', 1.0)
         if sample_max and beam_size > 1:
             return self._sample_beam(fc_feats, img_feats, box_feats, activity_labels, opt=opt)
@@ -263,6 +265,7 @@ class MultiModalGenerator(CaptionModel):
                 else:
                     activity = self.activity_embed(activity_labels.float()).unsqueeze(1)
             for t in range(self.seq_length + 1):
+                print('t: %d'%t)
                 if t == 0 : # input <bos>
                     it = fc_feats.new_zeros(batch_size, dtype=torch.long)
                 if self.use_video:
@@ -282,6 +285,7 @@ class MultiModalGenerator(CaptionModel):
                 # sample the next_word
                 if t == self.seq_length: # skip if we achieve maximum length
                     break
+                print('sample max değeri: ' + str(sample_max))
                 if sample_max:
                     sampleLogprobs_2, it_2 = torch.topk(logprobs.data, 2, dim=1)
                     it = it_2.new_zeros(batch_size)
@@ -306,10 +310,13 @@ class MultiModalGenerator(CaptionModel):
                     sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
-                if t == 0:
-                    unfinished = it > 0
-                else:
-                    unfinished = unfinished * (it > 0)
+                try:
+                    if t == 0:
+                        unfinished = it > 0
+                    else:
+                        unfinished = unfinished * (it > 0)
+                except:
+                    print('problemli')
 
                 it = it * unfinished.type_as(it)
                 seq[:,n,t] = it  # seq[t] the input of t+2 time step
