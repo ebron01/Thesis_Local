@@ -175,7 +175,7 @@ def parse_opt():
     # Optimization: General
     parser.add_argument('--g_pre_nepoch', type=int, default=30,
                     help='number of epochs to pre-train generator with cross entropy')
-    parser.add_argument('--batch_size', type=int, default=32,
+    parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')
     parser.add_argument('--grad_clip', type=float, default=0.1, #5.,
                     help='clip gradients at this value')

@@ -314,8 +314,12 @@ class MultiModalGenerator(CaptionModel):
                 it = it * unfinished.type_as(it)
                 seq[:,n,t] = it  # seq[t] the input of t+2 time step
                 seqLogprobs[:,n,t] = sampleLogprobs.view(-1)
-                if unfinished.sum() == 0:
-                    break
+                try:
+                    if unfinished.sum() == 0:
+                        break
+                except:
+                    print('hata burada')
+                    print(unfinished)
             if self.context:
                 context = self.get_hidden_state(state)
         return seq,seqLogprobs
