@@ -301,13 +301,23 @@ class MultiModalGenerator(CaptionModel):
                             sampleLogprobs[i] = sampleLogprobs_2[i,1]
                     it = it.view(-1).long()
                 else:
+                    print('else')
                     if temperature == 1.0:
+                        print('temp 1')
                         prob_prev = torch.exp(logprobs.data)  # fetch prev distribution: shape Nx(M+1)
                     else:
                         # scale logprobs by temperature
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
-                    it = torch.multinomial(prob_prev, 1)
-                    sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
+                    try:
+                        it = torch.multinomial(prob_prev, 1)
+                        print(it)
+                    except:
+                        print('multinominal exception')
+                    try:
+                        sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
+                        print(sampleLogprobs)
+                    except:
+                        print('samplelogprobs')
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
                 try:
