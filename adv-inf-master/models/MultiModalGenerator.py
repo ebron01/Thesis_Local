@@ -329,6 +329,8 @@ class MultiModalGenerator(CaptionModel):
                     print('problemli')
 
                 it = it * unfinished.type_as(it)
+                print('_it')
+                print(it)
                 seq[:,n,t] = it  # seq[t] the input of t+2 time step
                 seqLogprobs[:,n,t] = sampleLogprobs.view(-1)
                 try:
