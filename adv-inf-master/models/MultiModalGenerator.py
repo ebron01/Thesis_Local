@@ -285,7 +285,7 @@ class MultiModalGenerator(CaptionModel):
                 # sample the next_word
                 if t == self.seq_length: # skip if we achieve maximum length
                     break
-                print('sample max değeri: ' + str(sample_max))
+                print('sample max degeri: ' + str(sample_max))
                 if sample_max:
                     sampleLogprobs_2, it_2 = torch.topk(logprobs.data, 2, dim=1)
                     it = it_2.new_zeros(batch_size)
