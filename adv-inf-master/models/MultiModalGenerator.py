@@ -306,6 +306,9 @@ class MultiModalGenerator(CaptionModel):
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
 
                     it = torch.multinomial(prob_prev, 1)
+                    print(prob_prev)
+                    print(it)
+                    print(logprobs)
                     sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
@@ -436,8 +439,6 @@ class MultiModalGenerator(CaptionModel):
             it = it_2[:,0].clone().unsqueeze(1)
             bool = torch.eq(it,it.new_ones(batch_size,1)*(self.vocab_size+1)).long()
             it = it_2.gather(1,bool)
-            print(it)
-            print(logprobs)
             sampleLogprobs = logprobs.gather(1, it) # gather the logprobs at sampled positions
             it = it.view(-1).long() # and flatten indices for downstream processing
 
