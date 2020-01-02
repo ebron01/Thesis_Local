@@ -12,7 +12,7 @@ from .CaptionModel import CaptionModel
 from .Attention import Attention
 import numpy as np
 import time
-
+torch.set_printoptions(profile="full")
 
 class MultiModalGenerator(CaptionModel):
     def __init__(self, opt):
