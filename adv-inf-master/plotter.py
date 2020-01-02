@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import cPickle as pickle
 
 dir = '/Users/emre/Desktop/Advinf_Visual/'
-read_file = 'files/histories_closest10_encodesize10_cont1.pkl'
-save_file = 'plots/closest10_encodesize10'
-plot_label = 'Closest captions: 10, Encode size for aux: 10'
+read_file = 'files/histories_save_e15_lange1_b_32_0101.pkl'
+save_file = 'plots/e15_lange1_b_32_0101'
+plot_label = 'Closest captions: 10, Encode size for aux: 10 Batch size:32 '
 
 with open(dir + read_file, 'rb') as f:
     histories = pickle.load(f)

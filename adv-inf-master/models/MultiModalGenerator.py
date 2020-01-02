@@ -265,7 +265,6 @@ class MultiModalGenerator(CaptionModel):
                 else:
                     activity = self.activity_embed(activity_labels.float()).unsqueeze(1)
             for t in range(self.seq_length + 1):
-                print('t: %d'%t)
                 if t == 0 : # input <bos>
                     it = fc_feats.new_zeros(batch_size, dtype=torch.long)
                 if self.use_video:
@@ -285,7 +284,6 @@ class MultiModalGenerator(CaptionModel):
                 # sample the next_word
                 if t == self.seq_length: # skip if we achieve maximum length
                     break
-                print('sample max degeri: ' + str(sample_max))
                 if sample_max:
                     sampleLogprobs_2, it_2 = torch.topk(logprobs.data, 2, dim=1)
                     it = it_2.new_zeros(batch_size)
@@ -301,50 +299,27 @@ class MultiModalGenerator(CaptionModel):
                             sampleLogprobs[i] = sampleLogprobs_2[i,1]
                     it = it.view(-1).long()
                 else:
-                    print('else')
                     if temperature == 1.0:
-                        print('temp 1')
                         prob_prev = torch.exp(logprobs.data)  # fetch prev distribution: shape Nx(M+1)
                     else:
                         # scale logprobs by temperature
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
-                    try:
-                        it = torch.multinomial(prob_prev, 1)
-                        print(it)
-                    except Exception as e:
-                        print('multinominal exception')
-                        print(e)
-                    try:
-                        sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
-                        print(sampleLogprobs)
-                    except Exception as e:
-                        print('samplelogprobs')
-                        print(e)
+
+                    it = torch.multinomial(prob_prev, 1)
+                    sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
-                try:
-                    if t == 0:
-                        unfinished = it > 0
-                        print('unfinished_0')
-                        print(unfinished)
-                    else:
-                        unfinished = unfinished * (it > 0)
-                        print('unfinished')
-                        print(unfinished)
-                except:
-                    print('problemli')
+                if t == 0:
+                    unfinished = it > 0
+                else:
+                    unfinished = unfinished * (it > 0)
 
                 it = it * unfinished.type_as(it)
-                print('_it')
-                print(it)
                 seq[:,n,t] = it  # seq[t] the input of t+2 time step
                 seqLogprobs[:,n,t] = sampleLogprobs.view(-1)
-                try:
-                    if unfinished.sum() == 0:
-                        break
-                except:
-                    print('hata burada')
-                    print(unfinished)
+
+                if unfinished.sum() == 0:
+                    break
             if self.context:
                 context = self.get_hidden_state(state)
         return seq,seqLogprobs
