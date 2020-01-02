@@ -13,7 +13,7 @@ from .Attention import Attention
 import numpy as np
 import time
 torch.set_printoptions(profile="full")
-
+import pickle
 class MultiModalGenerator(CaptionModel):
     def __init__(self, opt):
         super(MultiModalGenerator, self).__init__()
@@ -307,14 +307,14 @@ class MultiModalGenerator(CaptionModel):
 
                     it = torch.multinomial(prob_prev, 1)
                     print(prob_prev)
-                    with open('prob_prev.out','w') as f:
-                        f.write(prob_prev)
+                    with open('prob_prev.pkl','w') as f:
+                        pickle.dump(prob_prev, f)
                     print(it)
-                    with open('it.out','w') as f:
-                        f.write(it)
+                    with open('it.pkl','w') as f:
+                        pickle.dump(it, f)
                     print(logprobs)
-                    with open('logprobs.out','w') as f:
-                        f.write(logprobs)
+                    with open('logprobs.pkl','w') as f:
+                        pickle.dump(logprobs,f)
                     sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
