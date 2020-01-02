@@ -12,6 +12,7 @@ from .CaptionModel import CaptionModel
 from .Attention import Attention
 import numpy as np
 import time
+import sys
 torch.set_printoptions(profile="full")
 import pickle
 class MultiModalGenerator(CaptionModel):
@@ -315,6 +316,7 @@ class MultiModalGenerator(CaptionModel):
                     print(logprobs)
                     with open('logprobs.pkl','w') as f:
                         pickle.dump(logprobs,f)
+                    sys.exit()
                     sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
