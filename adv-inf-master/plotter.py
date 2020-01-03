@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import cPickle as pickle
 
 dir = '/Users/emre/Desktop/Advinf_Visual/'
-read_file = 'files/histories__lange1_b_32_0101.pkl'
-save_file = 'plots/histories__lange1_b_32_0101'
+read_file = 'files/histories_22.pkl'
+save_file = 'plots/histories_22'
 plot_label = 'Closest captions: 10, Encode size for aux: 10 Batch size:32 '
 
 with open(dir + read_file, 'rb') as f:

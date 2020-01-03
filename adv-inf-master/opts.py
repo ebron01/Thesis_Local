@@ -6,7 +6,7 @@ def parse_opt():
 
     '''python train.py --caption_model video --input_aux_glove ConCap/inputs/gloves.pkl --input_json activity_net/inputs/video_data_dense.json --input_fc_dir activity_net/feats/resnext101-64f/ 
     --input_img_dir activity_net/feats/resnet152/ --input_box_dir activity_net/feats/bottomup/ --input_label_h5 activity_net/inputs/video_data_dense_label.h5 --glove_npy activity_net/inputs/glove.npy
-    --learning_rate 5e-4 --learning_rate_decay_start 0 --scheduled_sampling_start 0 --checkpoint_path video_ckpt --val_videos_use -1 --losses_print_every 10 --batch_size 16 --language_eval 1'''
+    --learning_rate 5e-4 --learning_rate_decay_start 0 --scheduled_samplin 0 --checkpoint_path video_ckpt --val_videos_use -1 --losses_print_every 10 --batch_size 16 --language_eval 1'''
 
     parser.add_argument('--dataset_size', type=int, default=1, help='if 0 minimal dataset else whole dataset')
     parser.add_argument('--ordered', type=int, default=0, help='if minimal dataset is in video id order')
