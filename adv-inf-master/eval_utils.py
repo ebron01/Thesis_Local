@@ -239,8 +239,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                         fc_feats_s = fc_feats[:, s]
                         img_feats_s = img_feats[:, s]
                         box_feats_s = box_feats[:, s]
+                        aux_feats_s = aux_feats[:, s]
                         start = time.time()
-                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities,
+                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, aux_feats_s,  activities,
                                                                              best_context, opt=eval_kwargs)
                         sample_time = time.time()
                         # print('sample_time:', sample_time-start)
@@ -302,7 +303,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 seq = torch.mul(seq,utils.generate_paragraph_mask(sent_num, seq))
 
                 # negatives for evaluating discriminator
-                mm_seq, _ = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities,
+                mm_seq, _ = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_aux_feats, mm_activities,
                                 opt=eval_kwargs, mode='sample')
                 mm_seq = torch.mul(mm_seq,utils.generate_paragraph_mask(sent_num, mm_seq))
 
