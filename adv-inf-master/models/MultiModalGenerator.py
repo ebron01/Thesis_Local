@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import *
 import misc.utils as utils
-
+import pdb
 from .CaptionModel import CaptionModel
 from .Attention import Attention
 import numpy as np
@@ -275,7 +275,7 @@ class MultiModalGenerator(CaptionModel):
                 if self.use_box:
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 if self.use_aux:
-                    box = self.attention_encoder(aux_feats[:, n], state, 'aux')
+                    aux = self.attention_encoder(aux_feats[:, n], state, 'aux')
                 encoded = self.encoder(torch.cat((video, image, box, aux, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 xt = torch.cat((encoded,context,xt),dim=2)
@@ -305,7 +305,7 @@ class MultiModalGenerator(CaptionModel):
                     else:
                         # scale logprobs by temperature
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
-
+                    pdb.set_trace()
                     it = torch.multinomial(prob_prev, 1)
                     sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
                     it = it.view(-1).long()  # and flatten indices for downstream processing
