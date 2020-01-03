@@ -13,4 +13,4 @@
 ####export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/samet/cuda-9.0/lib64
 #########################################################
 
-python train.py
+CUDA_LAUNCH_BLOCKING=1 python train.py --g_pre_nepoch 22 --g_start_from 'save_e15_lange1_b_32_0101' --g_start_epoch 'latest'
