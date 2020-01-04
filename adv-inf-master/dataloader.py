@@ -365,16 +365,16 @@ class DataLoader(data.Dataset):
             aux_features = np.zeros((1, self.aux_encoding_size))
             for key in self.aux_glove.keys():
                 if (id + '_' + str(sent_num)) in key:
-                    # print('Found key of mid feature:%s, id of concap video is:%s ' % (str(key), (str(id)+'_'+str(sent_num))))
                     if self.aux_glove_order == 'wmd':
                         order = 0
                         for k in self.aux_glove[key].keys():
-                            # print('Concap key:%s' % str(k))
-                            # print('order of Concap key %s is %s' % (str(k), str(order)))
                             if self.aux_glove[key][k]['order'] == order:
                                 aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
+                                #if sum(self.aux_glove[key][k]['np_glove'].sum()) != 0:
+                                    #aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
+                                #elif sum(self.aux_glove[key][k]['vp_glove'].sum()) != 0:
+                                    #aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['vp_glove'])), axis=0)
                                 if aux_features.shape[0] > self.aux_sequence_size + 1:
-                                    # print('aux features shape after %s with order %s is %s' % (str(k), str(order), str(aux_features.shape)))
                                     aux_features = aux_features[:self.aux_sequence_size+1]
                                     break
                             order += 1
@@ -384,17 +384,10 @@ class DataLoader(data.Dataset):
                             self.aux_glove[key] = self.aux_glove[key][:5]
                         aux_features.append(self.aux_glove[key])
                         break
-            # print('shape of aux features to store is %s' % str(aux_features.shape))
             outaux_features[i, :(aux_features.shape[0]-1)] = aux_features[1:]
 
-            #taking only one sample np or vp from closest captions of concap
-            #for key in aux_glove.keys():
-            #    if (id + '_' + str(sent_num)) in key and 'np' in key:
-            #        if aux_glove[key].shape[0] > 5:
-            #            aux_glove[key] = aux_glove[key][:5]
-            #        aux_features.append(aux_glove[key])
-            #        break
         return outaux_features
+
 
     def set_negatives(self,mode):
         self.negatives = mode
