@@ -437,7 +437,7 @@ class DataLoader(data.Dataset):
             sent_num_batch[i] = sent_num
             label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
             v_ix = self.video_id[ix]
-
+            print(v_ix)
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
             if self.negatives == 'hard':  # get caption from video with same activity (hard negatives)
                 activity = self.info['videos'][v_ix]['activities'][i % 2 - 1]  # randomly choose first or last activity
@@ -587,7 +587,6 @@ class BlobFetcher():
         ri = self.dataloader.iterators[self.split]
         print ('ri : %s'%ri)
         ix = self.dataloader.split_ix[self.split][ri]
-        print(ix)
         ri_next = ri + 1
         if ri_next >= max_index:
             ri_next = 0
