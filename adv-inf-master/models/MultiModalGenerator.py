@@ -307,8 +307,8 @@ class MultiModalGenerator(CaptionModel):
                     it = torch.multinomial(prob_prev, 1)
                     count = 0
                     for i in it:
-                        print(count)
                         if int(i) > prob_prev.size()[1]:
+                            print(count)
                             print('index is bigger than dim')
                         count += 1
                     try:
