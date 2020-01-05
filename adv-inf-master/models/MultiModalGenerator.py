@@ -306,7 +306,7 @@ class MultiModalGenerator(CaptionModel):
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
                     it = torch.multinomial(prob_prev, 1)
                     for i in it:
-                        if it > prob_prev.size[1]:
+                        if int(i)> prob_prev.size()[1]:
                             print('index is bigger than dim')
                     try:
                         sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
