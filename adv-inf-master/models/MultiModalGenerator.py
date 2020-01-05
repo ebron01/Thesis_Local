@@ -318,6 +318,7 @@ class MultiModalGenerator(CaptionModel):
                     #         print('index is bigger than dim')
                     #     count += 1
                     try:
+                        print(it[0])
                         sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     except:
                         continue
