@@ -317,6 +317,12 @@ class MultiModalGenerator(CaptionModel):
                     try:
                         sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     except:
+                        print('1\n')
+                        print(it)
+                        print('2\n')
+                        print(logprobs)
+                        print('3\n')
+                        print (prob_prev)
                         pdb.set_trace()
                         print('problem at sample prob.')
                     it = it.view(-1).long()  # and flatten indices for downstream processing
