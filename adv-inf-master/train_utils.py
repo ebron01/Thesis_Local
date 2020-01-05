@@ -1,6 +1,6 @@
 import torch
 import misc.utils as utils
-
+import pdb
 def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
     data = loader.get_batch('train')
@@ -41,6 +41,8 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         torch.cuda.synchronize()
     tmp = [data['fc_feats'],data['mm_fc_feats'], data['img_feats'], data['box_feats'], data['aux_feats'], data['mm_aux_feats'], data['att_feats'], data['labels'], data['mm_labels'],
            data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
+
+    pdb.set_trace()
     if torch.cuda.is_available():
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
     fc_feats, mm_fc_feats, img_feats, box_feats, aux_feats, mm_aux_feats, att_feats, labels, mm_labels, att_masks, activities, \
