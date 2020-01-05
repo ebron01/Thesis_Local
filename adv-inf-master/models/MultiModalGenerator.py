@@ -310,6 +310,10 @@ class MultiModalGenerator(CaptionModel):
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
                     try:
                         it = torch.multinomial(prob_prev, 1)
+                        for i in range(len(it)):
+                            if int(it[i]) > prob_prev.size()[0]:
+                                it[i] = 0
+                                print('changed')
                     except:
                         print('Fault1')
                     # count = 0
@@ -319,11 +323,10 @@ class MultiModalGenerator(CaptionModel):
                     #         print('index is bigger than dim')
                     #     count += 1
                     try:
-                        print(it[0])
                         sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     except:
-                        print(it[0])
                         print('Fault3')
+                        continue
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
                 if t == 0:
