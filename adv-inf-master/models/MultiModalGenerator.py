@@ -321,7 +321,7 @@ class MultiModalGenerator(CaptionModel):
                         print(it[0])
                         sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     except:
-                        continue
+                        print(it[0])
                         print('Fault3')
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
