@@ -281,7 +281,7 @@ class MultiModalGenerator(CaptionModel):
                 xt = torch.cat((encoded,context,xt),dim=2)
                 output, state = self.sent_rnn(xt, state)
                 logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
-                pdb.set_trace()
+                print(logprobs.size())
                 # sample the next_word
                 if t == self.seq_length: # skip if we achieve maximum length
                     break
@@ -301,26 +301,15 @@ class MultiModalGenerator(CaptionModel):
                     it = it.view(-1).long()
                 else:
                     if temperature == 1.0:
-                        try:
-                            prob_prev = torch.exp(logprobs.data)  # fetch prev distribution: shape Nx(M+1)
-                        except:
-                            print('Fault')
+                        prob_prev = torch.exp(logprobs.data)  # fetch prev distribution: shape Nx(M+1)
+                        print(prob_prev.size())
                     else:
                         # scale logprobs by temperature
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
-                    try:
-                        it = torch.multinomial(prob_prev, 1)
-                        # for i in range(len(it)):
-                        #     if int(it[i]) > prob_prev.size()[1]:
-                        #         print(it[i])
-                        #         it[i] = 0
-                        #         print('changed')
-                    except:
-                        print('Fault1')
-                    try:
-                        sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
-                    except:
-                        print('Fault3')
+                    it = torch.multinomial(prob_prev, 1)
+                    print(it.size())
+                    sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
+                    print(sampleLogprobs.size())
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
                 if t == 0:
