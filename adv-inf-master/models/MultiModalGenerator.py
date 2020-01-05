@@ -233,6 +233,7 @@ class MultiModalGenerator(CaptionModel):
     def _sample(self, fc_feats, img_feats, box_feats, aux_feats, activity_labels, opt={}):
         # pdb.set_trace()
         sample_max = opt.get('sample_max', 1)
+        print(sample_max)
         beam_size = opt.get('beam_size', 1)
         temperature = opt.get('temperature', 1.0)
         if sample_max and beam_size > 1:
