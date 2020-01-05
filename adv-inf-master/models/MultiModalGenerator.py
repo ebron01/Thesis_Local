@@ -305,6 +305,7 @@ class MultiModalGenerator(CaptionModel):
                         # scale logprobs by temperature
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
                     it = torch.multinomial(prob_prev, 1)
+                    pdb.set_trace()
                     for i in it:
                         if int(i)> prob_prev.size()[1]:
                             print('index is bigger than dim')
