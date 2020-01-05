@@ -231,11 +231,9 @@ class MultiModalGenerator(CaptionModel):
         return torch.cat([_.unsqueeze(1) for _ in outputs], 1).contiguous()
 
     def _sample(self, fc_feats, img_feats, box_feats, aux_feats, activity_labels, opt={}):
-        pdb.set_trace()
+        # pdb.set_trace()
         sample_max = opt.get('sample_max', 1)
-        print('_sample max : ' + str(sample_max))
         beam_size = opt.get('beam_size', 1)
-        print('_beam_size : ' + str(beam_size))
         temperature = opt.get('temperature', 1.0)
         if sample_max and beam_size > 1:
             return self._sample_beam(fc_feats, img_feats, box_feats, activity_labels, opt=opt)
@@ -307,7 +305,13 @@ class MultiModalGenerator(CaptionModel):
                         # scale logprobs by temperature
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
                     it = torch.multinomial(prob_prev, 1)
-                    sampleLogprobs = logprobs.gather(1, it)  # gather the logprobs at sampled positions
+                    for i in it:
+                        if it > prob_prev.size[1]:
+                            print('index is bigger than dim')
+                    try:
+                        sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
+                    except:
+                        print('problem at sample prob.')
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
                 if t == 0:
