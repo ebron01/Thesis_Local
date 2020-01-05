@@ -312,6 +312,7 @@ class MultiModalGenerator(CaptionModel):
                         it = torch.multinomial(prob_prev, 1)
                         for i in range(len(it)):
                             if int(it[i]) > prob_prev.size()[1]:
+                                print(it[i])
                                 it[i] = 0
                                 print('changed')
                     except:
