@@ -305,7 +305,6 @@ class MultiModalGenerator(CaptionModel):
                         # scale logprobs by temperature
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
                     it = torch.multinomial(prob_prev, 1)
-                    pdb.set_trace()
                     count = 0
                     for i in it:
                         print(count)
@@ -315,6 +314,7 @@ class MultiModalGenerator(CaptionModel):
                     try:
                         sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     except:
+                        pdb.set_trace()
                         print('problem at sample prob.')
                     it = it.view(-1).long()  # and flatten indices for downstream processing
                 # stop when all finished
