@@ -432,7 +432,7 @@ class DataLoader(data.Dataset):
             v_ix = self.video_id[ix]
             # print('its here')
             print(self.info['videos'][v_ix]['id'])
-            # print(sent_num)
+            print(sent_num)
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
             if self.negatives == 'hard':  # get caption from video with same activity (hard negatives)
                 activity = self.info['videos'][v_ix]['activities'][i % 2 - 1]  # randomly choose first or last activity
