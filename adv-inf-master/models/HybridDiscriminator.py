@@ -372,7 +372,7 @@ class ParagraphModel(nn.Module):
         self.bidirectional = opt.d_bidirectional
         self.sent_rnn = self.rnn_cell(self.input_encoding_size, self.rnn_size,
                                       self.num_layers, dropout=self.drop_prob_lm, batch_first=True,
-                                      bidirectional=self.bidirectional)
+                                      bidirectional=bool(self.bidirectional))
         self.classifier = Classifier(4*self.rnn_size) if self.bidirectional else Classifier(2*self.rnn_size)
         self.dropout = nn.Dropout(self.drop_prob_lm)
         self.init_weights()
