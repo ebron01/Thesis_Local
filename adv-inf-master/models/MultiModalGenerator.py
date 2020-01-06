@@ -309,6 +309,8 @@ class MultiModalGenerator(CaptionModel):
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
                     # it = torch.multinomial(prob_prev, 1)
                     print(it.size())
+                    it = it.unsqueeze(1)
+                    print(it.size())
                     sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     # print(sampleLogprobs.size())
                     it = it.view(-1).long()  # and flatten indices for downstream processing
