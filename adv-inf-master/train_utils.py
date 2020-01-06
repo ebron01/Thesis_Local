@@ -60,15 +60,15 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     with torch.no_grad():
 
         # generated captions
-        print('Problem here.')
+
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, aux_feats, activities,
-                                                opt={'sample_max':0,'temperature':temperature}, mode='sample')
+                                                opt={'sample_max': 1, 'temperature':temperature}, mode='sample')
         masks = utils.generate_paragraph_mask(sent_num,gen_labels)
         gen_labels = torch.mul(gen_labels, masks)
 
         # visually mismatched negatives from generator
         mm_gen_labels, mm_sample_logprobs = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_aux_feats, mm_activities,
-                                                      opt={'sample_max': 0, 'temperature': temperature}, mode='sample')
+                                                      opt={'sample_max': 1, 'temperature': temperature}, mode='sample')
         mm_masks = utils.generate_paragraph_mask(sent_num,mm_gen_labels)
         mm_gen_labels = torch.mul(mm_gen_labels, mm_masks)
 
