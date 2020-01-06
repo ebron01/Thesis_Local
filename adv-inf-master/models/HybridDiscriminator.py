@@ -288,7 +288,7 @@ class LanguageModel(nn.Module):
         self.bidirectional = opt.d_bidirectional
         self.sent_rnn = self.rnn_cell(self.input_encoding_size, self.rnn_size,
                                       self.num_layers, dropout=self.drop_prob_lm, batch_first=True,
-                                      bidirectional=self.bidirectional)
+                                      bidirectional=bool(self.bidirectional))
         self.sent_embed = NonLinearLayer(2 * self.rnn_size, self.rnn_size, 0) if self.bidirectional \
             else NonLinearLayer(self.rnn_size, self.rnn_size, 0)
         self.classify = Classifier(self.rnn_size)
