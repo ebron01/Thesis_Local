@@ -575,7 +575,7 @@ class BlobFetcher():
 
     def _get_next_minibatch_inds(self):
         max_index = len(self.dataloader.split_ix[self.split])
-        print('max_index : %d' % max_index)
+        # print('max_index : %d' % max_index)
         wrapped = False
 
 
