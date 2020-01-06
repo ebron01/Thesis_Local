@@ -282,7 +282,7 @@ class MultiModalGenerator(CaptionModel):
                 xt = torch.cat((encoded,context,xt),dim=2)
                 output, state = self.sent_rnn(xt, state)
                 logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
-                # print(logprobs.size())
+                print(logprobs.size())
                 # sample the next_word
                 if t == self.seq_length: # skip if we achieve maximum length
                     break
@@ -308,7 +308,7 @@ class MultiModalGenerator(CaptionModel):
                         # scale logprobs by temperature
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
                     it = torch.multinomial(prob_prev, 1)
-                    # print(it.size())
+                    print(it)
                     sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     # print(sampleLogprobs.size())
                     it = it.view(-1).long()  # and flatten indices for downstream processing
