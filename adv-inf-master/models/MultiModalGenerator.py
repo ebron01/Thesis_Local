@@ -240,7 +240,7 @@ class MultiModalGenerator(CaptionModel):
             return self._sample_beam(fc_feats, img_feats, box_feats, activity_labels, opt=opt)
         batch_size = fc_feats.size(0)
         sent_num = fc_feats.size(1)
-        print('number of sentences: %d'%sent_num)
+        # print('number of sentences: %d'%sent_num)
         if torch.cuda.is_available():
             video = torch.zeros(batch_size, 1, self.rnn_size).cuda()
             image = torch.zeros(batch_size, 1, self.rnn_size).cuda()
@@ -309,8 +309,8 @@ class MultiModalGenerator(CaptionModel):
                         prob_prev = torch.exp(torch.div(logprobs.data, temperature))
                     # it = torch.multinomial(prob_prev, 1)
                     print(it.size())
-                    it = torch.range(1,16).view(16,1).long().cuda()
-                    print(it.size())
+                    # it = torch.range(1,16).view(16,1).long().cuda()
+                    it = torch.randint(0, self.vocab_size, (self.batch_size, 1)).long().cuda()
                     sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     # print(sampleLogprobs.size())
                     it = it.view(-1).long()  # and flatten indices for downstream processing
