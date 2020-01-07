@@ -310,7 +310,7 @@ class MultiModalGenerator(CaptionModel):
                     # it = torch.multinomial(prob_prev, 1)
                     print(it.size())
                     # it = torch.range(1,16).view(16,1).long().cuda()
-                    it = torch.randint(0, self.vocab_size, (self.batch_size, 1)).long().cuda()
+                    it = torch.randint(0, self.vocab_size, (batch_size, 1)).long().cuda()
                     sampleLogprobs = logprobs.gather(1, it)# gather the logprobs at sampled positions
                     # print(sampleLogprobs.size())
                     it = it.view(-1).long()  # and flatten indices for downstream processing
