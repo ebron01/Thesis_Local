@@ -167,7 +167,6 @@ class DataLoader(data.Dataset):
         self.split_ix = {'train': [], 'val': [], 'test': []}
         self.split_size = {'train': 0, 'val': 0, 'test': 0}
         self.ix_split = {}
-
         self.use_aux = getattr(opt, 'use_aux', 0) or getattr(opt, 'd_use_aux', 0)
         
         if opt.load_aux == '.npy':
@@ -431,7 +430,7 @@ class DataLoader(data.Dataset):
             label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
             v_ix = self.video_id[ix]
             # print('its here')
-            # print(self.info['videos'][v_ix]['id'])
+            print(self.info['videos'][v_ix]['id'])
             # print(sent_num)
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
             if self.negatives == 'hard':  # get caption from video with same activity (hard negatives)
