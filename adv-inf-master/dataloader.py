@@ -124,11 +124,11 @@ class DataLoader(data.Dataset):
 
         act_video = []
         for i in range(len(self.act_video_ids)):
-            act_video.append(self.act_video_ids[i].split('.')[0].strip())
+            act_video.append(self.act_video_ids[i].strip())
 
         videos_ = []
         for i in range(len(self.info['videos'])):
-            if self.info['videos'][i]['id'] in act_video:
+            if (self.info['videos'][i]['id'] + '.mp4') in act_video:
                 videos_.append(self.info['videos'][i])
         self.info['videos'] = videos_
         del videos_
