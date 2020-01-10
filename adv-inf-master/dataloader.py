@@ -116,6 +116,24 @@ class DataLoader(data.Dataset):
         # load the json file which contains additional information about the dataset
         print('DataLoader loading json file: ', opt.input_json)
         self.info = json.load(open(self.opt.input_json))
+
+        with open(self.opt.frame_ids, 'r') as f:
+            self.act_video_ids = f.readlines()
+        for i in range(len(self.act_video_ids)):
+            self.act_video_ids[i] = self.act_video_ids[i].strip()
+
+        act_video = []
+        for i in range(len(self.act_video_ids)):
+            act_video[i] = self.act_video_ids[i].split('.')[0].strip()
+
+        videos_ = []
+        for i in range(len(self.info['videos'])):
+            if self.info['videos'][i]['id'] in act_video:
+                videos_.append(self.info['videos'][i])
+        self.info['videos'] = videos_
+        del videos_
+        del act_video
+
         if opt.word_source == 'activity':
             self.ix_to_word = self.info['ix_to_word']
             self.word_to_ix = self.info['word_to_ix']
@@ -144,15 +162,6 @@ class DataLoader(data.Dataset):
         self.max_seg = opt.max_seg
         self.sent_num = self.h5_label_file['sent_num'].value
         self.video_id = self.h5_label_file['video_id'].value
-
-        with open(self.opt.frame_ids, 'r') as f:
-            self.act_video_ids = f.readlines()
-        for i in range(len(self.act_video_ids)):
-            self.act_video_ids[i] = self.act_video_ids[i].strip()
-
-        # for v in self.video_id:
-        #     if (str(v) + '.mp4') not in self.act_video_ids:
-        #         self.video_id.remove(v)
 
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
