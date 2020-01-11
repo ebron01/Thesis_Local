@@ -228,7 +228,7 @@ def parse_opt():
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch')
     parser.add_argument('--checkpoint_path', type=str, default='save_e15_lange1_b_32_0101',
                     help='directory to store checkpointed models')
-    parser.add_argument('--losses_log_every', type=int, default=25,
+    parser.add_argument('--losses_log_every', type=int, default=5,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
     parser.add_argument('--language_eval', type=int, default=1,
                     help='Evaluate language as well (1 = yes, 0 = no)? BLEU/CIDEr/METEOR/ROUGE_L? requires coco-caption code from Github.')

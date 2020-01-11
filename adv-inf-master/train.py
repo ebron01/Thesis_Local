@@ -159,8 +159,10 @@ def train(opt):
                 frac = (g_epoch - opt.learning_rate_decay_start) // opt.learning_rate_decay_every
                 decay_factor = opt.learning_rate_decay_rate  ** frac
                 opt.current_lr = opt.learning_rate * decay_factor
+                print('current lr is : ' + str(opt.current_lr))
             else:
                 opt.current_lr = opt.learning_rate
+                print('current lr is : ' + str(opt.current_lr))
             utils.set_lr(gen_optimizer, opt.current_lr)
 
             # Assign the learning rate for discriminator
@@ -168,8 +170,10 @@ def train(opt):
                 frac = (d_epoch - opt.learning_rate_decay_start) // opt.learning_rate_decay_every
                 decay_factor = opt.learning_rate_decay_rate  ** frac
                 opt.current_lr = opt.learning_rate * decay_factor
+                print('current lr is : ' + str(opt.current_lr))
             else:
                 opt.current_lr = opt.learning_rate
+                print('current lr is : ' + str(opt.current_lr))
             utils.set_lr(dis_optimizer, opt.current_lr)
 
             # Assign the scheduled sampling prob

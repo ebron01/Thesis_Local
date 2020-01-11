@@ -244,7 +244,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                         seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, aux_feats_s,  activities,
                                                                              best_context, opt=eval_kwargs)
                         sample_time = time.time()
-                        # print('sample_time:', sample_time-start)
+                        print('sample_time:', sample_time-start)
 
                         """ Adversarial Inference """
                         if dis:
