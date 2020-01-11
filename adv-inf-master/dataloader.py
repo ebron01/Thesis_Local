@@ -88,6 +88,7 @@ class DataLoader(data.Dataset):
                       self.activity_dict[act] = [ix]
                   else:
                       self.activity_dict[act].append(ix)
+        print('Changed')
 
     def __init__(self, opt):
         self.opt = opt
