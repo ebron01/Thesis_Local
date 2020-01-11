@@ -79,15 +79,29 @@ class DataLoader(data.Dataset):
         return self.seq_length
 
     def build_activity_dict(self):
+        # self.activity_dict = {}
+        # videos = self.info['videos']
+        # for ix in range(len(self.video_id)):
+        #     v_ix = self.video_id[ix]
+        #     for act in videos[v_ix]['activities']:
+        #           if act not in self.activity_dict:
+        #               self.activity_dict[act] = [ix]
+        #           else:
+        #               self.activity_dict[act].append(ix)
+
         self.activity_dict = {}
         videos = self.info['videos']
         for ix in range(len(self.video_id)):
-            v_ix = self.video_id[ix]
-            for act in videos[v_ix]['activities']:
-                  if act not in self.activity_dict:
-                      self.activity_dict[act] = [ix]
-                  else:
-                      self.activity_dict[act].append(ix)
+            if self.video_id[ix] not in self.videos_missing_index:
+                v_ix = self.video_id[ix]
+                try:
+                    for act in videos[v_ix]['activities']:
+                        if act not in self.activity_dict:
+                            self.activity_dict[act] = [ix]
+                        else:
+                            self.activity_dict[act].append(ix)
+                except:
+                    print('there is a problem with video_id')
 
     def __init__(self, opt):
         self.opt = opt
@@ -116,24 +130,6 @@ class DataLoader(data.Dataset):
         # load the json file which contains additional information about the dataset
         print('DataLoader loading json file: ', opt.input_json)
         self.info = json.load(open(self.opt.input_json))
-
-        with open(self.opt.frame_ids, 'r') as f:
-            self.act_video_ids = f.readlines()
-        for i in range(len(self.act_video_ids)):
-            self.act_video_ids[i] = self.act_video_ids[i].strip()
-
-        act_video = []
-        for i in range(len(self.act_video_ids)):
-            act_video.append(self.act_video_ids[i].strip())
-
-        videos_ = []
-        for i in range(len(self.info['videos'])):
-            if (self.info['videos'][i]['id'] + '.mp4') in act_video:
-                videos_.append(self.info['videos'][i])
-        self.info['videos'] = videos_
-        del videos_
-        del act_video
-
         if opt.word_source == 'activity':
             self.ix_to_word = self.info['ix_to_word']
             self.word_to_ix = self.info['word_to_ix']
@@ -163,6 +159,19 @@ class DataLoader(data.Dataset):
         self.sent_num = self.h5_label_file['sent_num'].value
         self.video_id = self.h5_label_file['video_id'].value
 
+        with open(self.opt.frame_ids, 'r') as f:
+            self.act_video_ids = f.readlines()
+        for i in range(len(self.act_video_ids)):
+            self.act_video_ids[i] = self.act_video_ids[i].strip()
+
+        self.videos_missing_index = []
+        for i in range(len(self.info['videos'])):
+            if (self.info['videos'][i]['id'] + '.mp4') in self.act_video_ids:
+                continue
+            else:
+                self.videos_missing_index.append(i)
+
+
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
             self.activity = self.h5_label_file['activity'].value
@@ -176,6 +185,7 @@ class DataLoader(data.Dataset):
         self.split_ix = {'train': [], 'val': [], 'test': []}
         self.split_size = {'train': 0, 'val': 0, 'test': 0}
         self.ix_split = {}
+
         self.use_aux = getattr(opt, 'use_aux', 0) or getattr(opt, 'd_use_aux', 0)
         
         if opt.load_aux == '.npy':
@@ -439,7 +449,7 @@ class DataLoader(data.Dataset):
             label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
             v_ix = self.video_id[ix]
             # print('its here')
-            print(self.info['videos'][v_ix]['id'])
+            # print(self.info['videos'][v_ix]['id'])
             # print(sent_num)
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
             if self.negatives == 'hard':  # get caption from video with same activity (hard negatives)
@@ -611,3 +621,4 @@ class BlobFetcher():
         assert tmp[1] == ix, "ix not equal"
 
         return tmp + [wrapped]
+
