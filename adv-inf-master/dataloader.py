@@ -463,6 +463,7 @@ class DataLoader(data.Dataset):
                         mm_fc_batch[i, m:m + n] = self.get_seg_batch(a_ix, "video")[:n]
                         mm_img_batch[i, m:m + n] = self.get_seg_batch(a_ix, "img")[:n] if self.use_img else None
                         mm_box_batch[i, m:m + n] = self.get_box_batch(a_ix)[:n] if self.use_box else None
+                        mm_aux_batch[i, m:m + n] = self.get_aux_batch(a_ix)[:n] if self.use_aux else None
                         m += n
                     if m >= sent_num:
                         break
@@ -476,7 +477,7 @@ class DataLoader(data.Dataset):
                             mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[
                                                          :sent_num] if self.use_img else None
                             mm_box_batch[i, :sent_num] = self.get_box_batch(mmix)[:sent_num] if self.use_box else None
-                            mm_aux_batch[i, :sent_num] = self.get_aux_batch(mmix)[:sent_num]
+                            mm_aux_batch[i, :sent_num] = self.get_aux_batch(mmix)[:sent_num] if self.use_aux else None
                             break
                     else:
                         mmix = random.choice(self.split_ix[split])
@@ -489,7 +490,7 @@ class DataLoader(data.Dataset):
                             mm_img_batch[i, :sent_num] = self.get_seg_batch(mmix, "img")[
                                                          :sent_num] if self.use_img else None
                             mm_box_batch[i, :sent_num] = self.get_box_batch(mmix)[:sent_num] if self.use_box else None
-                            mm_aux_batch[i, :sent_num] = self.get_aux_batch(mmix)[:sent_num]
+                            mm_aux_batch[i, :sent_num] = self.get_aux_batch(mmix)[:sent_num] if self.use_aux else None
                             break
             if tmp_wrapped:
                 wrapped = True

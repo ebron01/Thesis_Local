@@ -106,6 +106,8 @@ class MultiModalGenerator(CaptionModel):
                 self.image_embed.weight.data.uniform_(-initrange, initrange)
         if self.use_box:
             self.box_embed.weight.data.uniform_(-initrange, initrange)
+        if self.use_aux:
+            self.aux_embed.weight.data.uniform_(-initrange, initrange)
         if self.use_activity_labels:
             self.activity_embed.weight.data.uniform_(-initrange, initrange)
         if self.glove is not None:
