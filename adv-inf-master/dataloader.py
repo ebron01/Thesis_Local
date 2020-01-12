@@ -482,7 +482,7 @@ class DataLoader(data.Dataset):
                     else:
                         mmix = random.choice(self.split_ix[split])
                         # mmix = random.randint(0, len(self.split_ix[split]) - 1)
-                        if self.video_id[mmix] != v_ix and sent_num <= self.sent_num[mmix]:  # avoid getting the gt pair
+                        if self.video_id[mmix] != v_ix and sent_num <= self.sent_num[mmix]:# avoid getting the gt pair
                             # print('sent_num : ' + str(sent_num))
                             # print('sent_num for wrong pair: ' + str(self.sent_num[mmix]))
                             mm_batch[i, :sent_num, 1:self.seq_length + 1] = self.labels[mmix, :sent_num, :]
@@ -534,7 +534,7 @@ class DataLoader(data.Dataset):
         data['gts'] = np.array(gts)
         data['att_feats'] = None
         data['att_masks'] = None
-        data['bounds'] = {'it_pos_now': self.iterators[split], 'it_max': len(self.split_ix[split]), 'wrapped': wrapped}
+        data['bounds'] = {'it_pos_now': self.iterators[split], 'it_max': len(self.split_ix[split]), 'wrapped': wrapped} #it_pos_now: iterator position now, it_max : iterator_max, wrapped: finished all samples in 'val, train'
         data['infos'] = infos
 
         return data

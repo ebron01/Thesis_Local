@@ -11,14 +11,17 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from .Attention import Attention
 
+
 def concat_scores(scores):
     return torch.cat([score.unsqueeze(1) for score in scores], 1)
+
 
 def make_one_hot_encoding(seq,vocab_size):
     sent_onehot = torch.zeros(seq.size(0),vocab_size).cuda()
     sent_onehot.scatter_(1,seq,1)
     sent_onehot[:,0] = 0
     return sent_onehot
+
 
 class NonLinearLayer(nn.Module):
     def __init__(self, in_size, out_size, dropout):
@@ -43,6 +46,7 @@ class Classifier(nn.Module):
 
     def forward(self,emb):
         return self.main(emb)
+
 
 class HybridDiscriminator(nn.Module):
     def __init__(self,opt):
@@ -73,6 +77,7 @@ class HybridDiscriminator(nn.Module):
     def get_moe_weights(self,seq):
         return self.visual.get_moe_weights(seq)
 
+
 # low rank bilinear pooling
 class JointEmbedVideoModel2(nn.Module):
     def __init__(self, rnn_size):
@@ -84,6 +89,7 @@ class JointEmbedVideoModel2(nn.Module):
 
     def forward(self,visual,sent):
         return self.classify(visual * sent)
+
 
 class MultiModalAttEarlyFusion(nn.Module):
     def __init__(self, opt):
@@ -264,6 +270,7 @@ class MultiModalAttEarlyFusion(nn.Module):
         scores = concat_scores(scores)
         return scores
 
+
 class LanguageModel(nn.Module):
     def __init__(self,opt):
         super(LanguageModel, self).__init__()
@@ -347,6 +354,7 @@ class LanguageModel(nn.Module):
             score = self.classify(sent_embed).squeeze(1).squeeze(1)
             scores.append(score)
         return concat_scores(scores)
+
 
 class ParagraphModel(nn.Module):
     def __init__(self,opt):

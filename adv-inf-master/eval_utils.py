@@ -1,10 +1,8 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 import torch
 import torch.nn as nn
-
 import numpy as np
 import json
 import string
@@ -17,6 +15,7 @@ import subprocess
 from six.moves import cPickle
 import time
 
+
 def extend_paragraph(sent_num,par_score):
     new_score = par_score.new(sum(sent_num)).zero_()
     m = 0
@@ -26,15 +25,15 @@ def extend_paragraph(sent_num,par_score):
         m+=n
     return new_score
 
+
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
+
 
 def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=False):
     import sys
     sys.path.append("densevid_eval")
-    template = {"version": "VERSION 1.0", "results": {},
-                "external_data": { "used": 'true',
-            "details": "ay"}  }
+    template = {"version": "VERSION 1.0", "results": {}, "external_data": {"used": 'true', "details": "ay"}}
     results = template['results']
     for pred in preds:
         id = pred['video_id']
@@ -57,8 +56,10 @@ def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=F
         os.remove(os.path.join('densevid_eval','result_' + model_id + '.json'))
     return output
 
+
 def bigram(sent):
     return zip(sent.split(" ")[:-1], sent.split(" ")[1:])
+
 
 # Input: seq, N*D numpy array, with element 0 .. vocab_size. 0 is END token.
 def decode_sequence(ix_to_word, seq):
@@ -76,6 +77,7 @@ def decode_sequence(ix_to_word, seq):
                 break
         out.append(txt)
     return out
+
 
 def diversity_meausures(predictions,div):
     vocab = {'gt': set(), 'gen': set()}
@@ -124,6 +126,7 @@ def diversity_meausures(predictions,div):
             template['div_2'][mode] = round(np.mean(div_2[mode]),3)
 
     return template
+
 
 def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifier=None, eval_kwargs={}):
     verbose = eval_kwargs.get('verbose', True)
@@ -283,15 +286,11 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     inds = score_list.argsort(axis=1)[:, ::-1]
 
                     if torch.cuda.is_available():
-                        caption_list = torch.tensor(
-                            sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
-                        best_context = torch.tensor(
-                            context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
+                        caption_list = torch.tensor(sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
+                        best_context = torch.tensor(context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
                     else:
-                        caption_list = torch.tensor(
-                            sample_list[np.arange(loader.batch_size)[:, None], inds]).long()
-                        best_context = torch.tensor(
-                            context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).float()
+                        caption_list = torch.tensor(sample_list[np.arange(loader.batch_size)[:, None], inds]).long()
+                        best_context = torch.tensor(context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).float()
                     best_seq = caption_list[:, 0, :]
                     seq_dummy[:, s] = best_seq
 
@@ -375,10 +374,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         sents = utils.decode_sequence(loader.get_vocab(), seq)
         for k, sent in enumerate(sents):
             entry = {'video_id': data['infos'][k]['id'], 'caption': sent.encode('ascii', 'ignore'),
-                     'gt' : gt[k].encode('ascii','ignore'), 'mm' : mm[k].encode('ascii','ignore'),
-                    'timestamp': data['infos'][k]['timestamp'].tolist(),
-                     'activity' : data['infos'][k]['activity']
-                     }
+                     'gt': gt[k].encode('ascii', 'ignore'), 'mm': mm[k].encode('ascii', 'ignore'),
+                     'timestamp': data['infos'][k]['timestamp'].tolist(),
+                     'activity': data['infos'][k]['activity']}
             # calculate accuracy
             if dis:
                 entry['v_gen_score'] = v_gen_score[k].item()
@@ -470,7 +468,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
     lang_stats = None
     if lang_eval == 1:
         diversity_dict = diversity_meausures(predictions,div)
-        lang_stats = language_eval_video(dataset, predictions, model_id, split , verbose=verbose_video, remove=remove_caption)
+        lang_stats = language_eval_video(dataset, predictions, model_id, split, verbose=verbose_video, remove=remove_caption)
         lang_stats.update(diversity_dict)
         lang_stats.update({'loss': gen_loss})
         print(lang_stats)

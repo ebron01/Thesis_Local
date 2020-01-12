@@ -155,9 +155,9 @@ def train(opt):
         # set every epoch
         if update_lr_flag:
             # Assign the learning rate for generator
-            if g_epoch > opt.learning_rate_decay_start and opt.learning_rate_decay_start >= 0:
+            if (g_epoch > opt.learning_rate_decay_start) and (opt.learning_rate_decay_start >= 0):
                 frac = (g_epoch - opt.learning_rate_decay_start) // opt.learning_rate_decay_every
-                decay_factor = opt.learning_rate_decay_rate  ** frac
+                decay_factor = opt.learning_rate_decay_rate ** frac
                 opt.current_lr = opt.learning_rate * decay_factor
                 print('current lr is : ' + str(opt.current_lr))
             else:
@@ -224,12 +224,12 @@ def train(opt):
                 # evaluate model on dev set
                 eval_kwargs = {'split': 'val',
                                'dataset': opt.input_json,
-                               'sample_max' : 1,
+                               'sample_max': 1,
                                'language_eval': opt.language_eval,
-                               'id' : opt.id,
-                               'val_videos_use' : opt.val_videos_use,
-                               'remove' : 1, # remove generated caption
-                               'dump_json' : 1}
+                               'id': opt.id,
+                               'val_videos_use': opt.val_videos_use,
+                               'remove': 1, # remove generated caption
+                               'dump_json': 1}
                 # eval_kwargs.update(vars(opt))
                 val_loss, predictions, lang_stats, _, _ = eval_split(gen_model, crit, loader, eval_kwargs=eval_kwargs)
                 if opt.language_eval == 1:

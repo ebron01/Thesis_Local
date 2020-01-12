@@ -32,9 +32,7 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=False):
     import sys
     sys.path.append("densevid_eval")
-    template = {"version": "VERSION 1.0", "results": {},
-                "external_data": { "used": 'true',
-            "details": "ay"}  }
+    template = {"version": "VERSION 1.0", "results": {}, "external_data": {"used": 'true', "details": "ay"}}
     results = template['results']
     for pred in preds:
         id = pred['video_id']
@@ -142,7 +140,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
     remove_caption = eval_kwargs.get('remove', 0) # usually remove captions in validation stage but not in test.
 
     print('beam_size', beam_size)
-    print('sample_max',sample_max)
+    print('sample_max', sample_max)
     print('num_samples', num_samples)
 
     model_id = eval_kwargs.get('id', eval_kwargs.get('val_id', ''))
@@ -237,7 +235,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                         seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities,
                                                                              best_context, opt=eval_kwargs)
                         sample_time = time.time()
-                        # print('sample_time:', sample_time-start)
+                        print('sample_time:', sample_time-start)
 
                         """ Adversarial Inference """
                         if dis:

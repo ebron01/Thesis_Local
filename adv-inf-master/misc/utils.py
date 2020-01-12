@@ -16,6 +16,7 @@ def if_use_att(caption_model):
         return False
     return True
 
+
 # Input: seq, N*D numpy array, with element 0 .. vocab_size. 0 is END token.
 def decode_sequence(ix_to_word, seq,add_punct=False):
     N, D = seq.size()
@@ -36,11 +37,13 @@ def decode_sequence(ix_to_word, seq,add_punct=False):
         out.append(txt)
     return out
 
+
 def to_contiguous(tensor):
     if tensor.is_contiguous():
         return tensor
     else:
         return tensor.contiguous()
+
 
 # split to batch_size * sent_num  x rest
 def align_seq(sent_num,seq):
@@ -62,6 +65,7 @@ def align_seq(sent_num,seq):
 
     return seq_aligned.contiguous()
 
+
 # combine to batch_size x rest
 def combine_seq(sent_num,seq):
     # seq      = batch_size x sent_num x seq_length
@@ -75,6 +79,7 @@ def combine_seq(sent_num,seq):
         seq_combined[i,:combined.size(0)] = combined
     return seq_combined
 
+
 def generate_paragraph_mask(sent_num,seq):
     assert len(seq.size()) == 3
     batch_size = seq.size(0)
@@ -83,6 +88,7 @@ def generate_paragraph_mask(sent_num,seq):
     for i in range(batch_size):
         mask[i,:sent_num[i]] = ones.expand(sent_num[i],-1)
     return mask
+
 
 def get_bert_masks(sent_num,seq,tokenizer,vocab,use_pair=False,eval=False,max_seq_length=40+2):
     input_ids = []
@@ -154,6 +160,7 @@ def get_bert_masks(sent_num,seq,tokenizer,vocab,use_pair=False,eval=False,max_se
     input_tokens = torch.tensor(input_tokens, dtype=torch.long).cuda().contiguous()
     return input_ids, input_masks, input_tokens
 
+
 def get_neg_lang(sent_num,gt,gen): # choose gt or gen
 
     # replace part of sentence with previous phrase.
@@ -206,6 +213,7 @@ def get_neg_lang(sent_num,gt,gen): # choose gt or gen
                             break
     return torch.from_numpy(new_seq).cuda()
 
+
 # https://stackoverflow.com/questions/25200220/generate-a-random-derangement-of-a-list
 def random_derangement(n):
     if n == 0:
@@ -221,6 +229,7 @@ def random_derangement(n):
         else:
             if v[0] != 0:
                 return v
+
 
 def get_neg_pair(sent_num,seq):
     new_seq = seq.copy()
@@ -262,6 +271,7 @@ def get_neg_pair(sent_num,seq):
                         new_seq[i,j] = seq[r1,r2].copy()
     return new_seq
 
+
 def dense_classifier(sent_num,fc_feats,img_feats,classifier):
     new_sent_num = [max(sent_num)] * len(sent_num)
     new_fc_feats = align_seq(new_sent_num, fc_feats)
@@ -270,12 +280,14 @@ def dense_classifier(sent_num,fc_feats,img_feats,classifier):
     activities = activities.view(fc_feats.size(0),max(sent_num),-1)
     return activities
 
+
 def load_dis_model_param(model,dict,modules=['visual','lang','par']):
     for k,v in dict.items():
         if k.split('.')[0] not in modules:
             print(k)
             dict[k] = model.state_dict()[k] # use initialized value instead
     model.load_state_dict(dict)
+
 
 class RewardCriterion(nn.Module):
     def __init__(self):
@@ -290,6 +302,7 @@ class RewardCriterion(nn.Module):
         output = torch.sum(output) / torch.sum(mask)
         return output
 
+
 class LanguageModelCriterion(nn.Module):
     def __init__(self):
         super(LanguageModelCriterion, self).__init__()
@@ -302,15 +315,18 @@ class LanguageModelCriterion(nn.Module):
         output = torch.sum(output) / torch.sum(mask)
         return output
 
+
 def set_lr(optimizer, lr):
     for group in optimizer.param_groups:
         group['lr'] = lr
+
 
 def clip_gradient(optimizer, grad_clip):
     for group in optimizer.param_groups:
         for param in group['params']:
             if param.grad is not None:
                 param.grad.data.clamp_(-grad_clip, grad_clip)
+
 
 def build_optimizer(params, opt):
     if opt.optim == 'rmsprop':
