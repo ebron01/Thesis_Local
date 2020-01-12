@@ -8,7 +8,7 @@ def parse_opt():
     --input_img_dir activity_net/feats/resnet152/ --input_box_dir activity_net/feats/bottomup/ --input_label_h5 activity_net/inputs/video_data_dense_label.h5 --glove_npy activity_net/inputs/glove.npy
     --learning_rate 5e-4 --learning_rate_decay_start 0 --scheduled_sampling_start 0 --checkpoint_path video_ckpt --val_videos_use -1 --losses_print_every 10 --batch_size 16 --language_eval 1'''
 
-    parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense.json',
+    parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_orj.json',
                     help='path to the json file containing additional info and vocab (img/video)')
     parser.add_argument('--input_fc_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/resnext101-64f/',
                         help='path to the directory containing the preprocessed fc video features')
@@ -16,7 +16,7 @@ def parse_opt():
                         help='path to the directory containing the image features')
     parser.add_argument('--input_box_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/bottomup/',
                     help='path to the directory containing the boxes of att img feats (img)')
-    parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label.h5',
+    parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label_orj.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
     parser.add_argument('--frame_ids', type=str,
                         default='/data/shared/ActivityNet/activity_net/inputs/2_filenames.txt',
@@ -194,7 +194,7 @@ def parse_opt():
 
 
     # Evaluation/Checkpointing
-    parser.add_argument('--val_id', type=str, default='1201',
+    parser.add_argument('--val_id', type=str, default='1201_not_missing',
                         help='id to use to save captions for validation')
     parser.add_argument('--val_videos_use', type=int, default=-1,
                     help='how many videos to use when periodically evaluating the validation loss? (-1 = all)')
@@ -202,7 +202,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='save_12Jan',
+    parser.add_argument('--checkpoint_path', type=str, default='save_12Jan_not_missing',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
@@ -251,7 +251,7 @@ def parse_opt():
 
 
     # misc
-    parser.add_argument('--id', type=str, default='1201',
+    parser.add_argument('--id', type=str, default='1201_not_missing',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')
