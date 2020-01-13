@@ -599,7 +599,7 @@ class BlobFetcher():
 
 
         ri = self.dataloader.iterators[self.split]
-        print ('ri : %s'%ri)
+        # print ('ri : %s'%ri)
         ix = self.dataloader.split_ix[self.split][ri]
         ri_next = ri + 1
         if ri_next >= max_index:
