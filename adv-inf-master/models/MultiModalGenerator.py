@@ -215,6 +215,7 @@ class MultiModalGenerator(CaptionModel):
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 if self.use_aux:
                     aux = self.attention_encoder(aux_feats[:, n], state, 'aux')
+                pdb.set_trace()
                 # encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 encoded = self.encoder(torch.cat((video, image, box, aux, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
