@@ -225,6 +225,7 @@ class MultiModalGenerator(CaptionModel):
                     xt = torch.cat((encoded, context, aux, xt), dim=2)
                 else:
                     xt = torch.cat((encoded,context,xt),dim=2)
+                print(self.use_aux)
                 output, state = self.sent_rnn(xt, state)
                 output = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
                 sequence.append(output)
