@@ -189,7 +189,7 @@ class MultiModalGenerator(CaptionModel):
             # AUX:added for aux data to enhance captions
             aux = torch.zeros(batch_size, 1, self.aux_encoding_size)
         for n in range(sent_num):
-            count = 0
+            # count = 0
             if fc_feats[:,n,:,:].sum() == 0:
                 break
             # decoder initialization
@@ -201,7 +201,7 @@ class MultiModalGenerator(CaptionModel):
                 else:
                     activity = self.activity_embed(activity_labels.float()).unsqueeze(1)
             for i in range(seq.size(2)-1):
-                count += 1
+                # count += 1
                 if torch.cuda.is_available():
                     it = seq[:,n,i].clone()
                 else:
@@ -227,8 +227,8 @@ class MultiModalGenerator(CaptionModel):
                     xt = torch.cat((encoded, context, aux, xt), dim=2)
                 else:
                     xt = torch.cat((encoded,context,xt),dim=2)
-                print('count: ', str(count))
-                print(self.use_aux)
+                # print('count: ', str(count))
+                # print(self.use_aux)
                 output, state = self.sent_rnn(xt, state)
                 output = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
                 sequence.append(output)
