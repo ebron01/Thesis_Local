@@ -222,8 +222,9 @@ class MultiModalGenerator(CaptionModel):
                 encoded = self.encoder(torch.cat((video, image, box, aux, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 #todo : rethink this part!!!
-                self.use_aux_ = False
-                if self.use_aux_:
+                self.use_aux = False
+                print(self.use_aux)
+                if self.use_aux:
                     xt = torch.cat((encoded, context, aux, xt), dim=2)
                 else:
                     xt = torch.cat((encoded,context,xt),dim=2)
