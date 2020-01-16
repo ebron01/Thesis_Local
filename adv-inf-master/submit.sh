@@ -14,4 +14,6 @@
 #########################################################
 
 #CUDA_VISIBLE_DEVICES="" python train.py --g_pre_nepoch 22 --g_start_from 'save_e15_lange1_b_32_0101' --g_start_epoch 'latest' --batch_size 16
-CUDA_LAUNCH_BLOCKING=1 python train.py --g_pre_nepoch 22 --g_start_from 'save_e15_lange1_b_32_0101'  --g_start_epoch 'latest' --d_start_epoch 'latest' --d_start_from 'save_e15_lange1_b_32_0101' --batch_size 32 --losses_print_every 1
+#CUDA_LAUNCH_BLOCKING=1 python train.py --g_pre_nepoch 22 --g_start_from 'save_e15_lange1_b_32_0101'  --g_start_epoch 'latest' --d_start_epoch 'latest' --d_start_from 'save_e15_l#ange1_b_32_0101' --batch_size 32 --losses_print_every 1
+
+CUDA_LAUNCH_BLOCKING=1 python train.py
