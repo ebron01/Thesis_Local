@@ -113,7 +113,7 @@ def parse_opt():
                         help='use bag of words for visual discriminator; otherwise, use lstm')
     parser.add_argument('--glove_npy', type=str, default=None,
                         help='npy containing glove vector associated with word_idx labels')
-    parser.add_argument('--use_aux', type=int, default=1,
+    parser.add_argument('--use_aux', type=int, default=0,
                         help='whether use auxiliary glove vectors or not')
     parser.add_argument('--aux_sequence_size', type=int, default=10,
                         help='how much aux glove vector to use')

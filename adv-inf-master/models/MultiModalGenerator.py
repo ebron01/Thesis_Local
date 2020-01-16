@@ -164,7 +164,7 @@ class MultiModalGenerator(CaptionModel):
     def use_context(self):
         self.context = True
 
-    def _forward(self, fc_feats, img_feats, box_feats, aux_feats, activity_labels, seq):
+    def _forward(self, fc_feats, img_feats, box_feats, aux_feats, activity_labels, seq, g_epoch):
         # fc_feats = batch_size x sent_num x frame_num x feat_dim
         # seq = batch_size x sent_num x seq_length
 
@@ -227,6 +227,9 @@ class MultiModalGenerator(CaptionModel):
                     xt = torch.cat((encoded, context, aux, xt), dim=2)
                 else:
                     xt = torch.cat((encoded,context,xt),dim=2)
+
+                if g_epoch > 2:
+                    self.use_aux = 1
                 # print('count: ', str(count))
                 # print(self.use_aux)
                 output, state = self.sent_rnn(xt, state)

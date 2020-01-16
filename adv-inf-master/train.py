@@ -201,7 +201,7 @@ def train(opt):
 
             # train generator
             start = time.time()
-            gen_loss, wrapped, sent_num = train_generator(gen_model, gen_optimizer, crit, loader)
+            gen_loss, wrapped, sent_num = train_generator(gen_model, gen_optimizer, crit, loader, g_epoch)
             end = time.time()
 
             # Print Info
