@@ -231,7 +231,7 @@ def train(opt):
                                'remove': 1, # remove generated caption
                                'dump_json': 1}
                 # eval_kwargs.update(vars(opt))
-                val_loss, predictions, lang_stats, _, _ = eval_split(gen_model, crit, loader, eval_kwargs=eval_kwargs)
+                val_loss, predictions, lang_stats, _, _ = eval_split(gen_model, crit, loader, g_epoch, eval_kwargs=eval_kwargs)
                 if opt.language_eval == 1:
                     current_score = lang_stats['METEOR']
                 else:
