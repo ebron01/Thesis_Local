@@ -1,7 +1,7 @@
 import torch
 import misc.utils as utils
 import pdb
-def train_generator(gen_model, gen_optimizer, crit, loader, g_epoch, grad_clip=0.1):
+def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
     data = loader.get_batch('train')
     if torch.cuda.is_available():
@@ -15,7 +15,7 @@ def train_generator(gen_model, gen_optimizer, crit, loader, g_epoch, grad_clip=0
     wrapped = data['bounds']['wrapped']
     gen_optimizer.zero_grad()
 
-    seq = gen_model(fc_feats, img_feats, box_feats, aux_feats, activities, labels, g_epoch)
+    seq = gen_model(fc_feats, img_feats, box_feats, aux_feats, activities, labels)
     seq = utils.align_seq(sent_num, seq)
     labels = utils.align_seq(sent_num, labels)
     masks = utils.align_seq(sent_num, masks)

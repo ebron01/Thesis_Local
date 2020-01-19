@@ -128,7 +128,7 @@ def diversity_meausures(predictions,div):
     return template
 
 
-def eval_split(gen_model, crit, loader, g_epoch, dis_model=None, gan_crit=None, classifier=None, eval_kwargs={}):
+def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifier=None, eval_kwargs={}):
     verbose = eval_kwargs.get('verbose', True)
     dump_json = eval_kwargs.get('dump_json', 0)
     num_videos = eval_kwargs.get('num_videos', eval_kwargs.get('val_videos_use', -1))
@@ -211,7 +211,7 @@ def eval_split(gen_model, crit, loader, g_epoch, dis_model=None, gan_crit=None, 
                 mm_activities = utils.dense_classifier(sent_num, mm_fc_feats, mm_img_feats, classifier)
 
             # calculate loss
-            gen_seq = gen_model(fc_feats, img_feats, box_feats, aux_feats, activities, labels, g_epoch)
+            gen_seq = gen_model(fc_feats, img_feats, box_feats, aux_feats, activities, labels)
             gen_seq = utils.align_seq(sent_num, gen_seq)
             loss = crit(gen_seq, utils.align_seq(sent_num, labels)[:, 1:], utils.align_seq(sent_num, masks)[:, 1:]).item()
             losses.append(loss)

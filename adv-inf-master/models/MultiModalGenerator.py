@@ -164,7 +164,7 @@ class MultiModalGenerator(CaptionModel):
     def use_context(self):
         self.context = True
 
-    def _forward(self, fc_feats, img_feats, box_feats, aux_feats, activity_labels, seq, g_epoch):
+    def _forward(self, fc_feats, img_feats, box_feats, aux_feats, activity_labels, seq):
         # fc_feats = batch_size x sent_num x frame_num x feat_dim
         # seq = batch_size x sent_num x seq_length
 
@@ -222,15 +222,22 @@ class MultiModalGenerator(CaptionModel):
                 encoded = self.encoder(torch.cat((video, image, box, aux, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 #todo : rethink this part!!!
-                self.use_aux = False
-                print(self.use_aux)
-                if self.use_aux:
-                    xt = torch.cat((encoded, context, aux, xt), dim=2)
-                else:
-                    xt = torch.cat((encoded,context,xt),dim=2)
-
-                if g_epoch > 2:
-                    self.use_aux = 1
+                '''
+                This is closed on 19Jan
+                #self.use_aux = False  
+                # print(self.use_aux)
+                # if self.use_aux:
+                #     xt = torch.cat((encoded, context, aux, xt), dim=2)
+                # else:
+                #     xt = torch.cat((encoded,context,xt),dim=2)
+                '''
+                #this is added on 19Jan : this is same as original code
+                xt = torch.cat((encoded, context, xt), dim=2)
+                '''
+                this is closed on 19jan
+                # if g_epoch > 2:
+                #     self.use_aux = 1
+                '''
                 # print('count: ', str(count))
                 # print(self.use_aux)
                 output, state = self.sent_rnn(xt, state)
