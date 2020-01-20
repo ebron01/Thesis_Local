@@ -167,7 +167,7 @@ class MultiModalGenerator(CaptionModel):
     def _forward(self, fc_feats, img_feats, box_feats, aux_feats, activity_labels, seq):
         # fc_feats = batch_size x sent_num x frame_num x feat_dim
         # seq = batch_size x sent_num x seq_length
-
+        pdb.set_trace()
         batch_size = fc_feats.size(0)
         sent_num = fc_feats.size(1)
         outputs = []

@@ -2,14 +2,15 @@ import nltk
 import json
 from unicodedata import normalize
 import time
+# nltk.download()
 '''
 <RB.?>* = "0 or more of any tense of adverb," followed by:
 <VB.?>* = "0 or more of any tense of verb," followed by:
 <NNP>+ = "One or more proper nouns," followed by
 <NN>? = "zero or one singular noun."
 '''
-input_not_parsed_file = 'sorted_5closest_updated_query_mid.json'
-output_parsed_file = 'sorted_5closest_parsed_np_vp.json'
+input_not_parsed_file = 'sorted_10closest_updated_query_mid.json'
+output_parsed_file = 'sorted_10closest_parsed_n_v.json'
 
 # this method tokenizes a document then creates part of speech tags from them and returns pos from documents.
 def ie_preprocess(document):
@@ -46,8 +47,13 @@ except Exception as e:
     print(e)
 
 #TODO: Check the grammer rules
+# grammer = """
+#         NP: {<DT>*<NN.?>*<JJ>*<NN.?>+}
+#         VP: {<VB.?>*}
+#         """
+
 grammer = """
-        NP: {<DT>*<NN.?>*<JJ>*<NN.?>+}
+        NP: {<NN.?>+}
         VP: {<VB.?>*}
         """
 cp = nltk.RegexpParser(grammer)
