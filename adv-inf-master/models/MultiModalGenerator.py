@@ -75,7 +75,7 @@ class MultiModalGenerator(CaptionModel):
         self.glove = None # opt.glove_npy
         if self.glove is not None:
             self.input_encoding_size = 300
-        self.word_embed = nn.Embedding(self.vocab_size + 2, self.input_encoding_size)
+        self.word_embed = nn.Embedding(self.vocab_size + 2, self.input_encoding_size) # self.vocab_size + 2 kadarlik bir rakam grubundan bir sayi gelcek, onu self.input_encoding_size bu buyuklukte encode edecek
         self.context_encoding_size = self.rnn_size
         self.sent_rnn = self.rnn_cell(2 * self.input_encoding_size + self.rnn_size, self.rnn_size,
                                       self.num_layers, dropout=self.drop_prob_lm, batch_first=True)
@@ -188,9 +188,9 @@ class MultiModalGenerator(CaptionModel):
             context = torch.zeros(batch_size, 1, self.context_encoding_size)
             # AUX:added for aux data to enhance captions
             aux = torch.zeros(batch_size, 1, self.aux_encoding_size)
-        for n in range(sent_num):
+        for n in range(sent_num): #n tum batchdeki n. siradaki event e refer ediyor.
             # count = 0
-            if fc_feats[:,n,:,:].sum() == 0:
+            if fc_feats[:,n,:,:].sum() == 0: # tum batch de n. siradaki tum fc_feats 0 ise bu demek oluyorki batchdeki tum feature 0dir.
                 break
             # decoder initialization
             sequence = []

@@ -15,9 +15,9 @@ run with CLAS env
 '''
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-input_parsed_file = '/sorted_10closest_parsed_np_vp.json'
+input_parsed_file = '/sorted_10closest_parsed_n_v.json'
 output_parsed_glove = 'gloves_10closest.pkl'
-concurrence_filename = 'concurrence_np_vp_10closest.json'
+concurrence_filename = 'concurrence_n_v_10closest.json'
 path_adv_inf_master = '../adv-inf-master/ConCap/inputs/gloves_10closest.pkl'
 option = 'pickle' # or 'numpy'
 

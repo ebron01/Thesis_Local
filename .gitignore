@@ -32,6 +32,9 @@ parser-nltk/parsed_np_vp.json
 parser-nltk/gloves/*
 parser-nltk/*.pkl
 parser-nltk/numpys/*
+parser-nltk/sorted_10closest_parsed_n_v.json
+parser-nltk/concurrence_n_v_10closest.json
+parser-nltk/caption_np_vp_pairs.json
 parser-nltk/sorted_10closest_parsed_np_vp.json
 parser-nltk/sorted_10closest_updated_query_mid.json
 wmd_v2/sorted_10closest_updated_query_mid.json
