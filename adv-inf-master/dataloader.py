@@ -388,10 +388,6 @@ class DataLoader(data.Dataset):
                         for k in self.aux_glove[key].keys():
                             if self.aux_glove[key][k]['order'] == order:
                                 aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
-                                #if sum(self.aux_glove[key][k]['np_glove'].sum()) != 0:
-                                    #aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['np_glove'])), axis=0)
-                                #elif sum(self.aux_glove[key][k]['vp_glove'].sum()) != 0:
-                                    #aux_features = np.concatenate((aux_features, (self.aux_glove[key][k]['vp_glove'])), axis=0)
                                 if aux_features.shape[0] > self.aux_sequence_size + 1:
                                     aux_features = aux_features[:self.aux_sequence_size+1]
                                     break

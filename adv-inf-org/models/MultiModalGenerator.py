@@ -178,6 +178,13 @@ class MultiModalGenerator(CaptionModel):
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
+                '''
+                it_  = np +vp - 5 (1,2,3,4,5) 5,512 - 
+                
+                kelimelerin yakinligi- 
+                car - pick-up
+                
+                '''
                 xt = torch.cat((encoded,context,xt),dim=2)
                 output, state = self.sent_rnn(xt, state)
                 output = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)

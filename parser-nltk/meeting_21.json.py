@@ -23,3 +23,4 @@ for key in query.keys():
 with open('caption_np_vp_pairs.json', 'w') as f:
     json.dump(all, f)
 print('Done')
+
