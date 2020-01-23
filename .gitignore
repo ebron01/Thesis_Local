@@ -10,11 +10,11 @@ turi/reference_data_all.model/*
 turi/conceptualcaptions_0_2.sframe/*
 turi/env2/*
 glove/*.bin
-adv-inf/activity_net
-adv-inf/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
-adv-inf/ConCap/*
-adv-inf/save/*
-adv-inf/slurm*
+adv-inf_old/activity_net
+adv-inf_old/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
+adv-inf_old/ConCap/*
+adv-inf_old/save/*
+adv-inf_old/slurm*
 adv-inf-master/activity_net
 adv-inf-master/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
 adv-inf-master/ConCap/*
@@ -49,8 +49,7 @@ adv-inf-org/slurm-*
 adv-inf/slurm-*
 
 adv-inf-master/save*/slurm-*
-adv-inf-master/save*/slurm-*
-adv-inf-master/save*/slurm-*
+
 
 bert/sample.h5
 **.idea
