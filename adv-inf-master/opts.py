@@ -24,6 +24,10 @@ def parse_opt():
                     help='path to the directory containing the boxes of att img feats (img)')
     parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/activity_net/inputs/video_data_dense_label.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
+    parser.add_argument('--input_aux_ix', type=str,
+                        default='/data/shared/ActivityNet/activity_net/inputs/caption_np_vp_pairs_ix.json',
+                        help='path to the json file containing ix for closest aux')
+
 
     parser.add_argument('--load_aux', type=str, default='.pkl',
                         help='load from pickle or npys')

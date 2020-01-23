@@ -215,6 +215,8 @@ class DataLoader(data.Dataset):
             if key not in self.aux_glove_vidids:
                 self.aux_glove_vidids.append(key)
 
+        self.aux_ix = json.load(open(self.opt.input_aux_ix))
+
         self.dataset_size = opt.dataset_size
 
         if self.dataset_size == 1:
