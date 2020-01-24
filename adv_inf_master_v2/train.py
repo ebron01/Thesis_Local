@@ -51,10 +51,8 @@ def train(opt):
     opt.video = 1
 
     # set up models
-    gen, dis = models.setup(opt)
-    gen_model = gen
+    gen_model, dis_model = models.setup(opt)
     gen_model.train()
-    dis_model = dis
     dis_model.train()
     gen_optimizer = utils.build_optimizer(gen_model.parameters(), opt)
     dis_optimizer = utils.build_optimizer(dis_model.parameters(), opt)
