@@ -50,6 +50,8 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     with torch.no_grad():
 
         # generated captions
+        import pdb
+        pdb.set_trace()
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
         masks = utils.generate_paragraph_mask(sent_num,gen_labels)
