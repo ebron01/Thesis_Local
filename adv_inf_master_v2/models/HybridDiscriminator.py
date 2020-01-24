@@ -15,7 +15,7 @@ def concat_scores(scores):
     return torch.cat([score.unsqueeze(1) for score in scores], 1)
 
 def make_one_hot_encoding(seq,vocab_size):
-    sent_onehot = torch.zeros(seq.size(0),vocab_size).cuda()
+    sent_onehot = torch.zeros(seq.size(0),vocab_size)
     sent_onehot.scatter_(1,seq,1)
     sent_onehot[:,0] = 0
     return sent_onehot
@@ -235,7 +235,7 @@ class MultiModalAttEarlyFusion(nn.Module):
         for n in range(sent_size):
             if seq[:,n,:].sum() == 0:
                 break
-            score = torch.zeros(batch_size).cuda()
+            score = torch.zeros(batch_size)
             multi_score = []
             # get sent representation
             sent_embed = self.sent_encoder(seq[:,n])

@@ -56,28 +56,28 @@ class DataLoader(data.Dataset):
         return self.seq_length
 
     def build_activity_dict(self):
-        self.activity_dict = {}
-        videos = self.info['videos']
-        for ix in range(len(self.video_id)):
-            v_ix = self.video_id[ix]
-            for act in videos[v_ix]['activities']:
-                  if act not in self.activity_dict:
-                      self.activity_dict[act] = [ix]
-                  else:
-                      self.activity_dict[act].append(ix)
         # self.activity_dict = {}
         # videos = self.info['videos']
         # for ix in range(len(self.video_id)):
-        #     if self.video_id[ix] not in self.videos_missing_index:
-        #         v_ix = self.video_id[ix]
-        #         try:
-        #             for act in videos[v_ix]['activities']:
-        #                 if act not in self.activity_dict:
-        #                     self.activity_dict[act] = [ix]
-        #                 else:
-        #                     self.activity_dict[act].append(ix)
-        #         except:
-        #             print('there is a problem with video_id')
+        #     v_ix = self.video_id[ix]
+        #     for act in videos[v_ix]['activities']:
+        #           if act not in self.activity_dict:
+        #               self.activity_dict[act] = [ix]
+        #           else:
+        #               self.activity_dict[act].append(ix)
+        self.activity_dict = {}
+        videos = self.info['videos']
+        for ix in range(len(self.video_id)):
+            if self.video_id[ix] not in self.videos_missing_index:
+                v_ix = self.video_id[ix]
+                try:
+                    for act in videos[v_ix]['activities']:
+                        if act not in self.activity_dict:
+                            self.activity_dict[act] = [ix]
+                        else:
+                            self.activity_dict[act].append(ix)
+                except:
+                    print('there is a problem with video_id')
 
     def __init__(self, opt):
         self.opt = opt
@@ -117,17 +117,17 @@ class DataLoader(data.Dataset):
         self.sent_num = self.h5_label_file['sent_num'].value
         self.video_id = self.h5_label_file['video_id'].value
 
-        # with open(self.opt.frame_ids, 'r') as f:
-        #     self.act_video_ids = f.readlines()
-        # for i in range(len(self.act_video_ids)):
-        #     self.act_video_ids[i] = self.act_video_ids[i].strip()
-        #
-        # self.videos_missing_index = []
-        # for i in range(len(self.info['videos'])):
-        #     if (self.info['videos'][i]['id'] + '.mp4') in self.act_video_ids:
-        #         continue
-        #     else:
-        #         self.videos_missing_index.append(i)
+        with open(self.opt.frame_ids, 'r') as f:
+            self.act_video_ids = f.readlines()
+        for i in range(len(self.act_video_ids)):
+            self.act_video_ids[i] = self.act_video_ids[i].strip()
+
+        self.videos_missing_index = []
+        for i in range(len(self.info['videos'])):
+            if (self.info['videos'][i]['id'] + '.mp4') in self.act_video_ids:
+                continue
+            else:
+                self.videos_missing_index.append(i)
 
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:

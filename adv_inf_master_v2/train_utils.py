@@ -4,10 +4,9 @@ import misc.utils as utils
 def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
     data = loader.get_batch('train')
-    torch.cuda.synchronize()
     tmp = [data['fc_feats'], data['att_feats'], data['img_feats'], data['box_feats'],
            data['labels'], data['masks'], data['att_masks'], data['activities']]
-    tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
+    tmp = [_ if _ is None else torch.from_numpy(_) for _ in tmp]
     fc_feats, att_feats, img_feats, box_feats, labels, masks, att_masks, activities = tmp
     sent_num = data['sent_num']
     wrapped = data['bounds']['wrapped']
@@ -23,7 +22,7 @@ def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
     utils.clip_gradient(gen_optimizer, grad_clip)
     gen_optimizer.step()
-    torch.cuda.synchronize()
+
 
     return gen_loss, wrapped, sent_num
 
@@ -34,13 +33,13 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     gen_model.eval()
     data = loader.get_batch('train')
     sent_num = data['sent_num']
-    torch.cuda.synchronize()
+
     tmp = [data['fc_feats'],data['mm_fc_feats'], data['img_feats'], data['box_feats'], data['att_feats'], data['labels'], data['mm_labels'],
            data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
-    tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
+    tmp = [_ if _ is None else torch.from_numpy(_) for _ in tmp]
     fc_feats, mm_fc_feats, img_feats, box_feats, att_feats, labels, mm_labels, att_masks, activities, \
     mm_img_feats, mm_box_feats, mm_activities = tmp
-    label = torch.zeros(sum(sent_num)).cuda()
+    label = torch.zeros(sum(sent_num))
     dis_v_loss = 0
     dis_l_loss = 0
     dis_p_loss = 0
@@ -65,7 +64,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         neg_lang_labels = utils.get_neg_lang(sent_num,labels,gen_labels)
 
         # only gt sentence pair as pairwise negatives
-        neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels'])).cuda()
+        neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels']))
 
     # update visual discriminator with [gt (real), gt mismatch (fake), gen mismatch (fake)]
     if use_vis:
@@ -96,7 +95,6 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         # update discriminator
         utils.clip_gradient(dis_optimizer, grad_clip)
         dis_optimizer.step()
-        torch.cuda.synchronize()
 
     # update language discriminator with [gt (real), gen(fake), neg (fake)]
     if use_lang:
@@ -128,7 +126,6 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         # update discriminator
         utils.clip_gradient(dis_optimizer, grad_clip)
         dis_optimizer.step()
-        torch.cuda.synchronize()
 
     # update pairwise discriminator [gt (real), gen(fake), neg(fake)]
     if use_pair:
@@ -163,7 +160,6 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         # update discriminator
         utils.clip_gradient(dis_optimizer, grad_clip)
         dis_optimizer.step()
-        torch.cuda.synchronize()
 
     # calculate accuracy (ground truth scores higher than negative inputs)
     with torch.no_grad():

@@ -52,16 +52,16 @@ def train(opt):
 
     # set up models
     gen, dis = models.setup(opt)
-    gen_model = gen.cuda()
+    gen_model = gen
     gen_model.train()
-    dis_model = dis.cuda()
+    dis_model = dis
     dis_model.train()
     gen_optimizer = utils.build_optimizer(gen_model.parameters(), opt)
     dis_optimizer = utils.build_optimizer(dis_model.parameters(), opt)
 
     # loss functions
     crit = utils.LanguageModelCriterion()
-    gan_crit = nn.BCELoss().cuda()
+    gan_crit = nn.BCELoss()
 
     # keep track of iteration
     g_iter = 0

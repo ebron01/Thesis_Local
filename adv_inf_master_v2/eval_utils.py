@@ -191,7 +191,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
         tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['mm_labels'],
                data['masks'], data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
-        tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
+        tmp = [_ if _ is None else torch.from_numpy(_) for _ in tmp]
         fc_feats, img_feats, box_feats, mm_fc_feats, att_feats, labels, mm_labels, masks, att_masks, activities, \
         mm_img_feats, mm_box_feats, mm_activities = tmp
         sent_num = data['sent_num']
@@ -220,7 +220,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             else:
                 sample_list = np.zeros((loader.batch_size, num_samples, loader.seq_length))
                 context_list = np.zeros((loader.batch_size, num_samples, 512))
-                seq_dummy = torch.zeros(loader.batch_size, 10, loader.seq_length).cuda()
+                seq_dummy = torch.zeros(loader.batch_size, 10, loader.seq_length)
                 best_context = None
                 best_seq = None
                 for s in range(max(sent_num)):
@@ -275,9 +275,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     # select the caption with highest score
                     inds = score_list.argsort(axis=1)[:, ::-1]
                     caption_list = torch.tensor(
-                        sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
+                        sample_list[np.arange(loader.batch_size)[:, None], inds]).long()
                     best_context = torch.tensor(
-                        context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
+                        context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).float()
                     best_seq = caption_list[:, 0, :]
                     seq_dummy[:, s] = best_seq
 
@@ -293,16 +293,16 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                                 opt=eval_kwargs, mode='sample')
                 mm_seq = torch.mul(mm_seq,utils.generate_paragraph_mask(sent_num, mm_seq))
 
-                neg_lang_labels = utils.get_neg_lang(sent_num, labels, seq.cuda())
-                neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels'])).cuda()
+                neg_lang_labels = utils.get_neg_lang(sent_num, labels, seq)
+                neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels']))
 
                 dis_loss = 0
 
-                v_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, seq.cuda())
+                v_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, seq)
                 v_gen_score = utils.align_seq(sent_num, v_gen_score)
-                l_gen_score = dis_model(seq.cuda(), mode='lang')
+                l_gen_score = dis_model(seq, mode='lang')
                 l_gen_score = utils.align_seq(sent_num, l_gen_score)
-                p_gen_score = dis_model(seq.cuda(), mode='par')
+                p_gen_score = dis_model(seq, mode='par')
                 p_gen_score = utils.align_seq(sent_num,p_gen_score)
                 scores['v_gen_scores'].extend(v_gen_score)
                 scores['l_gen_scores'].extend(l_gen_score)
@@ -322,7 +322,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
                 v_mm_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_labels[:,:,1:-1])
                 v_mm_score = utils.align_seq(sent_num, v_mm_score)
-                v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_seq.cuda())
+                v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_seq)
                 v_mm_gen_score = utils.align_seq(sent_num, v_mm_gen_score)
                 l_neg_score = dis_model(neg_lang_labels, mode='lang')
                 l_neg_score = utils.align_seq(sent_num, l_neg_score)
