@@ -431,8 +431,9 @@ class BlobFetcher():
 
         ix, wrapped = self._get_next_minibatch_inds()
         tmp = self.split_loader.next()
+        print(tmp)
         if wrapped:
             self.reset()
         assert tmp[1] == ix, "ix not equal"
-
-        return tmp + wrapped
+        print(wrapped)
+        return tmp + [wrapped]

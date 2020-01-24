@@ -1,6 +1,6 @@
 import torch
 import misc.utils as utils
-
+torch.set_printoptions(profile="full")
 def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
     data = loader.get_batch('train')
