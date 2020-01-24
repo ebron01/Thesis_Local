@@ -54,7 +54,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
 
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
-        pdb.set_trace()
+
         masks = utils.generate_paragraph_mask(sent_num,gen_labels)
         gen_labels = torch.mul(gen_labels, masks)
 
@@ -69,7 +69,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
 
         # only gt sentence pair as pairwise negatives
         neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels'])).cuda()
-
+    pdb.set_trace()
     # update visual discriminator with [gt (real), gt mismatch (fake), gen mismatch (fake)]
     if use_vis:
         dis_optimizer.zero_grad()
