@@ -147,7 +147,7 @@ def parse_opt():
                     help='If use box, do we normalize box feature')
 
     # Optimization: General
-    parser.add_argument('--g_pre_nepoch', type=int, default=50,
+    parser.add_argument('--g_pre_nepoch', type=int, default=1,
                     help='number of epochs to pre-train generator with cross entropy')
     parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')

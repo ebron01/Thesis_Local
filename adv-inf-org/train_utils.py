@@ -69,9 +69,10 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
 
         # only gt sentence pair as pairwise negatives
         neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels'])).cuda()
-    pdb.set_trace()
+
     # update visual discriminator with [gt (real), gt mismatch (fake), gen mismatch (fake)]
     if use_vis:
+        pdb.set_trace()
         dis_optimizer.zero_grad()
 
         # mismatch_gt
