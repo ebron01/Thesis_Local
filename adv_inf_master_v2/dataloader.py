@@ -148,6 +148,8 @@ class DataLoader(data.Dataset):
         with open('videos_missing.npy', 'r') as f:
             self.videos_missing = np.load(f)
 
+        self.aux_ix = json.load(open(self.opt.input_aux_ix))
+
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
             self.activity = self.h5_label_file['activity'].value

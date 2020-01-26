@@ -1,6 +1,6 @@
 import torch
 import misc.utils as utils
-
+import numpy as np
 def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
     data = loader.get_batch('train')
@@ -11,6 +11,7 @@ def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
     sent_num = data['sent_num']
     wrapped = data['bounds']['wrapped']
     gen_optimizer.zero_grad()
+
 
     seq = gen_model(fc_feats, img_feats, box_feats, activities, labels)
     seq = utils.align_seq(sent_num, seq)
@@ -65,6 +66,11 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
 
         # only gt sentence pair as pairwise negatives
         neg_pair_labels = torch.from_numpy(utils.get_neg_pair(sent_num, data['labels']))
+
+        aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype = 'int')
+        for i in len(sent_num):
+            for j in range(sent_num[i]):
+                aux_labels[i] = loader.aux_ix[data['infos'][i]['id'] + '_' + str(j)]
 
     # update visual discriminator with [gt (real), gt mismatch (fake), gen mismatch (fake)]
     if use_vis:

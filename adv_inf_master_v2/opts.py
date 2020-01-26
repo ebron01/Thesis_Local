@@ -19,7 +19,7 @@ def parse_opt():
                         help='path to videos downloaded from activity_net for ConCap comparison')
 
     parser.add_argument('--input_aux_ix', type=str,
-                        default='/data/shared/ActivityNet/activity_net/inputs/caption_np_vp_pairs_ix.json',
+                        default='/data/shared/ActivityNet/activity_net/inputs/caption_np_vp_pairs_ix_order.json',
                         help='path to the json file containing ix for closest aux')
 
 

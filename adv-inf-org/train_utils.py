@@ -1,5 +1,9 @@
 import torch
 import misc.utils as utils
+import json
+import numpy as np
+import pdb
+
 torch.set_printoptions(profile="full")
 def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
@@ -50,7 +54,12 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     with torch.no_grad():
 
         # generated captions
-        import pdb
+        pdb.set_trace()
+        aux_ix = json.load(open('/data/shared/ActivityNet/activity_net/inputs/caption_np_vp_pairs_ix_order.json'))
+        aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype = 'int')
+        for i in len(sent_num):
+            for j in range(sent_num[i]):
+                aux_labels[i] = aux_ix[data['infos'][i]['id'] + '_' + str(j)]
 
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
