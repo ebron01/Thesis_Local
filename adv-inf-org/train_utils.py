@@ -59,7 +59,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype = 'int')
         for i in range(len(sent_num)):
             for j in range(sent_num[i]):
-                aux_labels[i] = aux_ix[data['infos'][i]['id'] + '_' + str(j)]
+                aux_labels[i] = aux_ix[data['infos'][i]['id'] + '_' + str(j+1)]
 
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
