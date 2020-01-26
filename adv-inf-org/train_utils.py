@@ -54,14 +54,15 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     with torch.no_grad():
 
         # generated captions
-        pdb.set_trace()
+
         aux_ix = json.load(open('/data/shared/ActivityNet/activity_net/inputs/caption_np_vp_pairs_ix_order.json'))
         aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype = 'int')
+        count = 0
         for i in range(len(sent_num)):
             for j in range(sent_num[i]):
                 a = aux_ix[data['infos'][i]['id'] + '_' + str(j+1)]
                 aux_labels[i,j,:len(a)] = aux_ix[data['infos'][i]['id'] + '_' + str(j+1)]
-
+                count += 1
         pdb.set_trace()
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
