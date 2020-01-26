@@ -62,6 +62,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
                 a = aux_ix[data['infos'][i]['id'] + '_' + str(j+1)]
                 aux_labels[i,j,:len(a)] = aux_ix[data['infos'][i]['id'] + '_' + str(j+1)]
 
+        pdb.set_trace()
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
 
