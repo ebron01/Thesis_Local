@@ -62,7 +62,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         for i in range(len(sent_num)):
             for j in range(sent_num[i]):
                 a = aux_ix[data['infos'][i]['id'] + '_' + str(j+1)]
-                aux_labels[i,j,:len(a)] = aux_ix[data['infos'][i]['id'] + '_' + str(j+1)]
+                aux_labels[i,j,:len(a)] = aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
                 count += 1
         pdb.set_trace()
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
