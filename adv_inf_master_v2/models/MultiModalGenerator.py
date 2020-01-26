@@ -112,9 +112,9 @@ class MultiModalGenerator(CaptionModel):
 
     def get_hidden_state(self,state):
         if self.rnn_type == "lstm":
-            return state[0].transpose(0,1)
+            return state[0].transpose(0,1).cuda()
         else:
-            return state.transpose(0,1)
+            return state.transpose(0,1).cuda()
 
     # def attention_encoder(self, feats, state, embed, attention):
     #     result = embed(feats)
@@ -149,11 +149,11 @@ class MultiModalGenerator(CaptionModel):
         batch_size = fc_feats.size(0)
         sent_num = fc_feats.size(1)
         outputs = []
-        video = torch.zeros(batch_size, 1, self.rnn_size)
-        image = torch.zeros(batch_size, 1, self.rnn_size)
-        box = torch.zeros(batch_size, 1, self.rnn_size)
-        activity = torch.zeros(batch_size,1,self.activity_encoding_size)
-        context = torch.zeros(batch_size,1,self.context_encoding_size)
+        video = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        image = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        box = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        activity = torch.zeros(batch_size,1,self.activity_encoding_size).cuda()
+        context = torch.zeros(batch_size,1,self.context_encoding_size).cuda()
         for n in range(sent_num):
             if fc_feats[:,n,:,:].sum() == 0:
                 break
@@ -195,11 +195,11 @@ class MultiModalGenerator(CaptionModel):
             return self._sample_beam(fc_feats, img_feats, box_feats, activity_labels, opt=opt)
         batch_size = fc_feats.size(0)
         sent_num = fc_feats.size(1)
-        video = torch.zeros(batch_size, 1, self.rnn_size)
-        image = torch.zeros(batch_size, 1, self.rnn_size)
-        box = torch.zeros(batch_size, 1, self.rnn_size)
-        context = torch.zeros(batch_size,1,self.rnn_size)
-        activity = torch.zeros(batch_size,1,self.activity_encoding_size)
+        video = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        image = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        box = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        context = torch.zeros(batch_size,1,self.rnn_size).cuda()
+        activity = torch.zeros(batch_size,1,self.activity_encoding_size).cuda()
         seq = fc_feats.new_zeros(batch_size,sent_num, self.seq_length, dtype=torch.long)
         seqLogprobs = fc_feats.new_zeros(batch_size,sent_num, self.seq_length)
         for n in range(sent_num):
@@ -275,13 +275,13 @@ class MultiModalGenerator(CaptionModel):
         assert beam_size <= self.vocab_size + 1, 'lets assume this for now, otherwise this corner case causes a few headaches down the road. can be dealt with in future if needed'
         seq = torch.LongTensor(batch_size, sent_num, self.seq_length).zero_()
         seqLogprobs = torch.FloatTensor(batch_size, sent_num, self.seq_length)
-        video = torch.zeros(beam_size, 1, self.rnn_size)
-        image = torch.zeros(beam_size, 1, self.rnn_size)
-        box = torch.zeros(beam_size, 1, self.rnn_size)
-        activity = torch.zeros(beam_size, 1, self.activity_encoding_size)
+        video = torch.zeros(beam_size, 1, self.rnn_size).cuda()
+        image = torch.zeros(beam_size, 1, self.rnn_size).cuda()
+        box = torch.zeros(beam_size, 1, self.rnn_size).cuda()
+        activity = torch.zeros(beam_size, 1, self.activity_encoding_size).cuda()
         self.done_beams = [[] for _ in range(batch_size)]
         for k in range(batch_size):
-            context = torch.zeros(beam_size, 1, self.rnn_size)
+            context = torch.zeros(beam_size, 1, self.rnn_size).cuda()
             for n in range(sent_num):  # sent_num
                 if fc_feats[k, n, :, :].sum() == 0:
                     break
@@ -318,9 +318,9 @@ class MultiModalGenerator(CaptionModel):
 
     def get_logprobs_state(self, it, fkn, ikn, bkn, activity, context, state):
         batch_size = it.size(0)
-        video = torch.zeros(batch_size, 1, self.rnn_size)
-        image = torch.zeros(batch_size, 1, self.rnn_size)
-        box = torch.zeros(batch_size, 1, self.rnn_size)
+        video = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        image = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        box = torch.zeros(batch_size, 1, self.rnn_size).cuda()
         # 'it' contains a word index
         if self.use_video:
             video = self.attention_encoder(fkn, state, 'video')
@@ -339,17 +339,17 @@ class MultiModalGenerator(CaptionModel):
         temperature = opt.get('temperature', 1.0)
 
         batch_size = fc_feats.size(0)
-        video = torch.zeros(batch_size, 1, self.rnn_size)
-        image = torch.zeros(batch_size, 1, self.rnn_size)
-        box = torch.zeros(batch_size, 1, self.rnn_size)
-        activity = torch.zeros(batch_size,1,self.activity_encoding_size)
+        video = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        image = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        box = torch.zeros(batch_size, 1, self.rnn_size).cuda()
+        activity = torch.zeros(batch_size,1,self.activity_encoding_size).cuda()
         seq = fc_feats.new_zeros(batch_size,self.seq_length, dtype=torch.long)
         seqLogprobs = fc_feats.new_zeros(batch_size,self.seq_length)
         state = self.init_hidden(batch_size)
         if self.use_activity_labels:
             activity = self.activity_embed(activity_labels.float()).unsqueeze(1)
         if context is None:
-            context = torch.zeros(batch_size,1,self.rnn_size)
+            context = torch.zeros(batch_size,1,self.rnn_size).cuda()
         for t in range(self.seq_length + 1):
             if t == 0 : # input <bos>
                 it = fc_feats.new_zeros(batch_size, dtype=torch.long)

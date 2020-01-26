@@ -130,13 +130,15 @@ opt.vocab = infos['vocab'] # ix -> word mapping
 # Setup the model
 gen_model,dis_model = models.setup(opt)
 gen_model.load_state_dict(torch.load(opt.g_model_path))
+gen_model.cuda()
 gen_model.eval()
 crit = utils.LanguageModelCriterion()
 
 if len(opt.d_model_path) > 0 :
     dis_model.load_state_dict(torch.load(opt.d_model_path))
+    dis_model.cuda()
     dis_model.eval()
-    gan_crit = nn.BCELoss()
+    gan_crit = nn.BCELoss().cuda()
 else:
     dis_model = None
     gan_crit = None

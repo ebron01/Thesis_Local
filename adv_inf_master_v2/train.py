@@ -51,15 +51,17 @@ def train(opt):
     opt.video = 1
 
     # set up models
-    gen_model, dis_model = models.setup(opt)
+    gen, dis = models.setup(opt)
+    gen_model = gen.cuda()
     gen_model.train()
+    dis_model = dis.cuda()
     dis_model.train()
     gen_optimizer = utils.build_optimizer(gen_model.parameters(), opt)
     dis_optimizer = utils.build_optimizer(dis_model.parameters(), opt)
 
     # loss functions
     crit = utils.LanguageModelCriterion()
-    gan_crit = nn.BCELoss()
+    gan_crit = nn.BCELoss().cuda()
 
     # keep track of iteration
     g_iter = 0

@@ -265,6 +265,7 @@ class DataLoader(data.Dataset):
             box_features.append(feats[i*self.nbox:(i+1)*self.nbox])
         return box_features
 
+
     def set_negatives(self,mode):
         self.negatives = mode
 
