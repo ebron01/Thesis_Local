@@ -11,6 +11,7 @@ import pickle
 import torch
 import torch.utils.data as data
 
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import multiprocessing
 
 from six.moves import cPickle
@@ -122,12 +123,30 @@ class DataLoader(data.Dataset):
         for i in range(len(self.act_video_ids)):
             self.act_video_ids[i] = self.act_video_ids[i].strip()
 
-        self.videos_missing_index = []
-        for i in range(len(self.info['videos'])):
-            if (self.info['videos'][i]['id'] + '.mp4') in self.act_video_ids:
-                continue
-            else:
-                self.videos_missing_index.append(i)
+        # self.videos_missing_index = []
+        # for i in range(len(self.info['videos'])):
+        #     if (self.info['videos'][i]['id'] + '.mp4') in self.act_video_ids:
+        #         continue
+        #     else:
+        #         self.videos_missing_index.append(i)
+        # with open('videos_missing_index.npy', 'w') as f:
+        #     np.save(f, self.videos_missing_index)
+
+        # self.videos_missing = []
+        # for i in range(len(self.info['videos'])):
+        #     if (self.info['videos'][i]['id'] + '.mp4') in self.act_video_ids:
+        #         continue
+        #     else:
+        #         self.videos_missing.append(self.info['videos'][i]['id'])
+        # with open('videos_missing.npy', 'w') as f:
+        #     np.save(f, self.videos_missing)
+
+
+        with open('videos_missing_index.npy', 'r') as f:
+            self.videos_missing_index = np.load(f)
+
+        with open('videos_missing.npy', 'r') as f:
+            self.videos_missing = np.load(f)
 
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
@@ -275,6 +294,12 @@ class DataLoader(data.Dataset):
         for i in range(batch_size):
             # fetch visual features
             tmp_fcs, ix, tmp_wrapped = self._prefetch_process[split].get()
+            v_ix = self.video_id[ix]
+            vid_id = self.info['videos'][v_ix]['id']
+            while vid_id in self.videos_missing:
+                tmp_fcs, ix, tmp_wrapped = self._prefetch_process[split].get()
+                v_ix = self.video_id[ix]
+                vid_id = self.info['videos'][v_ix]['id']
             sent_num = self.sent_num[ix]
             fc_batch[i,:sent_num] = tmp_fcs[0]
             img_batch[i,:sent_num] = tmp_fcs[1]
@@ -413,7 +438,11 @@ class BlobFetcher():
         wrapped = False
 
         ri = self.dataloader.iterators[self.split]
+        # print(ri)
+        # while self.dataloader.split_ix[self.split][ri] in self.dataloader.videos_missing_index:
+        #     ri = ri + 1
         ix = self.dataloader.split_ix[self.split][ri]
+        # print(ix)
 
         ri_next = ri + 1
         if ri_next >= max_index:
