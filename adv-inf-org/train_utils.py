@@ -58,6 +58,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         aux_ix = json.load(open('/data/shared/ActivityNet/activity_net/inputs/caption_np_vp_pairs_ix_order.json'))
         aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype = 'int')
         count = 0
+        pdb.set_trace()
         for i in range(len(sent_num)):
             for j in range(sent_num[i]):
                 a = aux_ix[data['infos'][i]['id'] + '_' + str(j+1)]
