@@ -50,7 +50,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     dis_p_loss = 0
     accuracies = {}
     wrapped = data['bounds']['wrapped']
-    pdb.set_trace()
+
     with torch.no_grad():
 
         aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype='int64')
