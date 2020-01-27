@@ -155,6 +155,8 @@ class DataLoader(data.Dataset):
         self.aux_ix.update({'v_kMsWDe0V1Xg_3': self.aux_ix['v_kMsWDe0V1Xg_2']})
         self.aux_ix.update({'v_WQXoBfyUpaY_4': self.aux_ix['v_WQXoBfyUpaY_3']})
         self.aux_ix.update({'v_8K4cX9GfaII_1': self.aux_ix['v_8K4cX9GfaII_2']})
+        self.aux_ix.update({'v_EKyV_WFsJH0_3': self.aux_ix['v_EKyV_WFsJH0_2']})
+
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
             self.activity = self.h5_label_file['activity'].value
