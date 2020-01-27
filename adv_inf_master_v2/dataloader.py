@@ -152,7 +152,6 @@ class DataLoader(data.Dataset):
         for k in self.aux_ix.keys(): # this part deletes aux_ix longer than 30
             if len(self.aux_ix[k]) > 30:
                 self.aux_ix[k] = self.aux_ix[k][:30]
-
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
             self.activity = self.h5_label_file['activity'].value
