@@ -53,7 +53,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
 
     with torch.no_grad():
 
-        aux_labels = torch.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length)).cuda()
+        aux_labels = torch.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype=torch.int).cuda()
         count = 0
         for i in range(len(sent_num)):
             for j in range(sent_num[i]):
