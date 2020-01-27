@@ -53,13 +53,14 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
 
     with torch.no_grad():
 
-        aux_labels = torch.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype=torch.int).cuda()
+        aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype='int')
         count = 0
         for i in range(len(sent_num)):
             for j in range(sent_num[i]):
                 a = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
                 aux_labels[i,j,:len(a)] = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
                 count += 1
+        aux_labels = torch.Tensor(aux_labels).cuda()
         pdb.set_trace()
         # generated captions
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
