@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-import pdb
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -15,7 +15,7 @@ def concat_scores(scores):
     return torch.cat([score.unsqueeze(1) for score in scores], 1)
 
 def make_one_hot_encoding(seq,vocab_size):
-    sent_onehot = torch.zeros(seq.shape[0],vocab_size).cuda()
+    sent_onehot = torch.zeros(seq.size(0),vocab_size).cuda()
     sent_onehot.scatter_(1,seq,1)
     sent_onehot[:,0] = 0
     return sent_onehot
@@ -192,8 +192,8 @@ class MultiModalAttEarlyFusion(nn.Module):
         if self.use_bow:
             return self.bow_emb(make_one_hot_encoding(seq,self.vocab_size+2))
         else:
-            state = self.init_hidden(seq.shape[0])
-            for i in range(seq.shape[1]):
+            state = self.init_hidden(seq.size(0))
+            for i in range(seq.size(1)):
                 it = seq[:,i].clone()
                 xt = self.word_embed(it).unsqueeze(1)
                 xt = self.dropout(xt)
@@ -229,11 +229,9 @@ class MultiModalAttEarlyFusion(nn.Module):
             return moe_weights
 
     def forward(self, fc_feats, img_feats, box_feats, activity_labels, seq):
-        # pdb.set_trace()
-        # batch_size = seq.size(0)
-        # sent_size = seq.size(1)
-        batch_size = seq.shape[0]
-        sent_size = seq.shape[1]
+
+        batch_size = seq.size(0)
+        sent_size = seq.size(1)
         scores = []
         for n in range(sent_size):
             if seq[:,n,:].sum() == 0:
@@ -337,8 +335,8 @@ class LanguageModel(nn.Module):
     #     return new_seqs, len_sents, len_ix, inv_ix
 
     def forward(self, seq):
-        batch_size = seq.shape[0]
-        sent_size = seq.shape[1]
+        batch_size = seq.size(0)
+        sent_size = seq.size(1)
         scores = []
         for n in range(sent_size):
             if seq[:,n,:].sum() == 0:
@@ -412,8 +410,8 @@ class ParagraphModel(nn.Module):
                 p_scores[i,ix2] = p_scores[i,ix2] + new_scores2[i]
 
     def forward(self, seq):
-        batch_size = seq.shape[0]
-        sent_size = seq.shape[1]
+        batch_size = seq.size(0)
+        sent_size = seq.size(1)
         sent_num = [0] * batch_size
         p_scores = seq.new_zeros(batch_size,sent_size).float()
         sents = []
