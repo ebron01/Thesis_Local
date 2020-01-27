@@ -60,7 +60,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
                 a = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
                 aux_labels[i,j,:len(a)] = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
                 count += 1
-        aux_labels = torch.Tensor(aux_labels).cuda()
+        aux_labels = torch.Tensor(aux_labels, dtype=torch.long).cuda()
         # generated captions
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
