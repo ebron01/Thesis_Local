@@ -36,6 +36,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
                         use_vis=True,use_lang=True,use_pair=True,grad_clip=0.1):
 
     for i in range(40):
+        print (i)
         data = loader.get_batch('train')
         sent_num = data['sent_num']
         aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype='int64')
