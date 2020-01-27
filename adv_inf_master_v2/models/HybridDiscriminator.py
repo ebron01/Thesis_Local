@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+import pdb
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -229,6 +229,7 @@ class MultiModalAttEarlyFusion(nn.Module):
             return moe_weights
 
     def forward(self, fc_feats, img_feats, box_feats, activity_labels, seq):
+        pdb.set_trace()
         batch_size = seq.size(0)
         sent_size = seq.size(1)
         scores = []
