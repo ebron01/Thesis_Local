@@ -149,6 +149,9 @@ class DataLoader(data.Dataset):
             self.videos_missing = np.load(f)
 
         self.aux_ix = json.load(open(self.opt.input_aux_ix))
+        for k in self.aux_ix.keys(): # this part deletes aux_ix longer than 30
+            if len(self.aux_ix[k]) > 30:
+                self.aux_ix[k] = self.aux_ix[k][:30]
 
         self.timestamp = self.h5_label_file['timestamp'].value
         if self.activity_size > 0:
