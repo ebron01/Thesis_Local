@@ -57,8 +57,8 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         count = 0
         for i in range(len(sent_num)):
             for j in range(sent_num[i]):
-                print(sent_num[i])
-                print(data['infos'][count]['id'] + '_' + str(j + 1))
+                # print(sent_num[i])
+                # print(data['infos'][count]['id'] + '_' + str(j + 1))
                 a = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
                 aux_labels[i,j,:len(a)] = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
                 count += 1
