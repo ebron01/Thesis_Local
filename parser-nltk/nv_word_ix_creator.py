@@ -41,6 +41,7 @@ for key in data.keys():
                     caption_ix.append(8472)
             data_.update({key.rsplit('_', 1)[0]: caption_ix})
 
+data_.update({'v_kMsWDe0V1Xg_3': data_['v_kMsWDe0V1Xg_2']})
 with open(filename_, 'w') as f:
     json.dump(data, f)
 
