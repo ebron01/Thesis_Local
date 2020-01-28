@@ -109,16 +109,26 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         dis_v_loss += v_loss_3.item()
 
         # mismatch_gen
-        v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_gen_labels)
+        # v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_gen_labels)
+        # v_mm_gen_score = utils.align_seq(sent_num, v_mm_gen_score)
+        # v_loss_1 = gen_weight * gan_crit(v_mm_gen_score, label)
+        # v_loss_1.backward()
+        # dis_v_loss += v_loss_1.item()
+
+        #part for aux
+        label.fill_(1)
+        v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, aux_labels)
         v_mm_gen_score = utils.align_seq(sent_num, v_mm_gen_score)
+        #added for 'Assertion `input >= 0. && input <= 1.` failed.' fault.
+        v_mm_gen_score = torch.clamp(torch.sigmoid(v_mm_gen_score), 0, 1)
         v_loss_1 = gen_weight * gan_crit(v_mm_gen_score, label)
         v_loss_1.backward()
         dis_v_loss += v_loss_1.item()
 
         # gt
-        label.fill_(1)
-        # v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, labels[:, :, 1:-1])
-        v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, aux_labels)
+        # label.fill_(1)
+        v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, labels[:, :, 1:-1])
+        # v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, aux_labels)
         v_gt_score = utils.align_seq(sent_num, v_gt_score)
         #added for 'Assertion `input >= 0. && input <= 1.` failed.' fault.
         v_gt_score = torch.clamp(torch.sigmoid(v_gt_score), 0, 1)
