@@ -120,6 +120,8 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         # v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, labels[:, :, 1:-1])
         v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, aux_labels)
         v_gt_score = utils.align_seq(sent_num, v_gt_score)
+        #added for 'Assertion `input >= 0. && input <= 1.` failed.' fault.
+        v_gt_score = torch.clamp(torch.sigmoid(v_gt_score), 0, 1)
         v_loss_2 = gan_crit(v_gt_score, label)
         v_loss_2.backward()
         dis_v_loss += v_loss_2.item()
