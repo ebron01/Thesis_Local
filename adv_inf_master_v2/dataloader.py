@@ -315,6 +315,7 @@ class DataLoader(data.Dataset):
             tmp_fcs, ix, tmp_wrapped = self._prefetch_process[split].get()
             v_ix = self.video_id[ix]
             vid_id = self.info['videos'][v_ix]['id']
+            #this while controls fetched video_id is in videos_missing or not. if in missing fetches next video.
             while vid_id in self.videos_missing:
                 tmp_fcs, ix, tmp_wrapped = self._prefetch_process[split].get()
                 v_ix = self.video_id[ix]
