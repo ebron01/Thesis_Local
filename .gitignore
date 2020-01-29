@@ -5,6 +5,7 @@ adv-inf_old/save/*
 adv-inf_old/slurm*
 
 adv_inf_master_v2/save_aux_gt_10epoch/*
+adv_inf_master_v2/save_gt_10epoch/*
 adv-inf-master/save1/*
 adv-inf-master/save*
 adv-inf-master/activity_net
