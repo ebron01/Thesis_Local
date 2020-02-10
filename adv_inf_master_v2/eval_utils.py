@@ -50,7 +50,10 @@ def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=F
     json.dump(template, open(os.path.join('densevid_eval', 'caption_' + model_id + '.json'), 'w'))
     eval_command = ["python","para-evaluate.py", "-s",'caption_' + model_id + '.json',
                     "-o", 'result_' + model_id + '.json', '--verbose']
-    subprocess.call(eval_command,cwd='densevid_eval')
+    import os
+    os.chdir('densevid_eval')
+    subprocess.call(eval_command, cwd='densevid_eval')
+    #subprocess.call(eval_command, cwd='densevid_eval')
     output = json.load(open(os.path.join('densevid_eval','result_' + model_id + '.json'),'r'))
     if remove:
         os.remove(os.path.join('densevid_eval','caption_' + model_id + '.json'))
