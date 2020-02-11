@@ -56,5 +56,6 @@ parser-nltk/caption_np_vp_pairs_ix.json
 wmd_v2/sorted_10closest_updated_query_mid.json
 wmd_v2/inputs/*
 adv_inf_master_v2/save/*
+adv-inf-master_v2/save_local/*
 **.idea
 .DS_Store

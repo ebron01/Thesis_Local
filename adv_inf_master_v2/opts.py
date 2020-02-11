@@ -147,7 +147,7 @@ def parse_opt():
                     help='If use box, do we normalize box feature')
 
     # Optimization: General
-    parser.add_argument('--g_pre_nepoch', type=int, default=10,
+    parser.add_argument('--g_pre_nepoch', type=int, default=1,
                     help='number of epochs to pre-train generator with cross entropy')
     parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')
@@ -228,7 +228,7 @@ def parse_opt():
     # Discriminator
     parser.add_argument('--dis_model', type=str, default="joint_embed",
                     help='joint_embed, co_att, fc, fc_video, s2vt')
-    parser.add_argument('--d_pre_nepoch', type=int, default=10,
+    parser.add_argument('--d_pre_nepoch', type=int, default=1,
                     help='number of epochs to pre-train discriminator')
     parser.add_argument('--g_steps', type=int, default=1,
                     help='number of steps updating generator')

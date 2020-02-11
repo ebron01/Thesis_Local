@@ -31,6 +31,7 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 
 def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=False):
     import sys
+    import os
     sys.path.append("densevid_eval")
     template = {"version": "VERSION 1.0", "results": {},
                 "external_data": { "used": 'true',
@@ -50,10 +51,9 @@ def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=F
     json.dump(template, open(os.path.join('densevid_eval', 'caption_' + model_id + '.json'), 'w'))
     eval_command = ["python","para-evaluate.py", "-s",'caption_' + model_id + '.json',
                     "-o", 'result_' + model_id + '.json', '--verbose']
-    import os
-    os.chdir('densevid_eval')
+    #os.chdir('densevid_eval')
+    #subprocess.call(eval_command)
     subprocess.call(eval_command, cwd='densevid_eval')
-    #subprocess.call(eval_command, cwd='densevid_eval')
     output = json.load(open(os.path.join('densevid_eval','result_' + model_id + '.json'),'r'))
     if remove:
         os.remove(os.path.join('densevid_eval','caption_' + model_id + '.json'))
