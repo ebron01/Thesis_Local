@@ -99,6 +99,7 @@ class DataLoader(data.Dataset):
         print('DataLoader loading json file: ', opt.input_json)
         self.info = json.load(open(self.opt.input_json))
         self.ix_to_word = self.info['ix_to_word']
+        self.ix_to_word['1'] = 'raining'
         self.word_to_ix = self.info['word_to_ix']
         self.vocab_size = len(self.ix_to_word)
         self.ix_to_activity = self.info.get('ix_to_activity',None)
@@ -445,14 +446,19 @@ class BlobFetcher():
         2. wrapped: a new epoch, the split_ix and iterator have been updated in the get_minibatch_inds already.
         """
         # batch_size is 1, the merge is done in DataLoader class
+        # self.split_loader = iter(data.DataLoader(dataset=self.dataloader,
+        #                                     batch_size=1,
+        #                                     sampler=SubsetSampler(self.dataloader.split_ix[self.split][self.dataloader.iterators[self.split]:]),
+        #                                     shuffle=False,
+        #                                     pin_memory=True,
+        #                                     num_workers=2, # 4 is usually enough
+        #                                     collate_fn=lambda x: x[0]))
         self.split_loader = iter(data.DataLoader(dataset=self.dataloader,
                                             batch_size=1,
                                             sampler=SubsetSampler(self.dataloader.split_ix[self.split][self.dataloader.iterators[self.split]:]),
                                             shuffle=False,
                                             pin_memory=True,
-                                            num_workers=2, # 4 is usually enough
                                             collate_fn=lambda x: x[0]))
-
     def _get_next_minibatch_inds(self):
         max_index = len(self.dataloader.split_ix[self.split])
         wrapped = False

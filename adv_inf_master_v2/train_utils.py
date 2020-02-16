@@ -82,7 +82,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
 
-        masks = utils.generate_paragraph_mask(sent_num,gen_labels)
+        masks = utils.generate_paragraph_mask(sent_num, gen_labels)
         gen_labels = torch.mul(gen_labels, masks)
 
         # visually mismatched negatives from generator
