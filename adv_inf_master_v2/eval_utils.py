@@ -130,7 +130,7 @@ def diversity_meausures(predictions,div):
 
 def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifier=None, eval_kwargs={}):
     verbose = eval_kwargs.get('verbose', True)
-    dump_json = eval_kwargs.get('dump_json', 0)
+    dump_json = eval_kwargs.get('dump_json', 1)
     num_videos = eval_kwargs.get('num_videos', eval_kwargs.get('val_videos_use', -1))
     split = eval_kwargs.get('split', 'val')
     lang_eval = eval_kwargs.get('language_eval', 0)

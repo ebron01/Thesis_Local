@@ -312,7 +312,9 @@ def train(opt):
                                'remove' : 1}
                 _ , predictions, lang_stats, val_result, _ = eval_split(gen_model, crit, loader, dis_model, gan_crit,
                                                                         eval_kwargs=eval_kwargs)
-                d_val_result_history[d_epoch] = val_result
+
+                current_score = lang_stats['METEOR']
+                d_val_result_history[d_epoch] = {'val_results': val_result, 'lang_scores': current_score}
 
                 # save the best discriminator
                 current_d_score = v_weight * (val_result['v_gen_accuracy'] + val_result['v_mm_accuracy']) + \
