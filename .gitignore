@@ -62,6 +62,6 @@ adv_inf_master_v2/save*
 adv_inf_master_v2/output.log
 adv_inf_master_v2/save_local_wo_gen/*
 adv_inf_master_v2/output_dis.log
-adv_inf_master_v2/output.log
+
 **.idea
 .DS_Store

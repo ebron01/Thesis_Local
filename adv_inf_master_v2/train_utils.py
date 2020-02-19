@@ -34,7 +34,7 @@ def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
                         temperature=1.0,gen_weight=0.5, mm_weight=0.5,neg_weight=0.5,
                         use_vis=True,use_lang=True,use_pair=True,grad_clip=0.1):
-
+    #eklendi
     # for i in range(1000):
     #     print (i)
     #     data = loader.get_batch('train')
