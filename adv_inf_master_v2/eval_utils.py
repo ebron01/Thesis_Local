@@ -277,10 +277,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
                     # select the caption with highest score
                     inds = score_list.argsort(axis=1)[:, ::-1]
-                    caption_list = torch.tensor(
-                        sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
-                    best_context = torch.tensor(
-                        context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
+                    caption_list = torch.tensor(sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
+                    best_context = torch.tensor(context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
                     best_seq = caption_list[:, 0, :]
                     seq_dummy[:, s] = best_seq
 
