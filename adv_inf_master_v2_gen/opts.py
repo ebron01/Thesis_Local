@@ -79,6 +79,8 @@ def parse_opt():
                     help='number of layers in the RNN')
     parser.add_argument('--use_bn', type=int, default=0,
                     help='If 1, then do batch_normalization first in att_embed, if 2 then do bn both in the beginning and the end of att_embed')
+    parser.add_argument('--aux_size', type=int, default=512,
+                    help='size of aux vector.')
 
     # input settings
     parser.add_argument('--use_video', type=int, default=1,
