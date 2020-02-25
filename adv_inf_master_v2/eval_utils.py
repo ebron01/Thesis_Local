@@ -49,11 +49,13 @@ def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=F
     if remove:
         model_id += id_generator() # to avoid processing and removing same ids
     json.dump(template, open(os.path.join('densevid_eval', 'caption_' + model_id + '.json'), 'w'))
-    eval_command = ["python","para-evaluate.py", "-s",'caption_' + model_id + '.json',
-                    "-o", 'result_' + model_id + '.json', '--verbose']
-    #os.chdir('densevid_eval')
-    #subprocess.call(eval_command)
-    subprocess.call(eval_command, cwd='densevid_eval')
+    # eval_command = ['python','para-evaluate.py', '-s','caption_' + model_id + '.json', '-o', 'result_' + model_id + '.json', '--verbose']
+    eval_command = ('python para-evaluate.py -s caption_%s.json -o result_%s.json --verbose'%(model_id,model_id))
+    os.chdir('densevid_eval')
+    # subprocess.call(eval_command)
+    # subprocess.call(eval_command, cwd='densevid_eval')
+    os.system(eval_command)
+    os.chdir('..')
     output = json.load(open(os.path.join('densevid_eval','result_' + model_id + '.json'),'r'))
     if remove:
         os.remove(os.path.join('densevid_eval','caption_' + model_id + '.json'))
@@ -432,7 +434,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             break
         if num_videos >= 0 and n >= num_videos:
             break
-
+        # break #added debug
     # Switch back to training mode
     gen_model.train()
 

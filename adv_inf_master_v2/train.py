@@ -36,6 +36,7 @@ def add_summary_value(writer, key, value, iteration):
 
 def train(opt):
     # tb_summary_writer = tb and tb.SummaryWriter(opt.checkpoint_path)
+    # count = 1 #added debug
     if not os.path.exists(opt.checkpoint_path):
         os.mkdir(opt.checkpoint_path)
 
@@ -100,8 +101,10 @@ def train(opt):
             g_iter = (g_epoch) * loader.split_size['train'] // opt.batch_size
         else:
             g_epoch = infos['g_epoch_' + g_start_epoch] + 1
-            g_iter = infos['g_iter_' + g_start_epoch]
-        print('loaded %s (epoch: %d iter: %d)' % (g_model_path, g_epoch, g_iter))
+        #     g_iter = infos['g_iter_' + g_start_epoch]
+        # print('loaded %s (epoch: %d iter: %d)' % (g_model_path, g_epoch, g_iter))
+
+        print('loaded %s (epoch: %d )' % (g_model_path, g_epoch))
 
         # Load discriminator
         # assume that discriminator is loaded only if generator has been trained and saved in the same directory.
@@ -257,6 +260,7 @@ def train(opt):
                 update_lr_flag = True
 
         """ TRAIN DISCRIMINATOR """
+
         if dis_flag:
             dis_model.train()
             gen_model.eval()
@@ -285,7 +289,10 @@ def train(opt):
             if d_iter % opt.losses_print_every == 0:
                 print("d_iter {} (d_epoch {}), v_loss = {:.8f}, l_loss = {:.8f}, p_loss={:.8f}, time/batch = {:.3f}, num_sent = {} {}" \
                     .format(d_iter, d_epoch, dis_v_loss, dis_l_loss, dis_p_loss, end - start,sum(sent_num),sent_num))
-                print("accuracies:", accuracies)
+                # print ('accuracies: ', accuracies)
+                print("accuracies: dis_v_gen_accuracy : %.6f | dis_v_mm_accuracy : %.6f | dis_l_gen_accuracy : %.6f | dis_l_neg_accuracy : %.6f |"
+                "dis_p_gen_accuracy : %.6f | dis_p_neg_accuracy : %.6f"% (accuracies['dis_v_gen_accuracy'], accuracies['dis_v_mm_accuracy'], accuracies['dis_l_gen_accuracy'], \
+                                                                         accuracies['dis_l_neg_accuracy'], accuracies['dis_p_gen_accuracy'], accuracies['dis_p_neg_accuracy']))
 
             # Log Losses
             if d_iter % opt.losses_log_every == 0:
@@ -299,6 +306,7 @@ def train(opt):
             #########################
             # Evaluate & Save Model #
             #########################
+            # if count == 2: #added debug
             if wrapped:
                 # evaluate model on dev set
                 eval_kwargs = {'split': 'val',
@@ -351,7 +359,7 @@ def train(opt):
                 # update epoch and lr
                 d_epoch += 1
                 update_lr_flag = True
-
+            # count += 1 #added debug
 if __name__ == '__main__':
     opt = opts.parse_opt()
     train(opt)
