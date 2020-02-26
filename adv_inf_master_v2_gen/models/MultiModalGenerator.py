@@ -67,7 +67,7 @@ class MultiModalGenerator(CaptionModel):
             self.input_encoding_size = 300
         self.word_embed = nn.Embedding(self.vocab_size + 2, self.input_encoding_size)
         self.context_encoding_size = self.rnn_size
-        self.sent_rnn = self.rnn_cell(2 * self.input_encoding_size + self.rnn_size, self.rnn_size,
+        self.sent_rnn = self.rnn_cell(2 * self.input_encoding_size + 2 * self.rnn_size, self.rnn_size,
                                       self.num_layers, dropout=self.drop_prob_lm, batch_first=True)
         self.logit = nn.Linear(self.rnn_size, self.vocab_size + 2)
 
@@ -76,8 +76,8 @@ class MultiModalGenerator(CaptionModel):
         self.context_embed = None
 
         # entire encoder
-        # self.encoder = nn.Linear(self.activity_encoding_size + 3 * self.rnn_size, self.input_encoding_size)
-        self.encoder = nn.Linear(self.aux_size + self.activity_encoding_size + 3 * self.rnn_size, self.input_encoding_size)
+        self.encoder = nn.Linear(self.activity_encoding_size + 3 * self.rnn_size, self.input_encoding_size)
+        # self.encoder = nn.Linear(self.aux_size + self.activity_encoding_size + 3 * self.rnn_size, self.input_encoding_size)
 
         self.dropout = nn.Dropout(self.drop_prob_lm)
         self.init_weights()
@@ -180,9 +180,11 @@ class MultiModalGenerator(CaptionModel):
                 if self.use_box:
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 # print ('shape : %s'%(str(torch.cat((video, image, box, activity, aux), dim=2).shape)))
-                encoded = self.encoder(torch.cat((video, image, box, activity, aux), dim=2))
+                encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
+                # encoded = self.encoder(torch.cat((video, image, box, activity, aux), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
-                xt = torch.cat((encoded,context,xt),dim=2)
+                xt = torch.cat((encoded, context, xt, aux),dim=2)
+                # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 output = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
                 sequence.append(output)
@@ -225,9 +227,11 @@ class MultiModalGenerator(CaptionModel):
                     image = self.attention_encoder(img_feats[:, n], state, 'img')
                 if self.use_box:
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
-                encoded = self.encoder(torch.cat((video, image, box, activity, aux), dim=2))
+                encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
+                # encoded = self.encoder(torch.cat((video, image, box, activity, aux), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
-                xt = torch.cat((encoded,context,xt),dim=2)
+                # xt = torch.cat((encoded, context, xt),dim=2)
+                xt = torch.cat((encoded, context, xt, aux), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
 
@@ -283,6 +287,7 @@ class MultiModalGenerator(CaptionModel):
         video = torch.zeros(beam_size, 1, self.rnn_size).cuda()
         image = torch.zeros(beam_size, 1, self.rnn_size).cuda()
         box = torch.zeros(beam_size, 1, self.rnn_size).cuda()
+        aux = torch.zeros(batch_size, 1, self.aux_size).cuda()
         activity = torch.zeros(beam_size, 1, self.activity_encoding_size).cuda()
         self.done_beams = [[] for _ in range(batch_size)]
         for k in range(batch_size):
@@ -306,11 +311,12 @@ class MultiModalGenerator(CaptionModel):
                     else:
                         activity = self.activity_embed(activity_labels.float()).unsqueeze(1)
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
-
+                #encoded = self.encoder(torch.cat((video, image, box, activity, aux), dim=2))
                 # beam search
                 it = fc_feats.new_zeros(beam_size, dtype=torch.long)
                 xt = self.word_embed(it).unsqueeze(1)
-                xt = torch.cat((encoded, context, xt), dim=2)
+                xt = torch.cat((encoded, context, xt, aux), dim=2)
+                # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
                 self.done_beams[k] = self.beam_search(state, logprobs, fkn,ikn,bkn,activity,context, opt=opt)  # actual beam search
@@ -334,9 +340,11 @@ class MultiModalGenerator(CaptionModel):
             image = self.attention_encoder(ikn, state, 'img')
         if self.use_box:
             box = self.attention_encoder(bkn, state, 'box')
-        encoded = self.encoder(torch.cat((video, image, box, activity,aux), dim=2))
+        encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
+        # encoded = self.encoder(torch.cat((video, image, box, activity, aux), dim=2))
         xt = self.word_embed(it).unsqueeze(1)
-        xt = torch.cat((encoded, context, xt), dim=2)
+        # xt = torch.cat((encoded, context, xt), dim=2)
+        xt = torch.cat((encoded, context, xt, aux), dim=2)
         output, state = self.sent_rnn(xt, state)
         logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
         return logprobs, state
@@ -366,9 +374,11 @@ class MultiModalGenerator(CaptionModel):
                 image = self.attention_encoder(img_feats, state, 'img')
             if self.use_box:
                 box = self.attention_encoder(box_feats, state, 'box')
-            encoded = self.encoder(torch.cat((video, image, box, activity, aux), dim=2))
+            encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
+            # encoded = self.encoder(torch.cat((video, image, box, activity, aux), dim=2))
             xt = self.word_embed(it).unsqueeze(1)
-            xt = torch.cat((encoded,context,xt),dim=2)
+            # xt = torch.cat((encoded, context, xt), dim=2)
+            xt = torch.cat((encoded, context, xt, aux), dim=2)
             output, state = self.sent_rnn(xt, state)
             logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
 
