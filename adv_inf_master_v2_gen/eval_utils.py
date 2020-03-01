@@ -194,10 +194,10 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         data = loader.get_batch(split)
         n = n + loader.batch_size
 
-        tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['mm_labels'],
+        tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['aux_labels'], data['mm_labels'],
                data['masks'], data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-        fc_feats, img_feats, box_feats, mm_fc_feats, att_feats, labels, mm_labels, masks, att_masks, activities, \
+        fc_feats, img_feats, box_feats, mm_fc_feats, att_feats, labels, aux_labels, mm_labels, masks, att_masks, activities, \
         mm_img_feats, mm_box_feats, mm_activities = tmp
         sent_num = data['sent_num']
 
@@ -210,7 +210,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 mm_activities = utils.dense_classifier(sent_num, mm_fc_feats, mm_img_feats, classifier)
 
             # calculate loss
-            gen_seq = gen_model(fc_feats, img_feats, box_feats, activities, labels)
+            gen_seq = gen_model(fc_feats, img_feats, box_feats, activities, labels, aux_labels)
             gen_seq = utils.align_seq(sent_num, gen_seq)
             loss = crit(gen_seq, utils.align_seq(sent_num, labels)[:, 1:], utils.align_seq(sent_num, masks)[:, 1:]).item()
             losses.append(loss)
@@ -239,7 +239,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                         img_feats_s = img_feats[:, s]
                         box_feats_s = box_feats[:, s]
                         start = time.time()
-                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities,
+                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities, aux_labels,
                                                                              best_context, opt=eval_kwargs)
                         sample_time = time.time()
                         # print('sample_time:', sample_time-start)

@@ -326,7 +326,8 @@ class DataLoader(data.Dataset):
             img_batch[i,:sent_num] = tmp_fcs[1]
             box_batch[i,:sent_num] = tmp_fcs[2]
             sent_num_batch[i] = sent_num
-            label_batch[i, :, 1 : self.seq_length + 1] = self.labels[ix]
+            label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
+            aux_label_batch[i, :, 1:2] = self.labels[ix][:, :1]
             v_ix = self.video_id[ix]
 
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
@@ -381,6 +382,7 @@ class DataLoader(data.Dataset):
         data['img_feats'] = np.array(img_batch)
         data['box_feats'] = np.array(box_batch)
         data['labels'] = np.array(label_batch)
+        data['aux_labels'] = np.array(aux_label_batch)
         data['sent_num'] = np.array(sent_num_batch)
 
         data['mm_fc_feats'] = np.array(mm_fc_batch)

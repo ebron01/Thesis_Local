@@ -10,14 +10,14 @@ def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
     data = loader.get_batch('train')
     torch.cuda.synchronize()
     tmp = [data['fc_feats'], data['att_feats'], data['img_feats'], data['box_feats'],
-           data['labels'], data['masks'], data['att_masks'], data['activities']]
+           data['labels'], data['aux_labels'], data['masks'], data['att_masks'], data['activities']]
     tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-    fc_feats, att_feats, img_feats, box_feats, labels, masks, att_masks, activities = tmp
+    fc_feats, att_feats, img_feats, box_feats, labels, aux_labels, masks, att_masks, activities = tmp
     sent_num = data['sent_num']
     wrapped = data['bounds']['wrapped']
     gen_optimizer.zero_grad()
 
-    seq = gen_model(fc_feats, img_feats, box_feats, activities, labels)
+    seq = gen_model(fc_feats, img_feats, box_feats, activities, labels, aux_labels)
     seq = utils.align_seq(sent_num, seq)
     labels = utils.align_seq(sent_num, labels)
     masks = utils.align_seq(sent_num, masks)
