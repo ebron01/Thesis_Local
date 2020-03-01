@@ -218,7 +218,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             # use greedy max for inference
             if sample_max:
                 eval_kwargs['sample_max'] = 1
-                seq, _ = gen_model(fc_feats, img_feats, box_feats, activities,
+                seq, _ = gen_model(fc_feats, img_feats, box_feats, activities, aux_labels,
                                opt=eval_kwargs, mode='sample')
 
             # use sampling for inference
