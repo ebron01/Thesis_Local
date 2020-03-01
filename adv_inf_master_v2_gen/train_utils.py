@@ -54,10 +54,10 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     data = loader.get_batch('train')
     sent_num = data['sent_num']
     torch.cuda.synchronize()
-    tmp = [data['fc_feats'],data['mm_fc_feats'], data['img_feats'], data['box_feats'], data['att_feats'], data['labels'], data['mm_labels'],
+    tmp = [data['fc_feats'],data['mm_fc_feats'], data['img_feats'], data['box_feats'], data['att_feats'], data['labels'], data['aux_labels'], data['mm_labels'],
            data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
     tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-    fc_feats, mm_fc_feats, img_feats, box_feats, att_feats, labels, mm_labels, att_masks, activities, \
+    fc_feats, mm_fc_feats, img_feats, box_feats, att_feats, labels, aux_labels, mm_labels, att_masks, activities, \
     mm_img_feats, mm_box_feats, mm_activities = tmp
     label = torch.zeros(sum(sent_num)).cuda()
     dis_v_loss = 0
@@ -80,14 +80,14 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         # aux_labels = torch.Tensor(aux_labels).long().cuda()
 
         # generated captions
-        gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
+        gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities, aux_labels,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
 
         masks = utils.generate_paragraph_mask(sent_num, gen_labels)
         gen_labels = torch.mul(gen_labels, masks)
 
         # visually mismatched negatives from generator
-        mm_gen_labels, mm_sample_logprobs = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities,
+        mm_gen_labels, mm_sample_logprobs = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities, aux_labels,
                                                       opt={'sample_max': 0, 'temperature': temperature}, mode='sample')
         mm_masks = utils.generate_paragraph_mask(sent_num,mm_gen_labels)
         mm_gen_labels = torch.mul(mm_gen_labels, mm_masks)
