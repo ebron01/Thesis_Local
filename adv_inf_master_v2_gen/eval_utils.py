@@ -292,7 +292,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 seq = torch.mul(seq,utils.generate_paragraph_mask(sent_num, seq))
 
                 # negatives for evaluating discriminator
-                mm_seq, _ = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities,
+                #TODO: aux_labels added but think about this part
+                mm_seq, _ = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities, aux_labels,
                                 opt=eval_kwargs, mode='sample')
                 mm_seq = torch.mul(mm_seq,utils.generate_paragraph_mask(sent_num, mm_seq))
 
