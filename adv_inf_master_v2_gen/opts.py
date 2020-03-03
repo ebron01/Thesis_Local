@@ -3,6 +3,11 @@ import argparse
 def parse_opt():
     parser = argparse.ArgumentParser()
     #changes made.
+    '''
+    must be added
+    
+    --learning_rate_decay_start 0 --scheduled_sampling_start 0
+    '''
     # Data input settings
     parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_orj.json',
                     help='path to the json file containing additional info and vocab (img/video)')
@@ -97,7 +102,7 @@ def parse_opt():
                         help='use bottomup features sepcified in input_box_dir for discriminator')
     parser.add_argument('--d_use_bow', type=int, default=1,
                         help='use bag of words for visual discriminator; otherwise, use lstm')
-    parser.add_argument('--glove_npy', type=str, default=None,
+    parser.add_argument('--glove_npy', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/glove.npy',
                         help='npy containing glove vector associated with word_idx labels')
 
     # video options
