@@ -261,6 +261,7 @@ def train(opt):
 
         """ TRAIN DISCRIMINATOR """
 
+
         if dis_flag:
             dis_model.train()
             gen_model.eval()

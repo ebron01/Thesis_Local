@@ -6,7 +6,7 @@ def parse_opt():
     '''
     must be added
     
-    --learning_rate_decay_start 0 --scheduled_sampling_start 0
+    --learning_rate_decay_start 0 --scheduled_sampling_start 0 --learning_rate 5e-4
     '''
     # Data input settings
     parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_orj.json',
@@ -26,6 +26,8 @@ def parse_opt():
     parser.add_argument('--input_aux_ix', type=str,
                         default='/data/shared/ActivityNet/activity_net/inputs/caption_np_vp_pairs_ix_order.json',
                         help='path to the json file containing ix for closest aux')
+    parser.add_argument('--aux_np_actnet', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp_oneword.npy',
+                        help='contains gt actnet with one word nps and vps created with parser.py')
 
 
     parser.add_argument('--g_start_from', type=str, default=None,
@@ -102,9 +104,8 @@ def parse_opt():
                         help='use bottomup features sepcified in input_box_dir for discriminator')
     parser.add_argument('--d_use_bow', type=int, default=1,
                         help='use bag of words for visual discriminator; otherwise, use lstm')
-    parser.add_argument('--glove_npy', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/glove.npy',
-                        help='npy containing glove vector associated with word_idx labels')
-
+    parser.add_argument('--glove_npy', type=str, default=None,
+                        help='npy containing glove vector associated with word_idx labels') #'/data/shared/ActivityNet/advinf_activitynet/inputs/glove.npy'
     # video options
     parser.add_argument('--feat_type', type=str, default='resnext101-64f',
                         help='feat type for video (c3d, resnext101-64f)')
@@ -130,9 +131,9 @@ def parse_opt():
                               hard: different video with same activity')
 
     # video disc option
-    parser.add_argument('--visual_weight', type=float, default=1.0,
+    parser.add_argument('--visual_weight', type=float, default=0.8, #default=1.0
                         help='weight to visual discriminator reward')
-    parser.add_argument('--lang_weight', type=float, default=1.0,
+    parser.add_argument('--lang_weight', type=float, default=0.2, #default=1.0
                         help='weight to lang discriminator reward')
     parser.add_argument('--par_weight', type=float, default=1.0,
                         help='weight to paragraph discriminator reward')
@@ -172,7 +173,7 @@ def parse_opt():
     # Optimization: for the Language Model
     parser.add_argument('--optim', type=str, default='adam',
                     help='what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
-    parser.add_argument('--learning_rate', type=float, default=4e-4,
+    parser.add_argument('--learning_rate', type=float, default=5e-4,
                     help='learning rate')
     parser.add_argument('--learning_rate_decay_start', type=int, default=-1,
                     help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
@@ -199,7 +200,7 @@ def parse_opt():
 
 
     # Evaluation/Checkpointing
-    parser.add_argument('--val_id', type=str, default='result_gen_embed_1w_vectors_1',
+    parser.add_argument('--val_id', type=str, default='result_gen_embed_1gtnpvp_vectors',
                         help='id to use to save captions for validation')
     parser.add_argument('--val_videos_use', type=int, default=-1,
                     help='how many videos to use when periodically evaluating the validation loss? (-1 = all)')
@@ -207,7 +208,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_gen_embed_1w_vectors_1',
+    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_gen_embed_1gtnpvp_vectors',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
@@ -256,7 +257,7 @@ def parse_opt():
 
 
     # misc
-    parser.add_argument('--id', type=str, default='result_gen_embed_1w_vectors_1',
+    parser.add_argument('--id', type=str, default='result_gen_embed_1gtnpvp_vectors',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')

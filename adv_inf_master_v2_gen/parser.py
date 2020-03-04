@@ -2,6 +2,15 @@ import nltk
 import json
 import h5py
 import pickle
+import numpy as np
+# nltk.download('all')
+# nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+
+num_sentences = 10
+num_words = 10
+
+
 
 def ie_preprocess(document):
    sentences = nltk.sent_tokenize(document)
@@ -95,79 +104,32 @@ for line in labels_normal_parsed:
         event_phrases.append(caption_phrases)
     labels_normal_parsed_phrases.append(event_phrases)
 
+aux_labels = np.zeros((len(labels_normal_parsed_phrases), len(labels_normal_parsed_phrases[0]), num_sentences, num_words), dtype=np.int32)
+
+for l in range(len(labels_normal_parsed_phrases)):
+    for se in range(len(labels_normal_parsed_phrases[l])):
+        for s in range(len(labels_normal_parsed_phrases[l][se])):
+            if s > 9:
+                continue
+            aux_labels[l][se][s][:len(labels_normal_parsed_phrases[l][se][s])] = labels_normal_parsed_phrases[l][se][s]
+
+aux_labels_oneword = np.zeros((len(labels_normal_parsed_phrases), len(labels_normal_parsed_phrases[0]), num_sentences, num_words), dtype=np.int32)
+
+for l in range(aux_labels.shape[0]):
+    for i in range(aux_labels[l].shape[0]):
+        for a in range(aux_labels[l][i].shape[0]):
+            if np.count_nonzero(aux_labels[l][i][a]) > 1:
+                aux_labels_oneword[l][i][a] = np.zeros((10))
+            else:
+                aux_labels_oneword[l][i][a] = aux_labels[l][i][a]
+
 with open('/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp.pkl', 'w') as f:
     pickle.dump(labels_normal_parsed_phrases, f)
 
+with open('/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp.npy', 'w') as f:
+    np.save(f, aux_labels)
+
+with open('/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp_oneword.npy', 'w') as f:
+    np.save(f, aux_labels_oneword)
+
 print('Done')
-
-# for line in labels_normal:
-#     for n in line:
-#         result = cp.parse(n[0][0])
-# input_not_parsed_file = 'sorted_10closest_updated_query_mid.json'
-# output_parsed_file = 'sorted_10closest_parsed_n_v.json'
-#
-# # this method tokenizes a document then creates part of speech tags from them and returns pos from documents.
-#
-#
-#
-# # this part reads query for middle frame of selected videos.
-# with open(input_not_parsed_file, 'r') as f:
-#     data = json.load(f)
-#
-# sentences = []
-# sentences_dict = {}
-# count = 0
-# try:
-#     count = 0
-#     for key in data.keys():
-#         # this part creates a dict of parsed part of speech tags from conceptual caption sentences
-#         print(count)
-#         if 'concap' in str(key):
-#             concap_dict = {}
-#             for k in data[key].keys():
-#                 # this part encodes sentences with 'utf-8'
-#                 # normalized = data[key][k].encode('utf-8')
-#                 normalized = data[key][k]['caption']
-#                 order = data[key][k]['order']
-#                 # sentences.append(ie_preprocess(normalized))
-#                 concap_dict.update({k: {'caption': ie_preprocess(normalized), 'order': order}})
-#             sentences_dict.update({key: concap_dict})
-#         count += 1
-# except Exception as e:
-#     print(e)
-
-#TODO: Check the grammer rules
-# grammer = """
-#         NP: {<DT>*<NN.?>*<JJ>*<NN.?>+}
-#         VP: {<VB.?>*}
-#         """
-# parsed_sentences_dict = {}
-# for key in sentences_dict.keys():
-#     parsed_sentence = {}
-#     for k in sentences_dict[key].keys():
-#         result = cp.parse(sentences_dict[key][k]['caption'][0])
-#         order = sentences_dict[key][k]['order']
-#         sentence = []
-#         sentence_vp = []
-#         for a in result:
-#             if type(a) is nltk.Tree:
-#                 if a.label() == 'NP':  # This climbs into your NVN tree
-#                     s = ""
-#                     for i in range(len(a.leaves())):
-#                         s = s + ' ' + a.leaves()[i][0]
-#                     sentence.append(s.lstrip())  # This outputs your "NP"
-#                     # print('np ' + s.lstrip())
-#                     # time.sleep(1)
-#                 elif a.label() == 'VP':  # This climbs into your NVN tree
-#                     s = ""
-#                     for i in range(len(a.leaves())):
-#                         s = s + ' ' + a.leaves()[i][0]
-#                     sentence_vp.append(s.lstrip())  # This outputs your "NP"
-#                     # print('vp ' + s.lstrip())
-#                     # time.sleep(1)
-#         if sentence != []:
-#             parsed_sentence.update({k: {'np': sentence, 'vp': sentence_vp, 'order': order}})
-#     parsed_sentences_dict.update({key: parsed_sentence})
-#
-# with open(output_parsed_file, 'w') as f:
-#     json.dump(parsed_sentences_dict, f)

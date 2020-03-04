@@ -7,7 +7,7 @@ import h5py
 import os
 import numpy as np
 import random
-import pickle
+import cPickle
 import torch
 import torch.utils.data as data
 
@@ -110,14 +110,22 @@ class DataLoader(data.Dataset):
         # open the hdf5 file containing visual features and captions
         print('DataLoader loading h5 file: ', opt.input_label_h5)
         self.h5_label_file = h5py.File(self.opt.input_label_h5, 'r')
-        self.labels = self.h5_label_file['labels'].value
+        self.labels = self.h5_label_file['labels'][()] #.value
         seq_size = self.labels.shape
         self.seq_length = seq_size[2]
         self.max_sent_num = seq_size[1]
         print('max sequence length in data is', self.seq_length)
         self.max_seg = opt.max_seg
-        self.sent_num = self.h5_label_file['sent_num'].value
-        self.video_id = self.h5_label_file['video_id'].value
+        self.sent_num = self.h5_label_file['sent_num'][()] #.value
+        self.video_id = self.h5_label_file['video_id'][()] #.value
+
+        #this loads npy arrays for gt np or vp word ids
+        self.aux_np_actnet = np.load(opt.aux_np_actnet)
+
+        # for array in range(len(self.aux_np_actnet)):
+        #     for a in range(len(self.aux_np_actnet[array])):
+        #         for i in range(len(self.aux_np_actnet[array][a])):
+        #             self.aux_np_actnet[array][a][i] = np.asarray(self.aux_np_actnet[array][a][i], dtype=np.uint32)
 
         with open(self.opt.frame_ids, 'r') as f:
             self.act_video_ids = f.readlines()
@@ -167,9 +175,9 @@ class DataLoader(data.Dataset):
         self.aux_ix.update({'v_9PGFsuE3Ye0_2': self.aux_ix['v_9PGFsuE3Ye0_1']})
         self.aux_ix.update({'v_dG_jxrIaK6w_2': self.aux_ix['v_dG_jxrIaK6w_1']})
         self.aux_ix.update({'v_klGP18026Ek_2': self.aux_ix['v_klGP18026Ek_1']})
-        self.timestamp = self.h5_label_file['timestamp'].value
+        self.timestamp = self.h5_label_file['timestamp'][()] #.value
         if self.activity_size > 0:
-            self.activity = self.h5_label_file['activity'].value
+            self.activity = self.h5_label_file['activity'][()] #.value
         print('number of captions is', sum(self.sent_num))
         self.mean = opt.use_mean
         self.negatives = opt.negatives
@@ -327,7 +335,14 @@ class DataLoader(data.Dataset):
             box_batch[i,:sent_num] = tmp_fcs[2]
             sent_num_batch[i] = sent_num
             label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
-            aux_label_batch[i, :, 1:2] = self.labels[ix][:, :1]
+
+            #this parrt loads np/vp gt words from actnet dataset. It checks if there is a zero vector for np/vp takes next vp/gt from gt caption.
+            # aux_label_batch[i, :, 1:2] = self.labels[ix][:, :1]
+            for j in range(self.max_sent_num):
+                if self.aux_np_actnet[ix][j, 0].sum() == 0:
+                    self.aux_np_actnet[ix][j, 0] = self.aux_np_actnet[ix][j, 1]
+            aux_label_batch[i, :, 1:2] = self.aux_np_actnet[ix][:, 0, 0].reshape(self.max_sent_num,-1)
+
             v_ix = self.video_id[ix]
 
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
