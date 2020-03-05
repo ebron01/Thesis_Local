@@ -345,6 +345,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             mm = utils.decode_sequence(loader.get_vocab(), mm_labels[:,1:-1].data)
             seq = seq.data
 
+
         # print and store actual decoded sentence
         sents = utils.decode_sequence(loader.get_vocab(), seq)
         for k, sent in enumerate(sents):
