@@ -66,6 +66,11 @@ adv_inf_master_v2/output_dis.log
 adv_inf_master_v2_gen/activity_net
 adv_inf_master_v2_gen/densevid_eval/coco-caption/pycocoevalcap/meteor/data/*
 
+adv_inf_master_v2/eval_results/*
+adv_inf_master_v2/save/*
+adv_inf_master_v2/save_aux_ix_10epoch/*
+adv_inf_master_v2/save_local/*
+adv_inf_master_v2/vis/*
 
 **.idea
 .DS_Store

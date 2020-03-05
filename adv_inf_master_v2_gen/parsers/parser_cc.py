@@ -3,13 +3,10 @@ import os
 import numpy as np
 import h5py
 
-'''
-run with CLAS env
-'''
 num_sentences = 10
 num_words = 10
 dir_path = os.path.dirname(os.path.realpath(__file__))
-input_parsed_file = '/home/luchy/PycharmProjects/Thesis_Local/parser-nltk/sorted_10closest_parsed_n_v.json'
+input_parsed_file = '/parser-nltk/sorted_10closest_parsed_n_v.json'
 input_json = '/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_orj.json'
 input_label_h5 = '/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label_orj.h5'
 
@@ -68,6 +65,8 @@ for v in vid_id:
 with open('parser_cc.json', 'w') as f:
     json.dump(parsed_cc, f)
 
+# with open('parser_cc.json', 'r') as f:
+#     parsed_cc = json.load(f)
 
 aux_normal_parsed_phrases = []
 for key in vid_id:
@@ -77,7 +76,7 @@ for key in vid_id:
             caption_phrases = []
             for n in event:
                 p_ = []
-                for phrases in str(n).split():
+                for phrases in n.encode('utf-8').split():
                     if phrases not in ['<', '>', 'unk']:
                         try:
                             p_.append(word_to_ix[str(phrases)])
