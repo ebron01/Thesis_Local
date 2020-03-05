@@ -119,8 +119,9 @@ class DataLoader(data.Dataset):
         self.sent_num = self.h5_label_file['sent_num'][()] #.value
         self.video_id = self.h5_label_file['video_id'][()] #.value
 
-        #this loads npy arrays for gt np or vp word ids
-        self.aux_np_actnet = np.load(opt.aux_np_actnet)
+        #this loads npy arrays for gt np or vp or cc np vp word ids
+        # self.aux_np_actnet = np.load(opt.aux_np_actnet)
+        self.aux_np_vp_cc = np.load(opt.aux_np_vp_cc)
 
         # for array in range(len(self.aux_np_actnet)):
         #     for a in range(len(self.aux_np_actnet[array])):
@@ -338,10 +339,16 @@ class DataLoader(data.Dataset):
 
             #this parrt loads np/vp gt words from actnet dataset. It checks if there is a zero vector for np/vp takes next vp/gt from gt caption.
             # aux_label_batch[i, :, 1:2] = self.labels[ix][:, :1]
+
+            # for j in range(self.max_sent_num):
+            #     if self.aux_np_actnet[ix][j, 0].sum() == 0:
+            #         self.aux_np_actnet[ix][j, 0] = self.aux_np_actnet[ix][j, 1]
+            # aux_label_batch[i, :, 1:2] = self.aux_np_actnet[ix][:, 0, 0].reshape(self.max_sent_num,-1)
+
             for j in range(self.max_sent_num):
-                if self.aux_np_actnet[ix][j, 0].sum() == 0:
-                    self.aux_np_actnet[ix][j, 0] = self.aux_np_actnet[ix][j, 1]
-            aux_label_batch[i, :, 1:2] = self.aux_np_actnet[ix][:, 0, 0].reshape(self.max_sent_num,-1)
+                if self.aux_np_vp_cc[ix][j, 0].sum() == 0:
+                    self.aux_np_vp_cc[ix][j, 0] = self.aux_np_vp_cc[ix][j, 1]
+            aux_label_batch[i, :, 1:2] = self.aux_np_vp_cc[ix][:, 0, 0].reshape(self.max_sent_num,-1)
 
             v_ix = self.video_id[ix]
 

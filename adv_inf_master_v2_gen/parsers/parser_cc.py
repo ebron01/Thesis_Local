@@ -102,3 +102,21 @@ for l in range(len(aux_normal_parsed_phrases)):
 
 with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp.npy', 'w') as f:
     np.save(f, aux_labels)
+
+# with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp.npy', 'r') as f:
+#     aux_labels = np.load(f)
+
+aux_labels_oneword = np.zeros_like(aux_labels)
+
+for l in range(aux_labels.shape[0]):
+    for i in range(aux_labels[l].shape[0]):
+        for a in range(aux_labels[l][i].shape[0]):
+            if np.count_nonzero(aux_labels[l][i][a]) > 1:
+                aux_labels_oneword[l][i][a] = np.zeros((10))
+            else:
+                aux_labels_oneword[l][i][a] = aux_labels[l][i][a]
+
+with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_oneword.npy', 'w') as f:
+    np.save(f, aux_labels_oneword)
+
+print('Done')
