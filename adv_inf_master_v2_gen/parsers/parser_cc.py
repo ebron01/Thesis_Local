@@ -6,7 +6,7 @@ import h5py
 num_sentences = 10
 num_words = 10
 dir_path = os.path.dirname(os.path.realpath(__file__))
-input_parsed_file = '/parser-nltk/sorted_10closest_parsed_n_v.json'
+input_parsed_file = '/home/luchy/PycharmProjects/Thesis_Local/parser-nltk/sorted_10closest_parsed_n_v.json'
 input_json = '/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_orj.json'
 input_label_h5 = '/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label_orj.h5'
 
@@ -81,7 +81,7 @@ for key in vid_id:
                         try:
                             p_.append(word_to_ix[str(phrases)])
                         except:
-                            p_.append(10000)
+                            p_.append(8472)
                             continue
                 caption_phrases.append(p_)
             event_phrases.append(caption_phrases)
