@@ -377,7 +377,7 @@ class MultiModalGenerator(CaptionModel):
         if context is None:
             context = torch.zeros(batch_size,1,self.rnn_size).cuda()
         for t in range(self.seq_length + 1):
-            aux_w = aux_labels[:, :, 1].clone()
+            aux_w = aux_labels[:, 1].clone()
             if t == 0 : # input <bos>
                 it = fc_feats.new_zeros(batch_size, dtype=torch.long)
             if self.use_video:

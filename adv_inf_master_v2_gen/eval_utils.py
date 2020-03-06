@@ -238,8 +238,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                         fc_feats_s = fc_feats[:, s]
                         img_feats_s = img_feats[:, s]
                         box_feats_s = box_feats[:, s]
+                        aux_labels_s = aux_labels[:, s]
                         start = time.time()
-                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities, aux_labels,
+                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities, aux_labels_s,
                                                                              best_context, opt=eval_kwargs)
                         sample_time = time.time()
                         # print('sample_time:', sample_time-start)
