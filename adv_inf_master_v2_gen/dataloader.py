@@ -337,14 +337,16 @@ class DataLoader(data.Dataset):
             sent_num_batch[i] = sent_num
             label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
 
-            #this parrt loads np/vp gt words from actnet dataset. It checks if there is a zero vector for np/vp takes next vp/gt from gt caption.
+            ##this part loads one word from gt label.
             # aux_label_batch[i, :, 1:2] = self.labels[ix][:, :1]
 
+            ##this part loads np/vp gt word from actnet dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from gt caption.
             # for j in range(self.max_sent_num):
             #     if self.aux_np_actnet[ix][j, 0].sum() == 0:
             #         self.aux_np_actnet[ix][j, 0] = self.aux_np_actnet[ix][j, 1]
             # aux_label_batch[i, :, 1:2] = self.aux_np_actnet[ix][:, 0, 0].reshape(self.max_sent_num,-1)
 
+            # this part loads one np/vp word from cc dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from cc caption.
             for j in range(self.max_sent_num):
                 if self.aux_np_vp_cc[ix][j, 0].sum() == 0:
                     self.aux_np_vp_cc[ix][j, 0] = self.aux_np_vp_cc[ix][j, 1]
