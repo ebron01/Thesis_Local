@@ -72,5 +72,7 @@ adv_inf_master_v2/save_aux_ix_10epoch/*
 adv_inf_master_v2/save_local/*
 adv_inf_master_v2/vis/*
 
+adv_inf_master_v2_base/densevid_eval
+
 **.idea
 .DS_Store
