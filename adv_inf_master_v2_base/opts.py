@@ -114,9 +114,9 @@ def parse_opt():
                               hard: different video with same activity')
 
     # video disc option
-    parser.add_argument('--visual_weight', type=float, default=1.0,
+    parser.add_argument('--visual_weight', type=float, default=0.8, #1.0
                         help='weight to visual discriminator reward')
-    parser.add_argument('--lang_weight', type=float, default=1.0,
+    parser.add_argument('--lang_weight', type=float, default=0.2, #1.0
                         help='weight to lang discriminator reward')
     parser.add_argument('--par_weight', type=float, default=1.0,
                         help='weight to paragraph discriminator reward')
@@ -156,7 +156,7 @@ def parse_opt():
     # Optimization: for the Language Model
     parser.add_argument('--optim', type=str, default='adam',
                     help='what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
-    parser.add_argument('--learning_rate', type=float, default=4e-4,
+    parser.add_argument('--learning_rate', type=float, default=5e-4,
                     help='learning rate')
     parser.add_argument('--learning_rate_decay_start', type=int, default=-1,
                     help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
