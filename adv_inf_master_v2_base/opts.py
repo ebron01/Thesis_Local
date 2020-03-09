@@ -158,7 +158,7 @@ def parse_opt():
                     help='what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
     parser.add_argument('--learning_rate', type=float, default=5e-4,
                     help='learning rate')
-    parser.add_argument('--learning_rate_decay_start', type=int, default=-1,
+    parser.add_argument('--learning_rate_decay_start', type=int, default=0, #-1
                     help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
     parser.add_argument('--learning_rate_decay_every', type=int, default=3,
                     help='every how many iterations thereafter to drop LR?(in epoch)')
@@ -172,7 +172,7 @@ def parse_opt():
                     help='epsilon that goes into denominator for smoothing')
     parser.add_argument('--weight_decay', type=float, default=0,
                     help='weight_decay')
-    parser.add_argument('--scheduled_sampling_start', type=int, default=-1,
+    parser.add_argument('--scheduled_sampling_start', type=int, default=0, #-1
                     help='at what iteration to start decay gt probability')
     parser.add_argument('--scheduled_sampling_increase_every', type=int, default=5,
                     help='every how many iterations thereafter to gt probability')
