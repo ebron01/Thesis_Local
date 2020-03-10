@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import torch
 import torch.nn as nn
-
 import numpy as np
 import json
 import string
@@ -16,6 +15,7 @@ import misc.utils as utils
 import subprocess
 from six.moves import cPickle
 import time
+import opts
 
 def extend_paragraph(sent_num,par_score):
     new_score = par_score.new(sum(sent_num)).zero_()
@@ -476,8 +476,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
     if dump_json == 1:
         # dump the json
-        json.dump(lang_stats, open('eval_results/' + model_id + '.json', 'w'))
-        json.dump(predictions, open('vis/vis_' + model_id + '.json', 'w'))
-        json.dump(div['gen'], open('vis/vis_n_' + model_id + '.json', 'w'))
+        opt = opts.parse_opt()
+        json.dump(lang_stats, open(opt.checkpoint_path + '/' + 'eval_results/' + model_id + '.json', 'w'))
+        json.dump(predictions, open(opt.checkpoint_path + '/' + 'vis/vis_' + model_id + '.json', 'w'))
+        json.dump(div['gen'], open(opt.checkpoint_path + '/' + 'vis/vis_n_' + model_id + '.json', 'w'))
 
     return gen_loss, predictions, lang_stats, dis_infos, div
