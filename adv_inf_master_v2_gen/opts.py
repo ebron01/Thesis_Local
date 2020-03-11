@@ -29,8 +29,8 @@ def parse_opt():
     # parser.add_argument('--aux_np_actnet', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp_oneword.npy',
     #                     help='contains gt actnet with one word nps and vps created with parser.py')
     parser.add_argument('--aux_np_vp_cc', type=str,
-                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp.npy',
-                        help='contains cc with one word nps and vps created with parser_cc.py')
+                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat.npy',
+                        help='contains cc with all nps and vps for closest caption created with parser_cc.py')
 
 
     parser.add_argument('--g_start_from', type=str, default=None,

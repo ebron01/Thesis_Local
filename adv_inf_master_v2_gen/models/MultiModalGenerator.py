@@ -171,10 +171,8 @@ class MultiModalGenerator(CaptionModel):
                     activity = self.activity_embed(activity_labels.float()).unsqueeze(1)
             for i in range(seq.size(2)-1):
                 it = seq[:,n,i].clone()
-                if i == 0:
-                    aux_w = torch.from_numpy((np.zeros((batch_size), dtype=np.long))).cuda()
-                else:
-                    aux_w = aux_labels[:, n, 1].clone()
+                # aux_w = aux_labels[:, n, 1].clone()
+                aux_w = aux_labels[:, n, i].clone()
                 # break if all the sequences end
                 if i >= 1 and seq[:,:,i].sum() == 0:
                     break

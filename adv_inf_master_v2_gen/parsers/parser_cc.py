@@ -5,6 +5,7 @@ import h5py
 
 num_sentences = 10
 num_words = 10
+num_words_concat = 32
 dir_path = os.path.dirname(os.path.realpath(__file__))
 input_parsed_file = '/home/luchy/PycharmProjects/Thesis_Local/parser-nltk/sorted_10closest_parsed_n_v.json'
 input_json = '/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_orj.json'
@@ -68,6 +69,7 @@ with open('parser_cc.json', 'w') as f:
 # with open('parser_cc.json', 'r') as f:
 #     parsed_cc = json.load(f)
 
+
 aux_normal_parsed_phrases = []
 for key in vid_id:
     if key in parsed_cc.keys():
@@ -89,6 +91,25 @@ for key in vid_id:
     else:
         aux_normal_parsed_phrases.append([])
 
+aux_normal_parsed_concat = []
+for key in vid_id:
+    if key in parsed_cc.keys():
+        event_phrases = []
+        for event in parsed_cc[key]:
+            caption_phrases = []
+            for n in event:
+                for phrases in n.encode('utf-8').split():
+                    if phrases not in ['<', '>', 'unk']:
+                        try:
+                            caption_phrases.append(word_to_ix[str(phrases)])
+                        except:
+                            caption_phrases.append(8472)
+                            continue
+            event_phrases.append(caption_phrases)
+        aux_normal_parsed_concat.append(event_phrases)
+    else:
+        aux_normal_parsed_concat.append([])
+
 aux_labels = np.zeros((len(aux_normal_parsed_phrases), num_sentences, num_sentences, num_words), dtype=np.int32)
 
 for l in range(len(aux_normal_parsed_phrases)):
@@ -102,6 +123,19 @@ for l in range(len(aux_normal_parsed_phrases)):
 
 with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp.npy', 'w') as f:
     np.save(f, aux_labels)
+
+
+aux_concat = np.zeros((len(aux_normal_parsed_concat), num_sentences, num_words_concat), dtype=np.int32)
+
+for l in range(len(aux_normal_parsed_concat)):
+    for se in range(len(aux_normal_parsed_concat[l])):
+        if se > 9:
+            continue
+        aux_concat[l][se][:len(aux_normal_parsed_concat[l][se])] = aux_normal_parsed_concat[l][se]
+
+with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat.npy', 'w') as f:
+    np.save(f, aux_concat)
+
 
 # with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp.npy', 'r') as f:
 #     aux_labels = np.load(f)
@@ -120,3 +154,4 @@ with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_oneword.n
     np.save(f, aux_labels_oneword)
 
 print('Done')
+
