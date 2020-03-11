@@ -158,7 +158,7 @@ def parse_opt():
                     help='If use box, do we normalize box feature')
 
     # Optimization: General
-    parser.add_argument('--g_pre_nepoch', type=int, default=20,
+    parser.add_argument('--g_pre_nepoch', type=int, default=50,
                     help='number of epochs to pre-train generator with cross entropy')
     parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')
@@ -178,7 +178,7 @@ def parse_opt():
                     help='what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
     parser.add_argument('--learning_rate', type=float, default=5e-4,
                     help='learning rate')
-    parser.add_argument('--learning_rate_decay_start', type=int, default=-1,
+    parser.add_argument('--learning_rate_decay_start', type=int, default=0, #-1
                     help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
     parser.add_argument('--learning_rate_decay_every', type=int, default=3,
                     help='every how many iterations thereafter to drop LR?(in epoch)')
@@ -192,7 +192,7 @@ def parse_opt():
                     help='epsilon that goes into denominator for smoothing')
     parser.add_argument('--weight_decay', type=float, default=0,
                     help='weight_decay')
-    parser.add_argument('--scheduled_sampling_start', type=int, default=-1,
+    parser.add_argument('--scheduled_sampling_start', type=int, default=0, #-1
                     help='at what iteration to start decay gt probability')
     parser.add_argument('--scheduled_sampling_increase_every', type=int, default=5,
                     help='every how many iterations thereafter to gt probability')
@@ -203,7 +203,7 @@ def parse_opt():
 
 
     # Evaluation/Checkpointing
-    parser.add_argument('--val_id', type=str, default='result_gen_embed_1_cc_npvp_vectors',
+    parser.add_argument('--val_id', type=str, default='result_gen_embed_cc_npvp_repro',
                         help='id to use to save captions for validation')
     parser.add_argument('--val_videos_use', type=int, default=-1,
                     help='how many videos to use when periodically evaluating the validation loss? (-1 = all)')
@@ -211,7 +211,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_gen_embed_1_cc_npvp_vectors',
+    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_gen_embed_cc_npvp_repro',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
@@ -239,7 +239,7 @@ def parse_opt():
     # Discriminator
     parser.add_argument('--dis_model', type=str, default="joint_embed",
                     help='joint_embed, co_att, fc, fc_video, s2vt')
-    parser.add_argument('--d_pre_nepoch', type=int, default=1,
+    parser.add_argument('--d_pre_nepoch', type=int, default=10,
                     help='number of epochs to pre-train discriminator')
     parser.add_argument('--g_steps', type=int, default=1,
                     help='number of steps updating generator')
@@ -260,7 +260,7 @@ def parse_opt():
 
 
     # misc
-    parser.add_argument('--id', type=str, default='result_gen_embed_1_cc_npvp_vectors',
+    parser.add_argument('--id', type=str, default='result_gen_embed_cc_npvp_repro',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')
