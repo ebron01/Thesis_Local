@@ -52,6 +52,8 @@ def load_model(model_name):
   return model
 
 
+
+
 # List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = '/home/luchy/Desktop/tensorflow/models/research/object_detection/data/mscoco_label_map.pbtxt'
 category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
