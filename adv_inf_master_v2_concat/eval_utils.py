@@ -16,6 +16,7 @@ import misc.utils as utils
 import subprocess
 from six.moves import cPickle
 import time
+import opts
 
 def extend_paragraph(sent_num,par_score):
     new_score = par_score.new(sum(sent_num)).zero_()
@@ -31,6 +32,7 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 
 def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=False):
     import sys
+    import os
     sys.path.append("densevid_eval")
     template = {"version": "VERSION 1.0", "results": {},
                 "external_data": { "used": 'true',
@@ -48,9 +50,13 @@ def language_eval_video(dataset, preds, model_id, split, verbose=False, remove=F
     if remove:
         model_id += id_generator() # to avoid processing and removing same ids
     json.dump(template, open(os.path.join('densevid_eval', 'caption_' + model_id + '.json'), 'w'))
-    eval_command = ["python","para-evaluate.py", "-s",'caption_' + model_id + '.json',
-                    "-o", 'result_' + model_id + '.json', '--verbose']
-    subprocess.call(eval_command,cwd='densevid_eval')
+    # eval_command = ['python','para-evaluate.py', '-s','caption_' + model_id + '.json', '-o', 'result_' + model_id + '.json', '--verbose']
+    eval_command = ('python para-evaluate.py -s caption_%s.json -o result_%s.json --verbose'%(model_id,model_id))
+    os.chdir('densevid_eval')
+    # subprocess.call(eval_command)
+    # subprocess.call(eval_command, cwd='densevid_eval')
+    os.system(eval_command)
+    os.chdir('..')
     output = json.load(open(os.path.join('densevid_eval','result_' + model_id + '.json'),'r'))
     if remove:
         os.remove(os.path.join('densevid_eval','caption_' + model_id + '.json'))
@@ -127,7 +133,7 @@ def diversity_meausures(predictions,div):
 
 def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifier=None, eval_kwargs={}):
     verbose = eval_kwargs.get('verbose', True)
-    dump_json = eval_kwargs.get('dump_json', 0)
+    dump_json = eval_kwargs.get('dump_json', 1)
     num_videos = eval_kwargs.get('num_videos', eval_kwargs.get('val_videos_use', -1))
     split = eval_kwargs.get('split', 'val')
     lang_eval = eval_kwargs.get('language_eval', 0)
@@ -189,10 +195,10 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         data = loader.get_batch(split)
         n = n + loader.batch_size
 
-        tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['mm_labels'],
+        tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['aux_labels'], data['mm_labels'],
                data['masks'], data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-        fc_feats, img_feats, box_feats, mm_fc_feats, att_feats, labels, mm_labels, masks, att_masks, activities, \
+        fc_feats, img_feats, box_feats, mm_fc_feats, att_feats, labels, aux_labels, mm_labels, masks, att_masks, activities, \
         mm_img_feats, mm_box_feats, mm_activities = tmp
         sent_num = data['sent_num']
 
@@ -205,7 +211,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 mm_activities = utils.dense_classifier(sent_num, mm_fc_feats, mm_img_feats, classifier)
 
             # calculate loss
-            gen_seq = gen_model(fc_feats, img_feats, box_feats, activities, labels)
+            gen_seq = gen_model(fc_feats, img_feats, box_feats, activities, labels, aux_labels)
             gen_seq = utils.align_seq(sent_num, gen_seq)
             loss = crit(gen_seq, utils.align_seq(sent_num, labels)[:, 1:], utils.align_seq(sent_num, masks)[:, 1:]).item()
             losses.append(loss)
@@ -213,7 +219,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             # use greedy max for inference
             if sample_max:
                 eval_kwargs['sample_max'] = 1
-                seq, _ = gen_model(fc_feats, img_feats, box_feats, activities,
+                seq, _ = gen_model(fc_feats, img_feats, box_feats, activities, aux_labels,
                                opt=eval_kwargs, mode='sample')
 
             # use sampling for inference
@@ -233,8 +239,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                         fc_feats_s = fc_feats[:, s]
                         img_feats_s = img_feats[:, s]
                         box_feats_s = box_feats[:, s]
+                        aux_labels_s = aux_labels[:, s]
                         start = time.time()
-                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities,
+                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities, aux_labels_s,
                                                                              best_context, opt=eval_kwargs)
                         sample_time = time.time()
                         # print('sample_time:', sample_time-start)
@@ -274,10 +281,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
                     # select the caption with highest score
                     inds = score_list.argsort(axis=1)[:, ::-1]
-                    caption_list = torch.tensor(
-                        sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
-                    best_context = torch.tensor(
-                        context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
+                    caption_list = torch.tensor(sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
+                    best_context = torch.tensor(context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
                     best_seq = caption_list[:, 0, :]
                     seq_dummy[:, s] = best_seq
 
@@ -289,7 +294,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 seq = torch.mul(seq,utils.generate_paragraph_mask(sent_num, seq))
 
                 # negatives for evaluating discriminator
-                mm_seq, _ = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities,
+                #TODO: aux_labels added but think about this part
+                mm_seq, _ = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities, aux_labels,
                                 opt=eval_kwargs, mode='sample')
                 mm_seq = torch.mul(mm_seq,utils.generate_paragraph_mask(sent_num, mm_seq))
 
@@ -340,6 +346,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             gt = utils.decode_sequence(loader.get_vocab(),labels[:,1:-1].data)
             mm = utils.decode_sequence(loader.get_vocab(), mm_labels[:,1:-1].data)
             seq = seq.data
+
 
         # print and store actual decoded sentence
         sents = utils.decode_sequence(loader.get_vocab(), seq)
@@ -470,8 +477,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
     if dump_json == 1:
         # dump the json
-        json.dump(lang_stats, open('eval_results/' + model_id + '.json', 'w'))
-        json.dump(predictions, open('vis/vis_' + model_id + '.json', 'w'))
-        json.dump(div['gen'], open('vis/vis_n_' + model_id + '.json', 'w'))
+        opt = opts.parse_opt()
+        json.dump(lang_stats, open(opt.checkpoint_path + '/' + 'eval_results/' + model_id + '.json', 'w'))
+        json.dump(predictions, open(opt.checkpoint_path + '/' + 'vis/vis_' + model_id + '.json', 'w'))
+        json.dump(div['gen'], open(opt.checkpoint_path + '/' + 'vis/vis_n_' + model_id + '.json', 'w'))
 
     return gen_loss, predictions, lang_stats, dis_infos, div

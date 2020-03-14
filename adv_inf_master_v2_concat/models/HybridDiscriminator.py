@@ -229,6 +229,7 @@ class MultiModalAttEarlyFusion(nn.Module):
             return moe_weights
 
     def forward(self, fc_feats, img_feats, box_feats, activity_labels, seq):
+
         batch_size = seq.size(0)
         sent_size = seq.size(1)
         scores = []

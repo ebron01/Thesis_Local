@@ -11,6 +11,7 @@ import random
 import torch
 import torch.utils.data as data
 
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import multiprocessing
 
 from six.moves import cPickle
@@ -59,12 +60,16 @@ class DataLoader(data.Dataset):
         self.activity_dict = {}
         videos = self.info['videos']
         for ix in range(len(self.video_id)):
-            v_ix = self.video_id[ix]
-            for act in videos[v_ix]['activities']:
-                  if act not in self.activity_dict:
-                      self.activity_dict[act] = [ix]
-                  else:
-                      self.activity_dict[act].append(ix)
+            if self.video_id[ix] not in self.videos_missing_index:
+                v_ix = self.video_id[ix]
+                try:
+                    for act in videos[v_ix]['activities']:
+                        if act not in self.activity_dict:
+                            self.activity_dict[act] = [ix]
+                        else:
+                            self.activity_dict[act].append(ix)
+                except:
+                    print('there is a problem with video_id')
 
     def __init__(self, opt):
         self.opt = opt
@@ -85,6 +90,7 @@ class DataLoader(data.Dataset):
         print('DataLoader loading json file: ', opt.input_json)
         self.info = json.load(open(self.opt.input_json))
         self.ix_to_word = self.info['ix_to_word']
+        self.ix_to_word['1'] = 'raining'
         self.word_to_ix = self.info['word_to_ix']
         self.vocab_size = len(self.ix_to_word)
         self.ix_to_activity = self.info.get('ix_to_activity',None)
@@ -95,17 +101,75 @@ class DataLoader(data.Dataset):
         # open the hdf5 file containing visual features and captions
         print('DataLoader loading h5 file: ', opt.input_label_h5)
         self.h5_label_file = h5py.File(self.opt.input_label_h5, 'r')
-        self.labels = self.h5_label_file['labels'].value
+        self.labels = self.h5_label_file['labels'][()] #.value
         seq_size = self.labels.shape
         self.seq_length = seq_size[2]
         self.max_sent_num = seq_size[1]
         print('max sequence length in data is', self.seq_length)
         self.max_seg = opt.max_seg
-        self.sent_num = self.h5_label_file['sent_num'].value
-        self.video_id = self.h5_label_file['video_id'].value
-        self.timestamp = self.h5_label_file['timestamp'].value
+        self.sent_num = self.h5_label_file['sent_num'][()] #.value
+        self.video_id = self.h5_label_file['video_id'][()] #.value
+
+        #this loads npy arrays for gt np or vp or cc np vp word ids
+        # self.aux_np_actnet = np.load(opt.aux_np_actnet)
+        self.aux_np_vp_cc = np.load(opt.aux_np_vp_cc)
+
+        # for array in range(len(self.aux_np_actnet)):
+        #     for a in range(len(self.aux_np_actnet[array])):
+        #         for i in range(len(self.aux_np_actnet[array][a])):
+        #             self.aux_np_actnet[array][a][i] = np.asarray(self.aux_np_actnet[array][a][i], dtype=np.uint32)
+
+        with open(self.opt.frame_ids, 'r') as f:
+            self.act_video_ids = f.readlines()
+        for i in range(len(self.act_video_ids)):
+            self.act_video_ids[i] = self.act_video_ids[i].strip()
+
+        # self.videos_missing_index = []
+        # for i in range(len(self.info['videos'])):
+        #     if (self.info['videos'][i]['id'] + '.mp4') in self.act_video_ids:
+        #         continue
+        #     else:
+        #         self.videos_missing_index.append(i)
+        # with open('videos_missing_index.npy', 'w') as f:
+        #     np.save(f, self.videos_missing_index)
+
+        # self.videos_missing = []
+        # for i in range(len(self.info['videos'])):
+        #     if (self.info['videos'][i]['id'] + '.mp4') in self.act_video_ids:
+        #         continue
+        #     else:
+        #         self.videos_missing.append(self.info['videos'][i]['id'])
+        # with open('videos_missing.npy', 'w') as f:
+        #     np.save(f, self.videos_missing)
+
+
+        with open('videos_missing_index.npy', 'r') as f:
+            self.videos_missing_index = np.load(f)
+
+        with open('videos_missing.npy', 'r') as f:
+            self.videos_missing = np.load(f)
+
+        self.aux_ix = json.load(open(self.opt.input_aux_ix))
+        for k in self.aux_ix.keys(): # this part deletes aux_ix longer than 30
+            if len(self.aux_ix[k]) > 30:
+                self.aux_ix[k] = self.aux_ix[k][:30]
+        self.aux_ix.update({'v_kMsWDe0V1Xg_3': self.aux_ix['v_kMsWDe0V1Xg_2']})
+        self.aux_ix.update({'v_WQXoBfyUpaY_4': self.aux_ix['v_WQXoBfyUpaY_3']})
+        self.aux_ix.update({'v_8K4cX9GfaII_1': self.aux_ix['v_8K4cX9GfaII_2']})
+        self.aux_ix.update({'v_EKyV_WFsJH0_3': self.aux_ix['v_EKyV_WFsJH0_1']})
+        self.aux_ix.update({'v_0gvD2pktxxw_2': self.aux_ix['v_0gvD2pktxxw_1']})
+        self.aux_ix.update({'v_0gvD2pktxxw_3': self.aux_ix['v_0gvD2pktxxw_1']})
+        self.aux_ix.update({'v_IiG80Vp4WyY_5': self.aux_ix['v_EKyV_WFsJH0_2']})
+        self.aux_ix.update({'v_IiG80Vp4WyY_1': self.aux_ix['v_EKyV_WFsJH0_2']})
+        self.aux_ix.update({'v_IiG80Vp4WyY_2': self.aux_ix['v_EKyV_WFsJH0_2']})
+        self.aux_ix.update({'v_IiG80Vp4WyY_3': self.aux_ix['v_EKyV_WFsJH0_2']})
+        self.aux_ix.update({'v_IiG80Vp4WyY_4': self.aux_ix['v_EKyV_WFsJH0_2']})
+        self.aux_ix.update({'v_9PGFsuE3Ye0_2': self.aux_ix['v_9PGFsuE3Ye0_1']})
+        self.aux_ix.update({'v_dG_jxrIaK6w_2': self.aux_ix['v_dG_jxrIaK6w_1']})
+        self.aux_ix.update({'v_klGP18026Ek_2': self.aux_ix['v_klGP18026Ek_1']})
+        self.timestamp = self.h5_label_file['timestamp'][()] #.value
         if self.activity_size > 0:
-            self.activity = self.h5_label_file['activity'].value
+            self.activity = self.h5_label_file['activity'][()] #.value
         print('number of captions is', sum(self.sent_num))
         self.mean = opt.use_mean
         self.negatives = opt.negatives
@@ -121,19 +185,19 @@ class DataLoader(data.Dataset):
             video = self.info['videos'][i]
             if video['split'] == 'train':
                 self.split_ix['train'].append(j)
-                self.split_size['train']+=1
+                self.split_size['train'] += 1
                 self.ix_split[j] = 'train'
             elif video['split'] == 'val_2':
                 self.split_ix['val'].append(j)
-                self.split_size['val']+=1
+                self.split_size['val'] += 1
                 self.ix_split[j] = 'val'
             elif video['split'] == 'val_1':
                 self.split_ix['test'].append(j)
-                self.split_size['test']+=1
+                self.split_size['test'] += 1
                 self.ix_split[j] = 'test'
-            elif opt.train_only: # restval
+            elif opt.train_only:  # restval
                 self.split_ix['train'].append(j)
-                self.split_size['train']+=1
+                self.split_size['train'] += 1
 
         print('assigned %d videos to split train' % len(self.split_ix['train']))
         print('assigned %d videos to split val' % len(self.split_ix['val']))
@@ -217,6 +281,7 @@ class DataLoader(data.Dataset):
             box_features.append(feats[i*self.nbox:(i+1)*self.nbox])
         return box_features
 
+
     def set_negatives(self,mode):
         self.negatives = mode
 
@@ -226,6 +291,7 @@ class DataLoader(data.Dataset):
 
         # inputs for training
         label_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype = 'int')
+        aux_label_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype='int')
         mask_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype='float32')
         sent_num_batch = np.zeros(batch_size, dtype='int')
         fc_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.fc_feat_size], dtype = 'float32')
@@ -247,12 +313,32 @@ class DataLoader(data.Dataset):
         for i in range(batch_size):
             # fetch visual features
             tmp_fcs, ix, tmp_wrapped = self._prefetch_process[split].get()
+            v_ix = self.video_id[ix]
+            vid_id = self.info['videos'][v_ix]['id']
+            #this while controls fetched video_id is in videos_missing or not. if in missing fetches next video.
+            while vid_id in self.videos_missing:
+                tmp_fcs, ix, tmp_wrapped = self._prefetch_process[split].get()
+                v_ix = self.video_id[ix]
+                vid_id = self.info['videos'][v_ix]['id']
             sent_num = self.sent_num[ix]
             fc_batch[i,:sent_num] = tmp_fcs[0]
             img_batch[i,:sent_num] = tmp_fcs[1]
             box_batch[i,:sent_num] = tmp_fcs[2]
             sent_num_batch[i] = sent_num
-            label_batch[i, :, 1 : self.seq_length + 1] = self.labels[ix]
+            label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
+
+            ##this part loads one word from gt label.
+            # aux_label_batch[i, :, 1:2] = self.labels[ix][:, :1]
+
+            ##this part loads np/vp gt word from actnet dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from gt caption.
+            # for j in range(self.max_sent_num):
+            #     if self.aux_np_actnet[ix][j, 0].sum() == 0:
+            #         self.aux_np_actnet[ix][j, 0] = self.aux_np_actnet[ix][j, 1]
+            # aux_label_batch[i, :, 1:2] = self.aux_np_actnet[ix][:, 0, 0].reshape(self.max_sent_num,-1)
+
+            # this part loads one np/vp word from cc dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from cc caption.
+            aux_label_batch[i] = self.aux_np_vp_cc[ix]
+
             v_ix = self.video_id[ix]
 
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
@@ -272,6 +358,7 @@ class DataLoader(data.Dataset):
                         break
             else:  # get random caption (random negatives)
                 while True:
+                    # mmix = random.choice(self.split_ix[split])
                     mmix = random.randint(0, len(self.split_ix[split]) - 1)
                     if self.video_id[mmix] != v_ix and sent_num <= self.sent_num[mmix]:  # avoid getting the gt pair
                         mm_batch[i, :sent_num, 1:self.seq_length + 1] = self.labels[mmix, :sent_num, :]
@@ -306,6 +393,7 @@ class DataLoader(data.Dataset):
         data['img_feats'] = np.array(img_batch)
         data['box_feats'] = np.array(box_batch)
         data['labels'] = np.array(label_batch)
+        data['aux_labels'] = np.array(aux_label_batch)
         data['sent_num'] = np.array(sent_num_batch)
 
         data['mm_fc_feats'] = np.array(mm_fc_batch)
@@ -405,5 +493,11 @@ class BlobFetcher():
         if wrapped:
             self.reset()
         assert tmp[1] == ix, "ix not equal"
+        # print(wrapped)
+        if wrapped == True:
+            wrapped = 1
+        else:
+            wrapped = 0
+        return list(tmp) + [wrapped]
 
         return tmp + [wrapped]

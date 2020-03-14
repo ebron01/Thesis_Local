@@ -1,19 +1,23 @@
 import torch
 import misc.utils as utils
+import json
+import numpy as np
+import pdb
 
+torch.set_printoptions(profile="full")
 def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
     data = loader.get_batch('train')
     torch.cuda.synchronize()
     tmp = [data['fc_feats'], data['att_feats'], data['img_feats'], data['box_feats'],
-           data['labels'], data['masks'], data['att_masks'], data['activities']]
+           data['labels'], data['aux_labels'], data['masks'], data['att_masks'], data['activities']]
     tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-    fc_feats, att_feats, img_feats, box_feats, labels, masks, att_masks, activities = tmp
+    fc_feats, att_feats, img_feats, box_feats, labels, aux_labels, masks, att_masks, activities = tmp
     sent_num = data['sent_num']
     wrapped = data['bounds']['wrapped']
     gen_optimizer.zero_grad()
 
-    seq = gen_model(fc_feats, img_feats, box_feats, activities, labels)
+    seq = gen_model(fc_feats, img_feats, box_feats, activities, labels, aux_labels)
     seq = utils.align_seq(sent_num, seq)
     labels = utils.align_seq(sent_num, labels)
     masks = utils.align_seq(sent_num, masks)
@@ -30,15 +34,30 @@ def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
                         temperature=1.0,gen_weight=0.5, mm_weight=0.5,neg_weight=0.5,
                         use_vis=True,use_lang=True,use_pair=True,grad_clip=0.1):
+    #eklendi
+    # for i in range(1000):
+    #     print (i)
+    #     data = loader.get_batch('train')
+    #     sent_num = data['sent_num']
+    #     aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype='int64')
+    #     count = 0
+    #     for i in range(len(sent_num)):
+    #         for j in range(sent_num[i]):
+    #             # print(sent_num[i])
+    #             print(data['infos'][count]['id'] + '_' + str(j + 1))
+    #             a = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
+    #             aux_labels[i,j,:len(a)] = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
+    #             count += 1
+
     dis_model.train()
     gen_model.eval()
     data = loader.get_batch('train')
     sent_num = data['sent_num']
     torch.cuda.synchronize()
-    tmp = [data['fc_feats'],data['mm_fc_feats'], data['img_feats'], data['box_feats'], data['att_feats'], data['labels'], data['mm_labels'],
+    tmp = [data['fc_feats'],data['mm_fc_feats'], data['img_feats'], data['box_feats'], data['att_feats'], data['labels'], data['aux_labels'], data['mm_labels'],
            data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
     tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
-    fc_feats, mm_fc_feats, img_feats, box_feats, att_feats, labels, mm_labels, att_masks, activities, \
+    fc_feats, mm_fc_feats, img_feats, box_feats, att_feats, labels, aux_labels, mm_labels, att_masks, activities, \
     mm_img_feats, mm_box_feats, mm_activities = tmp
     label = torch.zeros(sum(sent_num)).cuda()
     dis_v_loss = 0
@@ -49,14 +68,26 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
 
     with torch.no_grad():
 
+        # aux_labels = np.zeros((loader.batch_size, loader.max_sent_num, loader.seq_length), dtype='int64')
+        # count = 0
+        # for i in range(len(sent_num)):
+        #     for j in range(sent_num[i]):
+        #         # print(sent_num[i])
+        #         # print(data['infos'][count]['id'] + '_' + str(j + 1))
+        #         a = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
+        #         aux_labels[i,j,:len(a)] = loader.aux_ix[data['infos'][count]['id'] + '_' + str(j+1)]
+        #         count += 1
+        # aux_labels = torch.Tensor(aux_labels).long().cuda()
+
         # generated captions
-        gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities,
+        gen_labels, sample_logprobs = gen_model(fc_feats, img_feats, box_feats, activities, aux_labels,
                                                 opt={'sample_max':0,'temperature':temperature}, mode='sample')
-        masks = utils.generate_paragraph_mask(sent_num,gen_labels)
+
+        masks = utils.generate_paragraph_mask(sent_num, gen_labels)
         gen_labels = torch.mul(gen_labels, masks)
 
         # visually mismatched negatives from generator
-        mm_gen_labels, mm_sample_logprobs = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities,
+        mm_gen_labels, mm_sample_logprobs = gen_model(mm_fc_feats, mm_img_feats, mm_box_feats, mm_activities, aux_labels,
                                                       opt={'sample_max': 0, 'temperature': temperature}, mode='sample')
         mm_masks = utils.generate_paragraph_mask(sent_num,mm_gen_labels)
         mm_gen_labels = torch.mul(mm_gen_labels, mm_masks)
@@ -85,10 +116,24 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         v_loss_1.backward()
         dis_v_loss += v_loss_1.item()
 
+        # #part for aux
+        # label.fill_(1)
+        # v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, aux_labels)
+        # v_mm_gen_score = utils.align_seq(sent_num, v_mm_gen_score)
+        # #added for 'Assertion `input >= 0. && input <= 1.` failed.' fault.
+        # v_mm_gen_score = torch.clamp(torch.sigmoid(v_mm_gen_score), 0, 1)
+        # v_loss_1 = gan_crit(v_mm_gen_score, label)
+        # # v_loss_1 = gen_weight * gan_crit(v_mm_gen_score, label)
+        # v_loss_1.backward()
+        # dis_v_loss += v_loss_1.item()
+
         # gt
         label.fill_(1)
         v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, labels[:, :, 1:-1])
+        # v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, aux_labels)
         v_gt_score = utils.align_seq(sent_num, v_gt_score)
+        #added for 'Assertion `input >= 0. && input <= 1.` failed.' fault.
+        v_gt_score = torch.clamp(torch.sigmoid(v_gt_score), 0, 1)
         v_loss_2 = gan_crit(v_gt_score, label)
         v_loss_2.backward()
         dis_v_loss += v_loss_2.item()
