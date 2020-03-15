@@ -3,7 +3,7 @@ import argparse
 def parse_opt():
     parser = argparse.ArgumentParser()
     # Data input settings
-    parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense.json',
+    parser.add_argument('--input_json', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_orj.json',
                     help='path to the json file containing additional info and vocab (img/video)')
     parser.add_argument('--input_fc_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/resnext101-64f/',
                         help='path to the directory containing the preprocessed fc video features')
@@ -11,8 +11,21 @@ def parse_opt():
                         help='path to the directory containing the image features')
     parser.add_argument('--input_box_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/bottomup/',
                     help='path to the directory containing the boxes of att img feats (img)')
-    parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label.h5',
+    parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label_orj.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
+    parser.add_argument('--frame_ids', type=str,
+                        default='/data/shared/ActivityNet/activity_net/inputs/2_filenames.txt',
+                        help='path to videos downloaded from activity_net for ConCap comparison')
+
+    parser.add_argument('--input_aux_ix', type=str,
+                        default='/data/shared/ActivityNet/activity_net/inputs/caption_np_vp_pairs_ix_order.json',
+                        help='path to the json file containing ix for closest aux')
+    # parser.add_argument('--aux_np_actnet', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp_oneword.npy',
+    #                     help='contains gt actnet with one word nps and vps created with parser.py')
+    parser.add_argument('--aux_np_vp_cc', type=str,
+                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat.npy',
+                        help='contains cc with all nps and vps for closest caption created with parser_cc.py')
+
 
     parser.add_argument('--g_start_from', type=str, default=None,
                      help="""skip pre training step and continue training from saved generator model at this path.
@@ -70,6 +83,8 @@ def parse_opt():
                     help='number of layers in the RNN')
     parser.add_argument('--use_bn', type=int, default=0,
                     help='If 1, then do batch_normalization first in att_embed, if 2 then do bn both in the beginning and the end of att_embed')
+    parser.add_argument('--aux_size', type=int, default=512,
+                    help='size of aux vector.')
 
     # input settings
     parser.add_argument('--use_video', type=int, default=1,
@@ -87,8 +102,7 @@ def parse_opt():
     parser.add_argument('--d_use_bow', type=int, default=1,
                         help='use bag of words for visual discriminator; otherwise, use lstm')
     parser.add_argument('--glove_npy', type=str, default=None,
-                        help='npy containing glove vector associated with word_idx labels')
-
+                        help='npy containing glove vector associated with word_idx labels') #'/data/shared/ActivityNet/advinf_activitynet/inputs/glove.npy'
     # video options
     parser.add_argument('--feat_type', type=str, default='resnext101-64f',
                         help='feat type for video (c3d, resnext101-64f)')
@@ -114,9 +128,9 @@ def parse_opt():
                               hard: different video with same activity')
 
     # video disc option
-    parser.add_argument('--visual_weight', type=float, default=0.8, #1.0
+    parser.add_argument('--visual_weight', type=float, default=0.8, #default=1.0
                         help='weight to visual discriminator reward')
-    parser.add_argument('--lang_weight', type=float, default=0.2, #1.0
+    parser.add_argument('--lang_weight', type=float, default=0.2, #default=1.0
                         help='weight to lang discriminator reward')
     parser.add_argument('--par_weight', type=float, default=1.0,
                         help='weight to paragraph discriminator reward')

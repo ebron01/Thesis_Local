@@ -32,6 +32,9 @@ class MultiModalGenerator(CaptionModel):
             self.rnn_cell = nn.GRU
         self.use_mean = opt.use_mean
 
+        #aux features
+        self.aux_embed = nn.Linear(2 * self.rnn_size, self.rnn_size)
+
         # motion features
         self.use_video = opt.use_video
         self.fc_feat_size = opt.fc_feat_size
@@ -184,6 +187,7 @@ class MultiModalGenerator(CaptionModel):
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 aux = self.word_embed(aux_w).unsqueeze(1)
+                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
                 xt = torch.cat((encoded, context, xt),dim=2)
                 # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
@@ -233,6 +237,7 @@ class MultiModalGenerator(CaptionModel):
                 xt = self.word_embed(it).unsqueeze(1)
                 aux = self.word_embed(aux_w).unsqueeze(1)
                 # xt = torch.cat((encoded, context, xt),dim=2)
+                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
                 xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
@@ -319,6 +324,7 @@ class MultiModalGenerator(CaptionModel):
                 it = fc_feats.new_zeros(beam_size, dtype=torch.long)
                 xt = self.word_embed(it).unsqueeze(1)
                 aux = self.word_embed(aux_w).unsqueeze(1)
+                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
                 xt = torch.cat((encoded, context, xt), dim=2)
                 # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
@@ -382,6 +388,7 @@ class MultiModalGenerator(CaptionModel):
             encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
             xt = self.word_embed(it).unsqueeze(1)
             aux = self.word_embed(aux_w).unsqueeze(1)
+            xt = self.aux_embed(torch.cat((xt, aux), dim=2))
             # xt = torch.cat((encoded, context, xt), dim=2)
             xt = torch.cat((encoded, context, xt), dim=2)
             output, state = self.sent_rnn(xt, state)
