@@ -197,7 +197,7 @@ def parse_opt():
 
 
     # Evaluation/Checkpointing
-    parser.add_argument('--val_id', type=str, default='result_concat',
+    parser.add_argument('--val_id', type=str, default='result_concat_best_gen',
                         help='id to use to save captions for validation')
     parser.add_argument('--val_videos_use', type=int, default=-1,
                     help='how many videos to use when periodically evaluating the validation loss? (-1 = all)')
@@ -205,7 +205,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_concat',
+    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_concat_best_gen',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
@@ -254,7 +254,7 @@ def parse_opt():
 
 
     # misc
-    parser.add_argument('--id', type=str, default='result_concat',
+    parser.add_argument('--id', type=str, default='result_concat_best_gen',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')
