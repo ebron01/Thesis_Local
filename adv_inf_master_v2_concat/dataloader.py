@@ -145,7 +145,7 @@ class DataLoader(data.Dataset):
 
         with open('videos_missing_index.npy', 'r') as f:
             self.videos_missing_index = np.load(f)
-        print ('videos missing from actnet is %d'%len(self.videos_missing))
+        print ('videos missing from actnet is %d'%len(self.videos_missing_index))
         with open('videos_missing.npy', 'r') as f:
             self.videos_missing = np.load(f)
 
