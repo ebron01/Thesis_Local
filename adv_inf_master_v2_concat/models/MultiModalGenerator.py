@@ -33,6 +33,7 @@ class MultiModalGenerator(CaptionModel):
         self.use_mean = opt.use_mean
 
         #aux features
+        self.modality_embed = nn.Linear(self.rnn_size, self.rnn_size, bias=False)
         self.aux_embed = nn.Linear(2 * self.rnn_size, self.rnn_size)
         self.sigmoid = nn.Sigmoid()
         self.tanh = nn.Tanh()
@@ -192,8 +193,8 @@ class MultiModalGenerator(CaptionModel):
                 # xt = self.aux_embed(torch.cat((xt, aux), dim=2))
 
                 #https://arxiv.org/abs/1702.01992
-                hx = self.tanh(xt)
-                ha = self.tanh(aux)
+                hx = self.tanh(self.modality_embed(xt))
+                ha = self.tanh(self.modality_embed(aux))
                 z = self.sigmoid(self.aux_embed(torch.cat((xt, aux), dim=2)))
                 h = hx * z + ha * (1-z)
                 xt = torch.cat((encoded, context, h),dim=2)
