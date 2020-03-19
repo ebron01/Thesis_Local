@@ -10,6 +10,7 @@ import misc.utils as utils
 
 from .CaptionModel import CaptionModel
 from .Attention import Attention
+from .Attention import MultiHeadAttention
 import numpy as np
 import time
 
@@ -37,6 +38,9 @@ class MultiModalGenerator(CaptionModel):
         self.aux_embed = nn.Linear(2 * self.rnn_size, self.rnn_size)
         self.sigmoid = nn.Sigmoid()
         self.tanh = nn.Tanh()
+
+        if self.use_aux_bias:
+            self.aux_attention = MultiHeadAttention(self.rnn_size, self.rnn_size, self.rnn_size)
 
         # motion features
         self.use_video = opt.use_video
@@ -193,11 +197,16 @@ class MultiModalGenerator(CaptionModel):
                 # xt = self.aux_embed(torch.cat((xt, aux), dim=2))
 
                 #https://arxiv.org/abs/1702.01992
-                hx = self.tanh(self.modality_embed(xt))
-                ha = self.tanh(self.modality_embed(aux))
-                z = self.sigmoid(self.aux_embed(torch.cat((xt, aux), dim=2)))
-                h = hx * z + ha * (1-z)
-                xt = torch.cat((encoded, context, h),dim=2)
+                # hx = self.tanh(self.modality_embed(xt))
+                # ha = self.tanh(self.modality_embed(aux))
+                # z = self.sigmoid(self.aux_embed(torch.cat((xt, aux), dim=2)))
+                # h = hx * z + ha * (1-z)
+                # xt = torch.cat((encoded, context, h),dim=2)
+
+                #https://arxiv.org/pdf/1808.02480.pdf
+                h = self.aux_attention(aux)
+                xt = torch.cat((encoded, context, h), dim=2)
+
 
                 # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)

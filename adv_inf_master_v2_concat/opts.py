@@ -259,6 +259,15 @@ def parse_opt():
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')
 
+    #deep context: https://arxiv.org/pdf/1808.02480.pdf
+    parser.add_argument('--n_order', type=int, default=1,
+                        help='')
+    parser.add_argument('--n_phrases', type=int, default=1,
+                        help='')
+    parser.add_argument('--p_keep', type=int, default=1,
+                        help='')
+
+
     args = parser.parse_args()
 
     # Check if args are valid
