@@ -10,6 +10,7 @@ import misc.utils as utils
 
 from .CaptionModel import CaptionModel
 from .Attention import Attention
+from .Attention import MultiHeadAttention
 import numpy as np
 import time
 
@@ -33,7 +34,13 @@ class MultiModalGenerator(CaptionModel):
         self.use_mean = opt.use_mean
 
         #aux features
+        self.modality_embed = nn.Linear(self.rnn_size, self.rnn_size, bias=False)
         self.aux_embed = nn.Linear(2 * self.rnn_size, self.rnn_size)
+        self.sigmoid = nn.Sigmoid()
+        self.tanh = nn.Tanh()
+
+        if self.use_aux_bias:
+            self.aux_attention = MultiHeadAttention(self.rnn_size, self.rnn_size, self.rnn_size)
 
         # motion features
         self.use_video = opt.use_video
@@ -102,7 +109,7 @@ class MultiModalGenerator(CaptionModel):
             self.activity_embed.weight.data.uniform_(-initrange, initrange)
         if self.glove is not None:
             self.word_embed.load_state_dict({'weight': torch.from_numpy(np.load(self.glove))})
-
+        self.aux_embed.weight.data.uniform_(-initrange, initrange)
         self.logit.bias.data.fill_(0)
         self.logit.weight.data.uniform_(-initrange, initrange)
 
@@ -187,8 +194,20 @@ class MultiModalGenerator(CaptionModel):
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 aux = self.word_embed(aux_w).unsqueeze(1)
-                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
-                xt = torch.cat((encoded, context, xt),dim=2)
+                # xt = self.aux_embed(torch.cat((xt, aux), dim=2))
+
+                #https://arxiv.org/abs/1702.01992
+                # hx = self.tanh(self.modality_embed(xt))
+                # ha = self.tanh(self.modality_embed(aux))
+                # z = self.sigmoid(self.aux_embed(torch.cat((xt, aux), dim=2)))
+                # h = hx * z + ha * (1-z)
+                # xt = torch.cat((encoded, context, h),dim=2)
+
+                #https://arxiv.org/pdf/1808.02480.pdf
+                h = self.aux_attention(aux)
+                xt = torch.cat((encoded, context, h), dim=2)
+
+
                 # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 output = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
@@ -236,9 +255,16 @@ class MultiModalGenerator(CaptionModel):
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 aux = self.word_embed(aux_w).unsqueeze(1)
-                # xt = torch.cat((encoded, context, xt),dim=2)
-                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
-                xt = torch.cat((encoded, context, xt), dim=2)
+                # xt = self.aux_embed(torch.cat((xt, aux), dim=2))
+
+                # https://arxiv.org/abs/1702.01992
+                hx = self.tanh(xt)
+                ha = self.tanh(aux)
+                z = self.sigmoid(self.aux_embed(torch.cat((xt, aux), dim=2)))
+                h = hx * z + ha * (1-z)
+                xt = torch.cat((encoded, context, h),dim=2)
+
+                # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
 
@@ -324,8 +350,15 @@ class MultiModalGenerator(CaptionModel):
                 it = fc_feats.new_zeros(beam_size, dtype=torch.long)
                 xt = self.word_embed(it).unsqueeze(1)
                 aux = self.word_embed(aux_w).unsqueeze(1)
-                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
-                xt = torch.cat((encoded, context, xt), dim=2)
+                # xt = self.aux_embed(torch.cat((xt, aux), dim=2))
+
+                # https://arxiv.org/abs/1702.01992
+                hx = self.tanh(xt)
+                ha = self.tanh(aux)
+                z = self.sigmoid(self.aux_embed(torch.cat((xt, aux), dim=2)))
+                h = hx * z + ha * (1-z)
+                xt = torch.cat((encoded, context, h),dim=2)
+
                 # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
@@ -388,9 +421,16 @@ class MultiModalGenerator(CaptionModel):
             encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
             xt = self.word_embed(it).unsqueeze(1)
             aux = self.word_embed(aux_w).unsqueeze(1)
-            xt = self.aux_embed(torch.cat((xt, aux), dim=2))
+            # xt = self.aux_embed(torch.cat((xt, aux), dim=2))
+
+            # https://arxiv.org/abs/1702.01992
+            hx = self.tanh(xt)
+            ha = self.tanh(aux)
+            z = self.sigmoid(self.aux_embed(torch.cat((xt, aux), dim=2)))
+            h = hx * z + ha * (1 - z)
+            xt = torch.cat((encoded, context, h), dim=2)
+
             # xt = torch.cat((encoded, context, xt), dim=2)
-            xt = torch.cat((encoded, context, xt), dim=2)
             output, state = self.sent_rnn(xt, state)
             logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
 

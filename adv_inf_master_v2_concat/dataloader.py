@@ -145,7 +145,7 @@ class DataLoader(data.Dataset):
 
         with open('videos_missing_index.npy', 'r') as f:
             self.videos_missing_index = np.load(f)
-
+        print ('videos missing from actnet is %d'%len(self.videos_missing_index))
         with open('videos_missing.npy', 'r') as f:
             self.videos_missing = np.load(f)
 
@@ -216,6 +216,10 @@ class DataLoader(data.Dataset):
                 del self._prefetch_process[split]
         import atexit
         atexit.register(cleanup)
+
+        self.n_order = opt.n_order
+        self.n_phrases = opt.n_phrases
+        self.p_keep = opt.p_keep
 
 
     # mean pool the features across $max_seg segments
@@ -326,6 +330,7 @@ class DataLoader(data.Dataset):
             box_batch[i,:sent_num] = tmp_fcs[2]
             sent_num_batch[i] = sent_num
             label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
+
 
             ##this part loads one word from gt label.
             # aux_label_batch[i, :, 1:2] = self.labels[ix][:, :1]
