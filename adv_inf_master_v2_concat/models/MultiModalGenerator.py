@@ -33,11 +33,11 @@ class MultiModalGenerator(CaptionModel):
             self.rnn_cell = nn.GRU
         self.use_mean = opt.use_mean
 
-        #aux features
-        self.modality_embed = nn.Linear(self.rnn_size, self.rnn_size, bias=False)
+        # #aux features
+        # self.modality_embed = nn.Linear(self.rnn_size, self.rnn_size, bias=False)
         self.aux_embed = nn.Linear(2 * self.rnn_size, self.rnn_size)
-        self.sigmoid = nn.Sigmoid()
-        self.tanh = nn.Tanh()
+        # self.sigmoid = nn.Sigmoid()
+        # self.tanh = nn.Tanh()
 
         if self.use_aux_bias:
             self.aux_attention = MultiHeadAttention(self.rnn_size, self.rnn_size, self.rnn_size)
@@ -194,7 +194,7 @@ class MultiModalGenerator(CaptionModel):
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 aux = self.word_embed(aux_w).unsqueeze(1)
-                # xt = self.aux_embed(torch.cat((xt, aux), dim=2))
+                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
 
                 #https://arxiv.org/abs/1702.01992
                 # hx = self.tanh(self.modality_embed(xt))
@@ -203,12 +203,11 @@ class MultiModalGenerator(CaptionModel):
                 # h = hx * z + ha * (1-z)
                 # xt = torch.cat((encoded, context, h),dim=2)
 
-                #https://arxiv.org/pdf/1808.02480.pdf
-                h = self.aux_attention(aux)
-                xt = torch.cat((encoded, context, h), dim=2)
+                # #https://arxiv.org/pdf/1808.02480.pdf
+                # h = self.aux_attention(aux)
+                # xt = torch.cat((encoded, context, h), dim=2)
 
-
-                # xt = torch.cat((encoded, context, xt), dim=2)
+                xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 output = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
                 sequence.append(output)
