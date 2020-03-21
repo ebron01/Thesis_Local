@@ -339,6 +339,7 @@ class DataLoader(data.Dataset):
             # this part loads one np/vp word from cc dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from cc caption.
             aux_label_batch[i, :, 1: self.seq_length + 1 ] = self.aux_np_vp_cc[ix]
 
+
             v_ix = self.video_id[ix]
 
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
