@@ -23,7 +23,7 @@ def parse_opt():
     # parser.add_argument('--aux_np_actnet', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp_oneword.npy',
     #                     help='contains gt actnet with one word nps and vps created with parser.py')
     parser.add_argument('--aux_np_vp_cc', type=str,
-                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_full_sent.npy',
+                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat.npy',
                         help='contains cc with all nps and vps for closest caption created with parser_cc.py')
 
 
@@ -254,7 +254,7 @@ def parse_opt():
 
 
     # misc
-    parser.add_argument('--id', type=str, default='result_concat_full_sent',
+    parser.add_argument('--id', type=str, default='result_base_missing_wo_gt',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')
