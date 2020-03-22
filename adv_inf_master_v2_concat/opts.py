@@ -252,7 +252,6 @@ def parse_opt():
     # parser.add_argument('--gan', type=int, default=1,
     #                     help='train with gan (1 = yes, 0 = no)?')
 
-
     # misc
     parser.add_argument('--id', type=str, default='result_concat_mmu_full_sent',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
