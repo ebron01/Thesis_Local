@@ -39,8 +39,8 @@ class MultiModalGenerator(CaptionModel):
         # self.sigmoid = nn.Sigmoid()
         # self.tanh = nn.Tanh()
 
-        if self.use_aux_bias:
-            self.aux_attention = MultiHeadAttention(self.rnn_size, self.rnn_size, self.rnn_size)
+        # if self.use_aux_bias:
+        #     self.aux_attention = MultiHeadAttention(self.rnn_size, self.rnn_size, self.rnn_size)
 
         # motion features
         self.use_video = opt.use_video
