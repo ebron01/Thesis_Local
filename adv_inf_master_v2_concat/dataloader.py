@@ -217,9 +217,9 @@ class DataLoader(data.Dataset):
         import atexit
         atexit.register(cleanup)
 
-        self.n_order = opt.n_order
-        self.n_phrases = opt.n_phrases
-        self.p_keep = opt.p_keep
+        # self.n_order = opt.n_order
+        # self.n_phrases = opt.n_phrases
+        # self.p_keep = opt.p_keep
 
 
     # mean pool the features across $max_seg segments
@@ -342,7 +342,7 @@ class DataLoader(data.Dataset):
             # aux_label_batch[i, :, 1:2] = self.aux_np_actnet[ix][:, 0, 0].reshape(self.max_sent_num,-1)
 
             # this part loads one np/vp word from cc dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from cc caption.
-            aux_label_batch[i, :, 1: self.seq_length + 1] = self.aux_np_vp_cc[ix]
+            aux_label_batch[i] = self.aux_np_vp_cc[ix]
 
             v_ix = self.video_id[ix]
 
