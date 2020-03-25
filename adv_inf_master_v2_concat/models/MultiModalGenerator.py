@@ -168,7 +168,18 @@ class MultiModalGenerator(CaptionModel):
             sequence = []
             state = self.init_hidden(batch_size)
             aux_whole = aux_labels[:, n].clone()
-            aux_w = self.word_embed(aux_whole)
+            aux_w = torch.zeros(batch_size, self.rnn_size)
+            for b in range(batch_size):
+                if aux_whole[b].sum() == 0:
+                    continue
+                count, sum = 0, 0
+                for a in range(aux_whole.shape[1]):
+                    if aux_whole[b][a] != 0:
+                        sum += self.word_embed(aux_whole[b][a])
+                        count += 1
+                aux_w[b] = sum / count
+            aux = aux_w.unsqueeze(1).cuda()
+            #aux_w = self.word_embed(aux_whole)
             if self.use_activity_labels: # False by default to avoid cheating
                 if len(activity_labels.size()) == 3:
                     activity = self.activity_embed(activity_labels[:,n].float()).unsqueeze(1)
@@ -188,7 +199,7 @@ class MultiModalGenerator(CaptionModel):
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
-                aux = self.word_embed(aux_whole).unsqueeze(1)
+                #aux = self.word_embed(aux_w).unsqueeze(1)
                 xt = self.aux_embed(torch.cat((xt, aux), dim=2))
                 xt = torch.cat((encoded, context, xt),dim=2)
                 # xt = torch.cat((encoded, context, xt), dim=2)
@@ -217,10 +228,22 @@ class MultiModalGenerator(CaptionModel):
         seq = fc_feats.new_zeros(batch_size,sent_num, self.seq_length, dtype=torch.long)
         seqLogprobs = fc_feats.new_zeros(batch_size,sent_num, self.seq_length)
         for n in range(sent_num):
-            aux_w = aux_labels[:, n, 1].clone()
+            #aux_w = aux_labels[:, n, 1].clone()
             if fc_feats[:,n,:,:].sum() == 0:
                 break
             state = self.init_hidden(batch_size)
+            aux_whole = aux_labels[:, n].clone()
+            aux_w = torch.zeros(batch_size, self.rnn_size)
+            for b in range(batch_size):
+                if aux_whole[b].sum() == 0:
+                    continue
+                count, sum = 0, 0
+                for a in range(aux_whole.shape[1]):
+                    if aux_whole[b][a] != 0:
+                        sum += self.word_embed(aux_whole[b][a])
+                        count += 1
+                aux_w[b] = sum / count
+            aux = aux_w.unsqueeze(1).cuda()
             if self.use_activity_labels:
                 if len(activity_labels.size()) == 3:
                     activity = self.activity_embed(activity_labels[:,n].float()).unsqueeze(1)
@@ -237,7 +260,7 @@ class MultiModalGenerator(CaptionModel):
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
-                aux = self.word_embed(aux_w).unsqueeze(1)
+                #aux = self.word_embed(aux_w).unsqueeze(1)
                 # xt = torch.cat((encoded, context, xt),dim=2)
                 xt = self.aux_embed(torch.cat((xt, aux), dim=2))
                 xt = torch.cat((encoded, context, xt), dim=2)
@@ -378,7 +401,18 @@ class MultiModalGenerator(CaptionModel):
         if context is None:
             context = torch.zeros(batch_size,1,self.rnn_size).cuda()
         for t in range(self.seq_length + 1):
-            aux_w = aux_labels[:, 1].clone()
+            # aux_w = aux_labels[:, 1].clone()
+            aux_w = torch.zeros(batch_size, self.rnn_size)
+            for b in range(batch_size):
+                if aux_labels[b].sum() == 0:
+                    continue
+                count, sum = 0, 0
+                for a in range(aux_labels.shape[1]):
+                    if aux_labels[b][a] != 0:
+                        sum += self.word_embed(aux_labels[b][a])
+                        count += 1
+                aux_w[b] = sum / count
+            aux = aux_w.unsqueeze(1).cuda()
             if t == 0 : # input <bos>
                 it = fc_feats.new_zeros(batch_size, dtype=torch.long)
             if self.use_video:
@@ -389,7 +423,6 @@ class MultiModalGenerator(CaptionModel):
                 box = self.attention_encoder(box_feats, state, 'box')
             encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
             xt = self.word_embed(it).unsqueeze(1)
-            aux = self.word_embed(aux_w).unsqueeze(1)
             xt = self.aux_embed(torch.cat((xt, aux), dim=2))
             # xt = torch.cat((encoded, context, xt), dim=2)
             xt = torch.cat((encoded, context, xt), dim=2)
