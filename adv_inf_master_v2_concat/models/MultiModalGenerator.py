@@ -186,7 +186,12 @@ class MultiModalGenerator(CaptionModel):
                     if count == self.aux_word_size:
                         break
                     # if aux_whole[b][a] != 0:
-                    aux_w[b, count*self.rnn_size:(count+1)*self.rnn_size] = self.word_embed(aux_whole[b][a])
+                    if aux_whole[b][a] // (10 ** 4) == 0:
+                        aux_w[b, count*self.rnn_size:(count+1)*self.rnn_size] = self.word_embed(aux_whole[b][a])
+                    else:
+                        first = self.word_embed(aux_whole[b][a] // (10 ** 4))
+                        second = self.word_embed(aux_whole[b][a] % (10 ** 4))
+                        aux_w[b, count * self.rnn_size:(count + 1) * self.rnn_size] = (first + second) / 2
                     count += 1
                 # aux_w[b] = sum / count
             aux_c = aux_w.unsqueeze(1).cuda()
@@ -255,7 +260,12 @@ class MultiModalGenerator(CaptionModel):
                     if count == self.aux_word_size:
                         break
                     # if aux_whole[b][a] != 0:
-                    aux_w[b, count * self.rnn_size:(count + 1) * self.rnn_size] = self.word_embed(aux_whole[b][a])
+                    if aux_whole[b][a] // (10 ** 4) == 0:
+                        aux_w[b, count * self.rnn_size:(count + 1) * self.rnn_size] = self.word_embed(aux_whole[b][a])
+                    else:
+                        first = self.word_embed(aux_whole[b][a] // (10 ** 4))
+                        second = self.word_embed(aux_whole[b][a] % (10 ** 4))
+                        aux_w[b, count * self.rnn_size:(count + 1) * self.rnn_size] = (first + second) / 2
                     count += 1
                 # aux_w[b] = sum / count
             aux = aux_w.unsqueeze(1).cuda()
@@ -429,7 +439,12 @@ class MultiModalGenerator(CaptionModel):
                     if count == self.aux_word_size:
                         break
                     # if aux_whole[b][a] != 0:
-                    aux_w[b, count * self.rnn_size:(count + 1) * self.rnn_size] = self.word_embed(aux_labels[b][a])
+                    if aux_labels[b][a] // (10 ** 4) == 0:
+                        aux_w[b, count*self.rnn_size:(count+1)*self.rnn_size] = self.word_embed(aux_labels[b][a])
+                    else:
+                        first = self.word_embed(aux_labels[b][a] // (10 ** 4))
+                        second = self.word_embed(aux_labels[b][a] % (10 ** 4))
+                        aux_w[b, count * self.rnn_size:(count + 1) * self.rnn_size] = (first + second) / 2
                     count += 1
                 # aux_w[b] = sum / count
             aux = aux_w.unsqueeze(1).cuda()
