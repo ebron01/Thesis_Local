@@ -268,7 +268,7 @@ class MultiModalGenerator(CaptionModel):
                         aux_w[b, count * self.rnn_size:(count + 1) * self.rnn_size] = (first + second) / 2
                     count += 1
                 # aux_w[b] = sum / count
-            aux = aux_w.unsqueeze(1).cuda()
+            aux_c = aux_w.unsqueeze(1).cuda()
             if self.use_activity_labels:
                 if len(activity_labels.size()) == 3:
                     activity = self.activity_embed(activity_labels[:,n].float()).unsqueeze(1)
@@ -284,7 +284,7 @@ class MultiModalGenerator(CaptionModel):
                 if self.use_box:
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 if self.use_aux:
-                    aux = self.attention_encoder(aux, state, 'aux')
+                    aux = self.attention_encoder(aux_c, state, 'aux')
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 #aux = self.word_embed(aux_w).unsqueeze(1)
@@ -447,7 +447,7 @@ class MultiModalGenerator(CaptionModel):
                         aux_w[b, count * self.rnn_size:(count + 1) * self.rnn_size] = (first + second) / 2
                     count += 1
                 # aux_w[b] = sum / count
-            aux = aux_w.unsqueeze(1).cuda()
+            aux_c = aux_w.unsqueeze(1).cuda()
 
             if t == 0 : # input <bos>
                 it = fc_feats.new_zeros(batch_size, dtype=torch.long)
@@ -458,7 +458,7 @@ class MultiModalGenerator(CaptionModel):
             if self.use_box:
                 box = self.attention_encoder(box_feats, state, 'box')
             if self.use_aux:
-                aux = self.attention_encoder(aux, state, 'aux')
+                aux = self.attention_encoder(aux_c, state, 'aux')
             encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
             xt = self.word_embed(it).unsqueeze(1)
             xt = self.aux_embed(torch.cat((xt, aux), dim=2))
