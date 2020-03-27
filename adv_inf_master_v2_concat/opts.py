@@ -261,7 +261,7 @@ def parse_opt():
     #aux
     parser.add_argument('--use_aux', type=int, default=1,
                         help='use aux features for aux_word_size word_embeddings')
-    parser.add_argument('--aux_word_size', type=int, default=15,
+    parser.add_argument('--aux_word_size', type=int, default=5,
                         help='use aux features for 15 word_embeddings')
 
     args = parser.parse_args()
