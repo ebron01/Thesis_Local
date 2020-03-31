@@ -141,7 +141,7 @@ def train(opt):
     d_val_result_history = histories.get('d_val_result_history', {})
     g_loss_history = histories.get('g_loss_history', {})
     d_loss_history = histories.get('d_loss_history', {})
-
+    print('learning_rate', opt.learning_rate)
     """ START TRAINING """
     while True:
         gc.collect()

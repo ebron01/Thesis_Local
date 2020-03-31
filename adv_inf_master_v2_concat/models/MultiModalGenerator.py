@@ -9,7 +9,7 @@ from torch.autograd import *
 import misc.utils as utils
 
 from .CaptionModel import CaptionModel
-from .Attention import Attention
+from .Attention import Attention, Attention_aux
 import numpy as np
 import time
 
@@ -38,7 +38,7 @@ class MultiModalGenerator(CaptionModel):
         self.aux_word_size = opt.aux_word_size
         if self.use_aux:
             self.aux_embeded = nn.Linear(self.rnn_size * self.aux_word_size, self.rnn_size)
-            self.aux_attention = Attention(self.rnn_size)
+            self.aux_attention = Attention_aux(self.rnn_size)
 
         # motion features
         self.use_video = opt.use_video
@@ -148,7 +148,8 @@ class MultiModalGenerator(CaptionModel):
 
             attention = self.box_attention
         elif mode == "aux":
-            result = self.aux_embeded(feats)
+            # result = self.aux_embeded(feats)
+            result = feats
             attention = self.aux_attention
         result = attention(self.get_hidden_state(state).squeeze(1), result).unsqueeze(1)
         return result
