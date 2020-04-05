@@ -113,6 +113,9 @@ class DataLoader(data.Dataset):
         #this loads npy arrays for gt np or vp or cc np vp word ids
         # self.aux_np_actnet = np.load(opt.aux_np_actnet)
         self.aux_np_vp_cc = np.load(opt.aux_np_vp_cc)
+        self.aux_np_cc = np.load(opt.aux_np_cc)
+        self.aux_vp_cc = np.load(opt.aux_vp_cc)
+
         self.aux_word_size = opt.aux_word_size
         # for array in range(len(self.aux_np_actnet)):
         #     for a in range(len(self.aux_np_actnet[array])):
@@ -296,6 +299,8 @@ class DataLoader(data.Dataset):
         # inputs for training
         label_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype = 'int')
         aux_label_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype='int')
+        aux_label_batch_n = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype='int')
+        aux_label_batch_v = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype='int')
         mask_batch = np.zeros((batch_size, self.max_sent_num, self.seq_length + 2), dtype='float32')
         sent_num_batch = np.zeros(batch_size, dtype='int')
         fc_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.fc_feat_size], dtype = 'float32')
@@ -342,8 +347,10 @@ class DataLoader(data.Dataset):
             # aux_label_batch[i, :, 1:2] = self.aux_np_actnet[ix][:, 0, 0].reshape(self.max_sent_num,-1)
 
             # this part loads one np/vp word from cc dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from cc caption.
-            # aux_label_batch[i, :, 1: self.aux_word_size + 1] = self.aux_np_vp_cc[ix]
-            aux_label_batch[i] = self.aux_np_vp_cc[ix]
+            aux_label_batch_n[i, :, 1: self.aux_word_size + 1] = self.aux_np_cc[ix]
+            aux_label_batch_v[i, :, 1: self.aux_word_size + 1] = self.aux_vp_cc[ix]
+            aux_label_batch = [aux_label_batch_n, aux_label_batch_v]
+            # aux_label_batch[i, :, 1: self.aux_np_vp_cc[ix].shape[1] + 1] = self.aux_np_vp_cc[ix]
             v_ix = self.video_id[ix]
 
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator

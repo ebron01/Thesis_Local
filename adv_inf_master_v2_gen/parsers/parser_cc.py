@@ -378,72 +378,275 @@ with open('cc_np_vp_cooccur_words.json', 'r') as f:
 
 
 #This creates a input with parsed with max two words and unk words
-cou = 0
-num_words_cooccur = 15
-cooccur_parsed_cc_phrases = []
-for key in vid_id:
-    if key in cooccur_parsed_cc.keys():
-        event_phrases = []
-        for event in cooccur_parsed_cc[key]:
-            p_ = []
-            for r in range(num_words_cooccur):
-                if event[r] == u'\uf0a7' or event[r] == u'\xa3' or event[r] == u'\xe9':
-                    # print (event[r])
-                    cou += 1
-                    event[r] = 'babalanga'
+# cou = 0
+# num_words_cooccur = 15
+# cooccur_parsed_cc_phrases = []
+# for key in vid_id:
+#     if key in cooccur_parsed_cc.keys():
+#         event_phrases = []
+#         for event in cooccur_parsed_cc[key]:
+#             p_ = []
+#             for r in range(num_words_cooccur):
+#                 if event[r] == u'\uf0a7' or event[r] == u'\xa3' or event[r] == u'\xe9':
+#                     # print (event[r])
+#                     cou += 1
+#                     event[r] = 'babalanga'
+#
+#                 concatted =''
+#                 if type(event[r]) == list:
+#                     for i in range(len(event[r])):
+#                         concatted += event[r][i] + ' '
+#                     event[r] = concatted
+#
+#                 if len(event[r].split()) > 1:
+#                     try:
+#                         event[r] = event[r].encode('utf-8').split()[:2]
+#                     except:
+#                         print(event[r])
+#                         try:
+#                             event[r] = event[r].split()[0].encode('utf-8').split()[:2]
+#                             print(event[r])
+#                         except:
+#                             event[r] = event[r].split()[1].encode('utf-8').split()[:2]
+#                             print(event[r])
+#                     sum = 0
+#                     for q in range(len(event[r])):
+#                         if event[r][q] not in ['<', '>', 'unk']:
+#                             try:
+#                                 sum += (word_to_ix[str(event[r][q])] * (10 ** (q * 4)))
+#                             except:
+#                                 sum += (8472 * (10 ** (q * 4)))
+#                     p_.append(sum)
+#                 else:
+#                     try:
+#                         if event[r].encode('utf-8') not in ['<', '>', 'unk']:
+#                             try:
+#                                 p_.append(word_to_ix[str(event[r].encode('utf-8'))])
+#                             except:
+#                                 p_.append(8472)
+#                                 continue
+#                     except:
+#                         print(event[r])
+#             event_phrases.append(p_)
+#         cooccur_parsed_cc_phrases.append(event_phrases)
+#     else:
+#         cooccur_parsed_cc_phrases.append([])
+#
+# num_words_cooccur = 15
+# cooccur_parsed = np.zeros((len(cooccur_parsed_cc_phrases), num_sentences, num_words_cooccur), dtype=np.int32)
+#
+# try:
+#     for l in range(len(cooccur_parsed_cc_phrases)):
+#         for se in range(len(cooccur_parsed_cc_phrases[l])):
+#             if se > 9:
+#                 continue
+#             if len(cooccur_parsed_cc_phrases[l][se]) > 15:
+#                 cooccur_parsed_cc[l][se] = cooccur_parsed_cc_phrases[l][se][:15]
+#             cooccur_parsed[l][se][:len(cooccur_parsed_cc_phrases[l][se])] = cooccur_parsed_cc_phrases[l][se]
+# except:
+#     print('Done')
+# with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_cooccur.npy', 'w') as f:
+#     np.save(f, cooccur_parsed)
 
-                concatted =''
-                if type(event[r]) == list:
-                    for i in range(len(event[r])):
-                        concatted += event[r][i] + ' '
-                    event[r] = concatted
 
-                if len(event[r].split()) > 1:
-                    try:
-                        event[r] = event[r].encode('utf-8').split()[:2]
-                    except:
-                        print(event[r])
-                        try:
-                            event[r] = event[r].split()[0].encode('utf-8').split()[:2]
-                            print(event[r])
-                        except:
-                            event[r] = event[r].split()[1].encode('utf-8').split()[:2]
-                            print(event[r])
-                    sum = 0
-                    for q in range(len(event[r])):
-                        if event[r][q] not in ['<', '>', 'unk']:
-                            try:
-                                sum += (word_to_ix[str(event[r][q])] * (10 ** (q * 4)))
-                            except:
-                                sum += (8472 * (10 ** (q * 4)))
-                    p_.append(sum)
-                else:
-                    try:
-                        if event[r].encode('utf-8') not in ['<', '>', 'unk']:
-                            try:
-                                p_.append(word_to_ix[str(event[r].encode('utf-8'))])
-                            except:
-                                p_.append(8472)
-                                continue
-                    except:
-                        print(event[r])
-            event_phrases.append(p_)
-        cooccur_parsed_cc_phrases.append(event_phrases)
-    else:
-        cooccur_parsed_cc_phrases.append([])
+# parsed_np = {}
+# parsed_vp = {}
+# for key in parsed_sentences_dict.keys():
+#     for k in parsed_sentences_dict[key].keys():
+#        list_np = []
+#        list_vp = []
+#        if  parsed_sentences_dict[key][k]['order'] == 0 :
+#             list_np.append(parsed_sentences_dict[key][k]['np'])
+#             list_vp.append(parsed_sentences_dict[key][k]['vp'])
+#             parsed_np.update({key : list_np})
+#             parsed_vp.update({key: list_vp})
+#             break
+#
+# parsed_np_cc = {}
+# for v in vid_id:
+#     p_cc = {}
+#     for p in parsed_np.keys():
+#         if v in p:
+#             # parsed_cc.append(p)
+#             p_cc.update({p.rsplit('_', 3)[1]: parsed_np[p]})
+#     concat_event = []
+#     for i in sorted(p_cc.keys()):
+#         concat = []
+#         for data in p_cc[i]:
+#             concat += data
+#         concat_event.append(concat)
+#     parsed_np_cc.update({v: concat_event})
+#
+# parsed_vp_cc = {}
+# for v in vid_id:
+#     p_cc = {}
+#     for p in parsed_vp.keys():
+#         if v in p:
+#             # parsed_cc.append(p)
+#             p_cc.update({p.rsplit('_', 3)[1]: parsed_vp[p]})
+#     concat_event = []
+#     for i in sorted(p_cc.keys()):
+#         concat = []
+#         for data in p_cc[i]:
+#             concat += data
+#         concat_event.append(concat)
+#     parsed_vp_cc.update({v: concat_event})
+#
+# with open('parsed_np_cc.json', 'w') as f:
+#     json.dump(parsed_np_cc, f)
+#
+# with open('parsed_vp_cc.json', 'w') as f:
+#     json.dump(parsed_vp_cc, f)
 
-num_words_cooccur = 15
-cooccur_parsed = np.zeros((len(cooccur_parsed_cc_phrases), num_sentences, num_words_cooccur), dtype=np.int32)
+with open('parsed_np_cc.json', 'r') as f:
+    parsed_np_cc = json.load(f)
 
-try:
-    for l in range(len(cooccur_parsed_cc_phrases)):
-        for se in range(len(cooccur_parsed_cc_phrases[l])):
-            if se > 9:
-                continue
-            if len(cooccur_parsed_cc_phrases[l][se]) > 15:
-                cooccur_parsed_cc[l][se] = cooccur_parsed_cc_phrases[l][se][:15]
-            cooccur_parsed[l][se][:len(cooccur_parsed_cc_phrases[l][se])] = cooccur_parsed_cc_phrases[l][se]
-except:
-    print('Done')
-with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_cooccur.npy', 'w') as f:
-    np.save(f, cooccur_parsed)
+with open('parsed_vp_cc.json', 'r') as f:
+    parsed_vp_cc = json.load(f)
+
+
+# # This creates a input with parsed np and vp separately with max two words and unk words
+#
+# cooccur_parsed_np_cc_phrases = []
+# for key in vid_id:
+#     if key in parsed_np_cc.keys():
+#         event_phrases = []
+#         for event in parsed_np_cc[key]:
+#             p_ = []
+#             for r in range(len(event)):
+#                 # if event[r] == u'\uf0a7' or event[r] == u'\xa3' or event[r] == u'\xe9':
+#                 #     # print (event[r])
+#                 #     cou += 1
+#                 #     event[r] = 'babalanga'
+#
+#                 concatted =''
+#                 if type(event[r]) == list:
+#                     for i in range(len(event[r])):
+#                         concatted += event[r][i] + ' '
+#                     event[r] = concatted
+#
+#                 if len(event[r].split()) > 1:
+#                     try:
+#                         event[r] = event[r].encode('utf-8').split()[:2]
+#                     except:
+#                         print(event[r])
+#                         try:
+#                             event[r] = event[r].split()[0].encode('utf-8').split()[:2]
+#                             print(event[r])
+#                         except:
+#                             event[r] = event[r].split()[1].encode('utf-8').split()[:2]
+#                             print(event[r])
+#                     sum = 0
+#                     for q in range(len(event[r])):
+#                         if event[r][q] not in ['<', '>', 'unk']:
+#                             try:
+#                                 sum += (word_to_ix[str(event[r][q])] * (10 ** (q * 4)))
+#                             except:
+#                                 sum += (8472 * (10 ** (q * 4)))
+#                     p_.append(sum)
+#                 else:
+#                     try:
+#                         if event[r].encode('utf-8') not in ['<', '>', 'unk']:
+#                             try:
+#                                 p_.append(word_to_ix[str(event[r].encode('utf-8'))])
+#                             except:
+#                                 p_.append(8472)
+#                                 continue
+#                     except:
+#                         print(event[r])
+#             event_phrases.append(p_)
+#         cooccur_parsed_np_cc_phrases.append(event_phrases)
+#     else:
+#         cooccur_parsed_np_cc_phrases.append([])
+#
+# cooccur_parsed_vp_cc_phrases = []
+# for key in vid_id:
+#     if key in parsed_vp_cc.keys():
+#         event_phrases = []
+#         for event in parsed_vp_cc[key]:
+#             p_ = []
+#             for r in range(len(event)):
+#                 # if event[r] == u'\uf0a7' or event[r] == u'\xa3' or event[r] == u'\xe9':
+#                 #     # print (event[r])
+#                 #     cou += 1
+#                 #     event[r] = 'babalanga'
+#
+#                 concatted =''
+#                 if type(event[r]) == list:
+#                     for i in range(len(event[r])):
+#                         concatted += event[r][i] + ' '
+#                     event[r] = concatted
+#
+#                 if len(event[r].split()) > 1:
+#                     try:
+#                         event[r] = event[r].encode('utf-8').split()[:2]
+#                     except:
+#                         print(event[r])
+#                         try:
+#                             event[r] = event[r].split()[0].encode('utf-8').split()[:2]
+#                             print(event[r])
+#                         except:
+#                             event[r] = event[r].split()[1].encode('utf-8').split()[:2]
+#                             print(event[r])
+#                     sum = 0
+#                     for q in range(len(event[r])):
+#                         if event[r][q] not in ['<', '>', 'unk']:
+#                             try:
+#                                 sum += (word_to_ix[str(event[r][q])] * (10 ** (q * 4)))
+#                             except:
+#                                 sum += (8472 * (10 ** (q * 4)))
+#                     p_.append(sum)
+#                 else:
+#                     try:
+#                         if event[r].encode('utf-8') not in ['<', '>', 'unk']:
+#                             try:
+#                                 p_.append(word_to_ix[str(event[r].encode('utf-8'))])
+#                             except:
+#                                 p_.append(8472)
+#                                 continue
+#                     except:
+#                         print(event[r])
+#             event_phrases.append(p_)
+#         cooccur_parsed_vp_cc_phrases.append(event_phrases)
+#     else:
+#         cooccur_parsed_vp_cc_phrases.append([])
+#
+# num_words_cooccur = 15
+# cooccur_parsed_np = np.zeros((len(cooccur_parsed_np_cc_phrases), num_sentences, num_words_cooccur), dtype=np.int32)
+# cooccur_parsed_vp = np.zeros((len(cooccur_parsed_vp_cc_phrases), num_sentences, num_words_cooccur), dtype=np.int32)
+# try:
+#     for l in range(len(cooccur_parsed_np_cc_phrases)):
+#         for se in range(len(cooccur_parsed_np_cc_phrases[l])):
+#             if se > 9:
+#                 continue
+#             if len(cooccur_parsed_np_cc_phrases[l][se]) > 15:
+#                 cooccur_parsed_cc[l][se] = cooccur_parsed_np_cc_phrases[l][se][:15]
+#             cooccur_parsed_np[l][se][:len(cooccur_parsed_np_cc_phrases[l][se])] = cooccur_parsed_np_cc_phrases[l][se]
+# except:
+#     print('Done')
+#
+# try:
+#     for l in range(len(cooccur_parsed_vp_cc_phrases)):
+#         for se in range(len(cooccur_parsed_vp_cc_phrases[l])):
+#             if se > 9:
+#                 continue
+#             if len(cooccur_parsed_vp_cc_phrases[l][se]) > 15:
+#                 cooccur_parsed_cc[l][se] = cooccur_parsed_vp_cc_phrases[l][se][:15]
+#             cooccur_parsed_vp[l][se][:len(cooccur_parsed_vp_cc_phrases[l][se])] = cooccur_parsed_vp_cc_phrases[l][se]
+# except:
+#     print('Done')
+#
+# with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_concat_np.npy', 'w') as f:
+#     np.save(f, cooccur_parsed_np)
+#
+# with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_concat_vp.npy', 'w') as f:
+#     np.save(f, cooccur_parsed_vp)
+
+with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_concat_np.npy', 'r') as f:
+    cooccur_parsed_np = np.load(f)
+
+with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_concat_vp.npy', 'r') as f:
+    cooccur_parsed_vp = np.load(f)
+
+print('Done')
+

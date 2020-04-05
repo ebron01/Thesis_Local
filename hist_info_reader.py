@@ -1,6 +1,6 @@
 import pickle
 
-path = '/home/luchy/Desktop/results/result_concat_sum_aux_full_sent/'
+path = '/home/luchy/Desktop/results/result_concat_aux_attent_concat_15_lr2/'
 
 histories = pickle.load(open(path + 'histories.pkl', 'r'))
 infos = pickle.load(open(path + 'infos.pkl', 'r'))

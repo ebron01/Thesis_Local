@@ -22,9 +22,16 @@ def parse_opt():
                         help='path to the json file containing ix for closest aux')
     # parser.add_argument('--aux_np_actnet', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp_oneword.npy',
     #                     help='contains gt actnet with one word nps and vps created with parser.py')
+
     parser.add_argument('--aux_np_vp_cc', type=str,
-                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat.npy',
+                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_cooccur.npy',
                         help='contains cc with all nps and vps for closest caption created with parser_cc.py')
+    parser.add_argument('--aux_np_cc', type=str,
+                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_concat_np.npy',
+                        help='')
+    parser.add_argument('--aux_vp_cc', type=str,
+                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_concat_vp.npy',
+                        help='')
 
 
     parser.add_argument('--g_start_from', type=str, default=None,
@@ -170,7 +177,7 @@ def parse_opt():
     # Optimization: for the Language Model
     parser.add_argument('--optim', type=str, default='adam',
                     help='what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
-    parser.add_argument('--learning_rate', type=float, default=5e-4,  #1e-3
+    parser.add_argument('--learning_rate', type=float, default=5e-4,
                     help='learning rate')
     parser.add_argument('--learning_rate_decay_start', type=int, default=0, #-1
                     help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
@@ -197,7 +204,7 @@ def parse_opt():
 
 
     # Evaluation/Checkpointing
-    parser.add_argument('--val_id', type=str, default='result_concat_aux_attent_concat_15_lr2',
+    parser.add_argument('--val_id', type=str, default='result_concat_sum_aux_np_vp',
                         help='id to use to save captions for validation')
     parser.add_argument('--val_videos_use', type=int, default=-1,
                     help='how many videos to use when periodically evaluating the validation loss? (-1 = all)')
@@ -205,7 +212,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_concat_aux_attent_concat_15_lr2',
+    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_concat_sum_aux_np_vp',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
@@ -253,7 +260,7 @@ def parse_opt():
     #                     help='train with gan (1 = yes, 0 = no)?')
 
     # misc
-    parser.add_argument('--id', type=str, default='result_concat_aux_attent_concat_15_lr2',
+    parser.add_argument('--id', type=str, default='result_concat_sum_aux_np_vp',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')
@@ -263,6 +270,7 @@ def parse_opt():
                         help='use aux features for aux_word_size word_embeddings')
     parser.add_argument('--aux_word_size', type=int, default=15,
                         help='use aux features for 15 word_embeddings')
+
 
     args = parser.parse_args()
 
