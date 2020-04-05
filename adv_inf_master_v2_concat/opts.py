@@ -177,7 +177,7 @@ def parse_opt():
     # Optimization: for the Language Model
     parser.add_argument('--optim', type=str, default='adam',
                     help='what update to use? rmsprop|sgd|sgdmom|adagrad|adam')
-    parser.add_argument('--learning_rate', type=float, default=5e-4,
+    parser.add_argument('--learning_rate', type=float, default=5e-5,
                     help='learning rate')
     parser.add_argument('--learning_rate_decay_start', type=int, default=0, #-1
                     help='at what iteration to start decaying learning rate? (-1 = dont) (in epoch)')
@@ -268,7 +268,7 @@ def parse_opt():
     #aux
     parser.add_argument('--use_aux', type=int, default=1,
                         help='use aux features for aux_word_size word_embeddings')
-    parser.add_argument('--aux_word_size', type=int, default=15,
+    parser.add_argument('--aux_word_size', type=int, default=5,
                         help='use aux features for 15 word_embeddings')
 
 

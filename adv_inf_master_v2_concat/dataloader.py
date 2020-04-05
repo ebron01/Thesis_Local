@@ -347,9 +347,9 @@ class DataLoader(data.Dataset):
             # aux_label_batch[i, :, 1:2] = self.aux_np_actnet[ix][:, 0, 0].reshape(self.max_sent_num,-1)
 
             # this part loads one np/vp word from cc dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from cc caption.
-            aux_label_batch_n[i, :, 1: self.aux_word_size + 1] = self.aux_np_cc[ix]
-            aux_label_batch_v[i, :, 1: self.aux_word_size + 1] = self.aux_vp_cc[ix]
-            aux_label_batch = [aux_label_batch_n, aux_label_batch_v]
+            aux_label_batch_n[i, :, 1: self.aux_word_size + 1] = self.aux_np_cc[ix][:,:self.aux_word_size]
+            aux_label_batch_v[i, :, 1: self.aux_word_size + 1] = self.aux_vp_cc[ix][:,:self.aux_word_size]
+
             # aux_label_batch[i, :, 1: self.aux_np_vp_cc[ix].shape[1] + 1] = self.aux_np_vp_cc[ix]
             v_ix = self.video_id[ix]
 
@@ -398,7 +398,7 @@ class DataLoader(data.Dataset):
             for ix, row in enumerate(mask_batch[i]):
                 if ix < sent_num:
                     row[:nonzeros[ix]] = 1
-
+        aux_label_batch = [aux_label_batch_n, aux_label_batch_v] 
         data = {}
 
         data['fc_feats'] = np.array(fc_batch)

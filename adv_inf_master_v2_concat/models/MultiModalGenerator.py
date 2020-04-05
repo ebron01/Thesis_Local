@@ -176,7 +176,7 @@ class MultiModalGenerator(CaptionModel):
             aux_whole_n, aux_whole_v = aux_labels[:, n].clone()
 
             aux_w_n = torch.zeros(batch_size, self.rnn_size)
-            for b in range(batch_size):
+            for b in range(sent_num):
                 if aux_whole_n[b].sum() == 0:
                     continue
                 count, sum = 0, 0
@@ -195,7 +195,7 @@ class MultiModalGenerator(CaptionModel):
             aux_n = aux_w_n.unsqueeze(1).cuda()
 
             aux_w_v = torch.zeros(batch_size, self.rnn_size)
-            for b in range(batch_size):
+            for b in range(sent_num):
                 if aux_whole_v[b].sum() == 0:
                     continue
                 count, sum = 0, 0
@@ -269,7 +269,7 @@ class MultiModalGenerator(CaptionModel):
             aux_whole_n, aux_whole_v = aux_labels[:, n].clone()
 
             aux_w_n = torch.zeros(batch_size, self.rnn_size)
-            for b in range(batch_size):
+            for b in range(sent_num):
                 if aux_whole_n[b].sum() == 0:
                     continue
                 count, sum = 0, 0
@@ -288,7 +288,7 @@ class MultiModalGenerator(CaptionModel):
             aux_n = aux_w_n.unsqueeze(1).cuda()
 
             aux_w_v = torch.zeros(batch_size, self.rnn_size)
-            for b in range(batch_size):
+            for b in range(sent_num):
                 if aux_whole_v[b].sum() == 0:
                     continue
                 count, sum = 0, 0
@@ -449,6 +449,7 @@ class MultiModalGenerator(CaptionModel):
         temperature = opt.get('temperature', 1.0)
 
         batch_size = fc_feats.size(0)
+        sent_num = fc_feats.size(1)
         video = torch.zeros(batch_size, 1, self.rnn_size).cuda()
         image = torch.zeros(batch_size, 1, self.rnn_size).cuda()
         box = torch.zeros(batch_size, 1, self.rnn_size).cuda()
@@ -466,7 +467,7 @@ class MultiModalGenerator(CaptionModel):
             # aux_w = aux_labels[:, 1].clone()
             aux_whole_n, aux_whole_v = aux_labels
             aux_w_n = torch.zeros(batch_size, self.rnn_size)
-            for b in range(batch_size):
+            for b in range(sent_num):
                 if aux_whole_n[b].sum() == 0:
                     continue
                 count, sum = 0, 0
@@ -485,7 +486,7 @@ class MultiModalGenerator(CaptionModel):
             aux_n = aux_w_n.unsqueeze(1).cuda()
 
             aux_w_v = torch.zeros(batch_size, self.rnn_size)
-            for b in range(batch_size):
+            for b in range(sent_num):
                 if aux_whole_v[b].sum() == 0:
                     continue
                 count, sum = 0, 0
