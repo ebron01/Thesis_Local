@@ -33,7 +33,8 @@ class MultiModalGenerator(CaptionModel):
         self.use_mean = opt.use_mean
 
         #aux features
-        self.aux_embed = nn.Linear(3 * self.rnn_size, self.rnn_size)
+        self.aux_embed = nn.Linear(2 * self.rnn_size, self.rnn_size)
+        self.aux_np_vp = nn.Linear(2 * self.rnn_size, self.rnn_size)
         self.use_aux = opt.use_aux
         self.aux_word_size = opt.aux_word_size
         if self.use_aux:
@@ -112,6 +113,7 @@ class MultiModalGenerator(CaptionModel):
         self.logit.bias.data.fill_(0)
         self.logit.weight.data.uniform_(-initrange, initrange)
         self.aux_embed.weight.data.uniform_(-initrange, initrange)
+        self.aux_np_vp.weight.data.uniform_(-initrange, initrange)
 
     def init_hidden(self, bsz):
         weight = next(self.parameters())
@@ -233,7 +235,8 @@ class MultiModalGenerator(CaptionModel):
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 # aux = self.word_embed(aux_w).unsqueeze(1)
-                xt = self.aux_embed(torch.cat((xt, aux_n, aux_v), dim=2))
+                aux = self.aux_np_vp(torch.cat((aux_n, aux_v), dim=2))
+                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
                 xt = torch.cat((encoded, context, xt),dim=2)
                 # xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
@@ -323,7 +326,8 @@ class MultiModalGenerator(CaptionModel):
 
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
-                xt = self.aux_embed(torch.cat((xt, aux_n, aux_v), dim=2))
+                aux = self.aux_np_vp(torch.cat((aux_n, aux_v), dim=2))
+                xt = self.aux_embed(torch.cat((xt, aux), dim=2))
                 xt = torch.cat((encoded, context, xt), dim=2)
                 output, state = self.sent_rnn(xt, state)
                 logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
@@ -515,8 +519,8 @@ class MultiModalGenerator(CaptionModel):
 
             encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
             xt = self.word_embed(it).unsqueeze(1)
-            xt = self.aux_embed(torch.cat((xt, aux_n, aux_v), dim=2))
-
+            aux = self.aux_np_vp(torch.cat((aux_n, aux_v), dim=2))
+            xt = self.aux_embed(torch.cat((xt, aux), dim=2))
             xt = torch.cat((encoded, context, xt), dim=2)
             output, state = self.sent_rnn(xt, state)
             logprobs = F.log_softmax(self.logit(self.dropout(output.squeeze(1))), dim=1)
