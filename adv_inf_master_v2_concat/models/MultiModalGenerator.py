@@ -38,7 +38,7 @@ class MultiModalGenerator(CaptionModel):
         self.aux_word_size = opt.aux_word_size
         if self.use_aux:
             self.aux_embeded = nn.Linear(self.rnn_size * self.aux_word_size, self.rnn_size)
-            self.aux_attention = Attention_aux(self.rnn_size)
+            self.aux_attention = Attention(self.rnn_size)
 
         # motion features
         self.use_video = opt.use_video
@@ -215,6 +215,7 @@ class MultiModalGenerator(CaptionModel):
                 if self.use_box:
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 if self.use_aux:
+                    aux_c = aux_c.view(batch_size, self.aux_word_size, -1)
                     aux = self.attention_encoder(aux_c, state, 'aux')
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
@@ -285,6 +286,7 @@ class MultiModalGenerator(CaptionModel):
                 if self.use_box:
                     box = self.attention_encoder(box_feats[:, n], state, 'box')
                 if self.use_aux:
+                    aux_c = aux_c.view(batch_size, self.aux_word_size, -1)
                     aux = self.attention_encoder(aux_c, state, 'aux')
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
@@ -459,6 +461,7 @@ class MultiModalGenerator(CaptionModel):
             if self.use_box:
                 box = self.attention_encoder(box_feats, state, 'box')
             if self.use_aux:
+                aux_c = aux_c.view(batch_size, self.aux_word_size, -1)
                 aux = self.attention_encoder(aux_c, state, 'aux')
             encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
             xt = self.word_embed(it).unsqueeze(1)
