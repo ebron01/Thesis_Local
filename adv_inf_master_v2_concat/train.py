@@ -29,7 +29,7 @@ import gc
 # There seems to be cpu memory leak in lstm?
 # https://github.com/pytorch/pytorch/issues/3665
 torch.backends.cudnn.enabled = False
-
+print('git version: ', utils.git_version())
 def add_summary_value(writer, key, value, iteration):
     if writer:
         writer.add_scalar(key, value, iteration)

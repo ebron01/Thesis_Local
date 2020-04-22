@@ -9,7 +9,8 @@ filename_ = '/data/shared/ActivityNet/advinf_activitynet/inputs/caption_np_vp_pa
 filename_order = '/data/shared/ActivityNet/advinf_activitynet/inputs/caption_np_vp_pairs_ix_order.json'
 label_file = '/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense.h5'
 video_info = '/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense.json'
-
+word_to_ix_f = '/data/shared/ActivityNet/advinf_activitynet/inputs/new_dict.json'
+ix_to_word_f = '/data/shared/ActivityNet/advinf_activitynet/inputs/new_dict_ix_to_word.json'
 
 with open(video_info, 'r') as f:
     video_data = json.load(f)
@@ -51,7 +52,14 @@ print(count)
 with open(filename_, 'w') as f:
     json.dump(parsed_data_ix, f)
 
-with open('new_dict.json', 'w') as f:
+with open(word_to_ix_f, 'w') as f:
     json.dump(word_to_ix, f)
+
+ix_to_word = {}
+for key in word_to_ix.keys():
+    ix_to_word[int(word_to_ix[key])] = key
+
+with open(ix_to_word_f, 'w') as f:
+    json.dump(ix_to_word, f)
 
 print('Done')

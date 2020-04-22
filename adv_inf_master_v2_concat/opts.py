@@ -13,6 +13,12 @@ def parse_opt():
                     help='path to the directory containing the boxes of att img feats (img)')
     parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label_orj.h5',
                     help='path to the h5file containing the preprocessed dataset (img/video)')
+    parser.add_argument('--word_to_ix_cc', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/new_dict.json',
+                    help='')
+    parser.add_argument('--ix_to_word_cc', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/new_dict_ix_to_word.json',
+                    help='')
+
+
     parser.add_argument('--frame_ids', type=str,
                         default='/data/shared/ActivityNet/activity_net/inputs/2_filenames.txt',
                         help='path to videos downloaded from activity_net for ConCap comparison')
@@ -23,8 +29,8 @@ def parse_opt():
     # parser.add_argument('--aux_np_actnet', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp_oneword.npy',
     #                     help='contains gt actnet with one word nps and vps created with parser.py')
     parser.add_argument('--aux_np_vp_cc', type=str,
-                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat.npy',
-                        help='contains cc with all nps and vps for closest caption created with parser_cc.py')
+                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat_dict.npy',
+                        help='contains cc with all nps and vps for closest caption created with new dict with parser_cc.py')
 
 
     parser.add_argument('--g_start_from', type=str, default=None,

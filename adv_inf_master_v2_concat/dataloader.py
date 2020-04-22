@@ -89,9 +89,12 @@ class DataLoader(data.Dataset):
         # load the json file which contains additional information about the dataset
         print('DataLoader loading json file: ', opt.input_json)
         self.info = json.load(open(self.opt.input_json))
-        self.ix_to_word = self.info['ix_to_word']
+        # self.ix_to_word = self.info['ix_to_word']
+        self.ix_to_word = json.load(open(opt.ix_to_word_cc))
         self.ix_to_word['1'] = 'raining'
-        self.word_to_ix = self.info['word_to_ix']
+        # self.word_to_ix = self.info['word_to_ix']
+        self.word_to_ix = json.load(open(opt.word_to_ix_cc))
+        self.word_to_ix['raining'] = 1
         self.vocab_size = len(self.ix_to_word)
         self.ix_to_activity = self.info.get('ix_to_activity',None)
         self.activity_size = len(self.ix_to_activity) if self.ix_to_activity is not None else 0

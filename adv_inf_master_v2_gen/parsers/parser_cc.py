@@ -155,3 +155,38 @@ with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_oneword.n
 
 print('Done')
 
+with open('parser_cc.json', 'r') as f:
+    parsed_cc = json.load(f)
+
+word_to_ix_file = '/data/shared/ActivityNet/advinf_activitynet/inputs/new_dict.json'
+word_to_ix_f = json.load(open(word_to_ix_file, 'r'))
+
+aux_normal_parsed_concat_dict = []
+for key in vid_id:
+    if key in parsed_cc.keys():
+        event_phrases = []
+        for event in parsed_cc[key]:
+            caption_phrases = []
+            for n in event:
+                for phrases in n.encode('utf-8').split():
+                    if phrases not in ['<', '>', 'unk']:
+                        try:
+                            caption_phrases.append(word_to_ix_f[str(phrases)])
+                        except:
+                            caption_phrases.append(8472)
+                            continue
+            event_phrases.append(caption_phrases)
+        aux_normal_parsed_concat_dict.append(event_phrases)
+    else:
+        aux_normal_parsed_concat_dict.append([])
+
+
+aux_concat_dict = np.zeros((len(aux_normal_parsed_concat_dict), num_sentences, num_words_concat), dtype=np.int32)
+for l in range(len(aux_normal_parsed_concat_dict)):
+    for se in range(len(aux_normal_parsed_concat_dict[l])):
+        if se > 9:
+            continue
+        aux_concat_dict[l][se][:len(aux_normal_parsed_concat_dict[l][se])] = aux_normal_parsed_concat_dict[l][se]
+
+with open('/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat_dict.npy', 'w') as f:
+    np.save(f, aux_concat_dict)
