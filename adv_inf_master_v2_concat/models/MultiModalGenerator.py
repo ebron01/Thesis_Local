@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -151,8 +151,8 @@ class MultiModalGenerator(CaptionModel):
             # result = self.aux_embeded(feats)
             result = feats
             attention = self.aux_attention
-        result = attention(self.get_hidden_state(state).squeeze(1), result).unsqueeze(1)
-        return result
+        result, weight = attention(self.get_hidden_state(state).squeeze(1), result)
+        return result.unsqueeze(1), weight
 
     def use_context(self):
         self.context = True
@@ -209,14 +209,14 @@ class MultiModalGenerator(CaptionModel):
                 if i >= 1 and seq[:,:,i].sum() == 0:
                     break
                 if self.use_video:
-                    video = self.attention_encoder(fc_feats[:, n], state, 'video')
+                    video, _ = self.attention_encoder(fc_feats[:, n], state, 'video')
                 if self.use_img:
-                    image = self.attention_encoder(img_feats[:, n], state, 'img')
+                    image, _ = self.attention_encoder(img_feats[:, n], state, 'img')
                 if self.use_box:
-                    box = self.attention_encoder(box_feats[:, n], state, 'box')
+                    box, _ = self.attention_encoder(box_feats[:, n], state, 'box')
                 if self.use_aux:
                     aux_c = aux_c.view(batch_size, self.aux_word_size, -1)
-                    aux = self.attention_encoder(aux_c, state, 'aux')
+                    aux, _ = self.attention_encoder(aux_c, state, 'aux')
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 #aux = self.word_embed(aux_w).unsqueeze(1)
@@ -229,6 +229,8 @@ class MultiModalGenerator(CaptionModel):
             if self.context:
                 context = self.get_hidden_state(state)
             outputs.append(torch.cat([_.unsqueeze(1) for _ in sequence], 1).contiguous())
+            # if n == (sent_num-1):
+            #     sys.exit()
         return torch.cat([_.unsqueeze(1) for _ in outputs], 1).contiguous()
 
     def _sample(self, fc_feats, img_feats, box_feats, activity_labels, aux_labels,  opt={}):
@@ -280,14 +282,14 @@ class MultiModalGenerator(CaptionModel):
                 if t == 0 : # input <bos>
                     it = fc_feats.new_zeros(batch_size, dtype=torch.long)
                 if self.use_video:
-                    video = self.attention_encoder(fc_feats[:, n], state, 'video')
+                    video, _ = self.attention_encoder(fc_feats[:, n], state, 'video')
                 if self.use_img:
-                    image = self.attention_encoder(img_feats[:, n], state, 'img')
+                    image, _ = self.attention_encoder(img_feats[:, n], state, 'img')
                 if self.use_box:
-                    box = self.attention_encoder(box_feats[:, n], state, 'box')
+                    box, _ = self.attention_encoder(box_feats[:, n], state, 'box')
                 if self.use_aux:
                     aux_c = aux_c.view(batch_size, self.aux_word_size, -1)
-                    aux = self.attention_encoder(aux_c, state, 'aux')
+                    aux, attention_weights = self.attention_encoder(aux_c, state, 'aux')
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 #aux = self.word_embed(aux_w).unsqueeze(1)
@@ -401,11 +403,11 @@ class MultiModalGenerator(CaptionModel):
         aux = torch.zeros(batch_size, 1, self.rnn_size).cuda()
         # 'it' contains a word index
         if self.use_video:
-            video = self.attention_encoder(fkn, state, 'video')
+            video, _ = self.attention_encoder(fkn, state, 'video')
         if self.use_img:
-            image = self.attention_encoder(ikn, state, 'img')
+            image, _ = self.attention_encoder(ikn, state, 'img')
         if self.use_box:
-            box = self.attention_encoder(bkn, state, 'box')
+            box, _ = self.attention_encoder(bkn, state, 'box')
         encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
         xt = self.word_embed(it).unsqueeze(1)
         # xt = torch.cat((encoded, context, xt), dim=2)
@@ -425,6 +427,7 @@ class MultiModalGenerator(CaptionModel):
         activity = torch.zeros(batch_size,1,self.activity_encoding_size).cuda()
         seq = fc_feats.new_zeros(batch_size,self.seq_length, dtype=torch.long)
         seqLogprobs = fc_feats.new_zeros(batch_size,self.seq_length)
+        atten = torch.zeros(batch_size, self.seq_length + 1, self.aux_word_size)
         state = self.init_hidden(batch_size)
         if self.use_activity_labels:
             activity = self.activity_embed(activity_labels.float()).unsqueeze(1)
@@ -455,14 +458,15 @@ class MultiModalGenerator(CaptionModel):
             if t == 0 : # input <bos>
                 it = fc_feats.new_zeros(batch_size, dtype=torch.long)
             if self.use_video:
-                video = self.attention_encoder(fc_feats, state, 'video')
+                video, _ = self.attention_encoder(fc_feats, state, 'video')
             if self.use_img:
-                image = self.attention_encoder(img_feats, state, 'img')
+                image, _ = self.attention_encoder(img_feats, state, 'img')
             if self.use_box:
-                box = self.attention_encoder(box_feats, state, 'box')
+                box, _ = self.attention_encoder(box_feats, state, 'box')
             if self.use_aux:
                 aux_c = aux_c.view(batch_size, self.aux_word_size, -1)
-                aux = self.attention_encoder(aux_c, state, 'aux')
+                aux, attention_weights = self.attention_encoder(aux_c, state, 'aux')
+                atten[:, t, :] = attention_weights
             encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
             xt = self.word_embed(it).unsqueeze(1)
             xt = self.aux_embed(torch.cat((xt, aux), dim=2))
@@ -503,4 +507,4 @@ class MultiModalGenerator(CaptionModel):
                 break
 
         context = self.get_hidden_state(state)
-        return seq,seqLogprobs,context
+        return seq,seqLogprobs,context, atten

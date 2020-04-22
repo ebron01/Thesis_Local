@@ -146,7 +146,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
     num_captions = eval_kwargs.get('num_captions', 1)
     verbose_video = eval_kwargs.get('verbose_video', 0)
     remove_caption = eval_kwargs.get('remove', 0) # usually remove captions in validation stage but not in test.
-
+    aux_word_size = eval_kwargs.get('aux_word_size', 15)
     print('beam_size', beam_size)
     print('sample_max',sample_max)
     print('num_samples', num_samples)
@@ -227,6 +227,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 sample_list = np.zeros((loader.batch_size, num_samples, loader.seq_length))
                 context_list = np.zeros((loader.batch_size, num_samples, 512))
                 seq_dummy = torch.zeros(loader.batch_size, 10, loader.seq_length).cuda()
+                attention_max = torch.zeros(loader.batch_size, 10, loader.seq_length + 1, aux_word_size)
                 best_context = None
                 best_seq = None
                 for s in range(max(sent_num)):
@@ -235,14 +236,17 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     p_score_list = np.zeros((loader.batch_size, num_samples))
                     prob_score_list = np.zeros((loader.batch_size, num_samples))
                     score_list = np.zeros((loader.batch_size, num_samples))
+                    attention = torch.zeros(loader.batch_size, num_samples, loader.seq_length + 1, aux_word_size)
+                    attention_max_sent = torch.zeros(loader.batch_size, 1, loader.seq_length + 1, aux_word_size)
                     for i in range(num_samples):
                         fc_feats_s = fc_feats[:, s]
                         img_feats_s = img_feats[:, s]
                         box_feats_s = box_feats[:, s]
                         aux_labels_s = aux_labels[:, s]
                         start = time.time()
-                        seq, logprobs, context = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities, aux_labels_s,
+                        seq, logprobs, context, attention[:, i, :, :] = gen_model.sample_sequential(fc_feats_s, img_feats_s, box_feats_s, activities, aux_labels_s,
                                                                              best_context, opt=eval_kwargs)
+
                         sample_time = time.time()
                         # print('sample_time:', sample_time-start)
 
@@ -278,13 +282,16 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                         prob_score_list[:, i] += prob_score
                         if score_list[:, i].sum() == 0:
                             score_list[:, i] += 0.5 * prob_score
-
+                        print(i)
                     # select the caption with highest score
                     inds = score_list.argsort(axis=1)[:, ::-1]
+                    for j in range(loader.batch_size):
+                        attention_max_sent[j] = attention[j, np.argwhere(inds == 0)[:, 1][j], :, :]
                     caption_list = torch.tensor(sample_list[np.arange(loader.batch_size)[:, None], inds]).cuda().long()
                     best_context = torch.tensor(context_list[np.arange(loader.batch_size)[:, None], inds][:, :1, :]).cuda().float()
                     best_seq = caption_list[:, 0, :]
                     seq_dummy[:, s] = best_seq
+                    attention_max[:, s] = attention_max_sent.squeeze(1)
 
                 # generated sequence
                 seq = seq_dummy.long()

@@ -217,8 +217,8 @@ class MultiModalAttEarlyFusion(nn.Module):
             embed = self.box_embed
             attention = self.box_attention
         result = embed(feats)
-        result = attention(sent.squeeze(1), result)
-        return result
+        result, _ = attention(sent.squeeze(1), result)
+        return result, _
 
     def get_moe_weights(self,seq):
         with torch.no_grad():
@@ -244,13 +244,13 @@ class MultiModalAttEarlyFusion(nn.Module):
             moe_weights = self.moe_fc(sent_embed)
             moe_weights = F.softmax(moe_weights, dim=1)
             if self.use_video:
-                video = self.attention_encoder(fc_feats[:, n], sent_embed, 'video')
+                video, _ = self.attention_encoder(fc_feats[:, n], sent_embed, 'video')
                 multi_score.append(self.video_classifier(video,sent_embed))
             if self.use_img:
-                image = self.attention_encoder(img_feats[:, n], sent_embed, 'img')
+                image, _ = self.attention_encoder(img_feats[:, n], sent_embed, 'img')
                 multi_score.append(self.img_classifier(image,sent_embed))
             if self.use_box:
-                box = self.attention_encoder(box_feats[:, n], sent_embed, 'box')
+                box, _ = self.attention_encoder(box_feats[:, n], sent_embed, 'box')
                 multi_score.append(self.box_classifier(box,sent_embed))
             if self.use_activity_labels:
                 if len(activity_labels.size()) == 3:

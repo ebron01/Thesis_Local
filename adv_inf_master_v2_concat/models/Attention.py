@@ -36,7 +36,7 @@ class Attention(nn.Module):
         e = o.view(batch_size, seq_len)
         alpha = F.softmax(e, dim=1)
         context = torch.bmm(alpha.unsqueeze(1), encoder_outputs).squeeze(1)
-        return context
+        return context, alpha
 
 class Attention_aux(nn.Module):
     """
