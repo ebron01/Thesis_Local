@@ -132,6 +132,7 @@ def diversity_meausures(predictions,div):
     return template
 
 def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifier=None, eval_kwargs={}):
+    weights = {}
     verbose = eval_kwargs.get('verbose', True)
     dump_json = eval_kwargs.get('dump_json', 1)
     num_videos = eval_kwargs.get('num_videos', eval_kwargs.get('val_videos_use', -1))
@@ -282,7 +283,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                         prob_score_list[:, i] += prob_score
                         if score_list[:, i].sum() == 0:
                             score_list[:, i] += 0.5 * prob_score
-                        print(i)
+
                     # select the caption with highest score
                     inds = score_list.argsort(axis=1)[:, ::-1]
                     for j in range(loader.batch_size):
@@ -299,6 +300,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             # calculate discriminator scores for each input.
             if dis:
                 seq = torch.mul(seq,utils.generate_paragraph_mask(sent_num, seq))
+                aux_labels = torch.mul(aux_labels, utils.generate_paragraph_mask(sent_num, aux_labels))
+                attention_max = torch.mul(attention_max, utils.generate_paragraph_mask_aux(sent_num, attention_max))
 
                 # negatives for evaluating discriminator
                 #TODO: aux_labels added but think about this part
@@ -349,6 +352,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
             seq = utils.align_seq(sent_num,seq)
             labels = utils.align_seq(sent_num,labels)
+            aux_labels = utils.align_seq(sent_num, aux_labels)
+            if dis:
+                attention_max = utils.align_seq(sent_num, attention_max)
             mm_labels = utils.align_seq(sent_num, mm_labels)
             gt = utils.decode_sequence(loader.get_vocab(),labels[:,1:-1].data)
             mm = utils.decode_sequence(loader.get_vocab(), mm_labels[:,1:-1].data)
@@ -357,14 +363,20 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
         # print and store actual decoded sentence
         sents = utils.decode_sequence(loader.get_vocab(), seq)
+        if dis:
+            auxs = utils.decode_sequence(loader.get_vocab(), aux_labels)
         for k, sent in enumerate(sents):
             entry = {'video_id': data['infos'][k]['id'], 'caption': sent.encode('ascii', 'ignore'),
                      'gt' : gt[k].encode('ascii','ignore'), 'mm' : mm[k].encode('ascii','ignore'),
                     'timestamp': data['infos'][k]['timestamp'].tolist(),
                      'activity' : data['infos'][k]['activity']
                      }
+            with open('weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
+                np.save(f, attention_max[k])
             # calculate accuracy
             if dis:
+
+                entry['aux'] = auxs[k]
                 entry['v_gen_score'] = v_gen_score[k].item()
                 entry['v_gt_score'] = v_gt_score[k].item()
                 entry['v_mm_score'] = v_mm_score[k].item()
@@ -408,8 +420,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
             if verbose:
                 if dis:
-                    print_str = 'video %s: activity: %s; caption: %s; gt: %s; mm: %s; v_gen_score: %5f; v_gt_score: %5f; v_mm_score %5f' \
-                                % (entry['video_id'], entry['activity'], entry['caption'], entry['gt'], entry['mm'], entry['v_gen_score'], entry['v_gt_score'], entry['v_mm_score'])
+                    print_str = 'video %s: activity: %s; caption: %s; cc: %s; gt: %s; mm: %s; v_gen_score: %5f; v_gt_score: %5f; v_mm_score %5f' \
+                                % (entry['video_id'], entry['activity'], entry['caption'], entry['aux'], entry['gt'], entry['mm'], entry['v_gen_score'], entry['v_gt_score'], entry['v_mm_score'])
                     print_str = '%s; l_gen_score: %5f; l_gt_score: %5f; p_gen_score: %5f; p_gt_score: %5f;' \
                                 % (print_str, entry['l_gen_score'], entry['l_gt_score'], entry['p_gen_score'], entry['p_gt_score'])
                     print(print_str)
@@ -445,7 +457,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             break
         if num_videos >= 0 and n >= num_videos:
             break
-
+    with open('attention_weights.json', 'w') as f:
+        json.dump(weights, f)
     # Switch back to training mode
     gen_model.train()
 

@@ -110,6 +110,15 @@ def generate_paragraph_mask(sent_num,seq):
         mask[i,:sent_num[i]] = ones.expand(sent_num[i],-1)
     return mask
 
+def generate_paragraph_mask_aux(sent_num,seq):
+    assert len(seq.size()) == 4
+    batch_size = seq.size(0)
+    mask = seq.new_zeros(seq.size())
+    ones = torch.ones((seq.size(2), seq.size(3))).cuda()
+    for i in range(batch_size):
+        mask[i,:sent_num[i]] = ones.expand(sent_num[i],-1,-1)
+    return mask
+
 def get_bert_masks(sent_num,seq,tokenizer,vocab,use_pair=False,eval=False,max_seq_length=40+2):
     input_ids = []
     input_masks = []
