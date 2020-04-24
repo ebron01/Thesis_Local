@@ -133,6 +133,7 @@ def diversity_meausures(predictions,div):
 
 def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifier=None, eval_kwargs={}):
     weights = {}
+    print('git version: ', utils.git_version())
     verbose = eval_kwargs.get('verbose', True)
     dump_json = eval_kwargs.get('dump_json', 1)
     num_videos = eval_kwargs.get('num_videos', eval_kwargs.get('val_videos_use', -1))
@@ -151,7 +152,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
     print('beam_size', beam_size)
     print('sample_max',sample_max)
     print('num_samples', num_samples)
-
+    opt = opts.parse_opt()
     model_id = eval_kwargs.get('id', eval_kwargs.get('val_id', ''))
 
     if split == 'val':
@@ -371,7 +372,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     'timestamp': data['infos'][k]['timestamp'].tolist(),
                      'activity' : data['infos'][k]['activity']
                      }
-            with open('weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
+            with open(opt.checkpoint_path + '/weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
                 np.save(f, attention_max[k])
             # calculate accuracy
             if dis:

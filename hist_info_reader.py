@@ -1,6 +1,6 @@
 import pickle
 
-path = '/home/luchy/Desktop/results/result_concat_sum_aux_full_sent/'
+path = '/home/luchy/Desktop/results/result_concat_aux_attent_concat_visualized/'
 
 histories = pickle.load(open(path + 'histories.pkl', 'r'))
 infos = pickle.load(open(path + 'infos.pkl', 'r'))
@@ -56,7 +56,7 @@ for key in d_val_results.keys():
     score[key] = e_score
     m_score = d_val_results[key]['lang_scores']
     M_score[key] = m_score
-
+    print('val', key, m_score)
     if e_score > max_e_score:
         max_score = e_score
         max_key = key
