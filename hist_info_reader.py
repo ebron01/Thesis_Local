@@ -1,6 +1,6 @@
 import pickle
 
-path = '/home/luchy/Desktop/results/result_concat_aux_attent_concat_visualized/'
+path = '/home/luchy/Desktop/results/result_concat_dict/'
 
 histories = pickle.load(open(path + 'histories.pkl', 'r'))
 infos = pickle.load(open(path + 'infos.pkl', 'r'))
