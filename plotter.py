@@ -158,4 +158,5 @@ plt.title("Losses")
 
 # plt.show() #to save the figure this line must be closed.
 plt.savefig(result_dir+save_file_dis+''+'.png')
+
 print('Done')
