@@ -38,7 +38,7 @@ class MultiModalGenerator(CaptionModel):
         self.aux_word_size = opt.aux_word_size
         if self.use_aux:
             self.aux_embeded = nn.Linear(self.rnn_size * self.aux_word_size, self.rnn_size)
-            self.aux_attention = Attention(self.rnn_size)
+            self.aux_attention = Attention_aux(self.rnn_size)
 
         # motion features
         self.use_video = opt.use_video
@@ -132,7 +132,7 @@ class MultiModalGenerator(CaptionModel):
     #     result = attention(self.get_hidden_state(state).squeeze(1), result).unsqueeze(1)
     #     return result
 
-    def attention_encoder(self, feats, state, mode):
+    def attention_encoder(self, feats, state, mode, mask):
         if mode == "video":
             result = self.frame_embed(feats)
             attention = self.video_attention
@@ -151,7 +151,7 @@ class MultiModalGenerator(CaptionModel):
             # result = self.aux_embeded(feats)
             result = feats
             attention = self.aux_attention
-        result, weight = attention(self.get_hidden_state(state).squeeze(1), result)
+        result, weight = attention(self.get_hidden_state(state).squeeze(1), result, mask)
         return result.unsqueeze(1), weight
 
     def use_context(self):
@@ -196,6 +196,15 @@ class MultiModalGenerator(CaptionModel):
                     count += 1
                 # aux_w[b] = sum / count
             aux_c = aux_w.unsqueeze(1).cuda()
+            # mask_gpu = aux_whole > 1
+            # mask = mask_gpu.data.cpu().numpy()
+            mask = (aux_whole > 1)[:, :self.aux_word_size]
+            for i in range(len(mask)):
+                for j in range(len(mask[i])):
+                    if mask[i][j] == 0:
+                        mask[i][j] = 1
+                        break
+            mask = torch.tensor(mask, dtype=torch.float64).cuda().float()
             #aux_w = self.word_embed(aux_whole)
             if self.use_activity_labels: # False by default to avoid cheating
                 if len(activity_labels.size()) == 3:
@@ -209,14 +218,14 @@ class MultiModalGenerator(CaptionModel):
                 if i >= 1 and seq[:,:,i].sum() == 0:
                     break
                 if self.use_video:
-                    video, _ = self.attention_encoder(fc_feats[:, n], state, 'video')
+                    video, _ = self.attention_encoder(fc_feats[:, n], state, 'video', mask)
                 if self.use_img:
-                    image, _ = self.attention_encoder(img_feats[:, n], state, 'img')
+                    image, _ = self.attention_encoder(img_feats[:, n], state, 'img', mask)
                 if self.use_box:
-                    box, _ = self.attention_encoder(box_feats[:, n], state, 'box')
+                    box, _ = self.attention_encoder(box_feats[:, n], state, 'box', mask)
                 if self.use_aux:
                     aux_c = aux_c.view(batch_size, self.aux_word_size, -1)
-                    aux, attention_weights = self.attention_encoder(aux_c, state, 'aux')
+                    aux, attention_weights = self.attention_encoder(aux_c, state, 'aux', mask)
                 encoded = self.encoder(torch.cat((video, image, box, activity), dim=2))
                 xt = self.word_embed(it).unsqueeze(1)
                 #aux = self.word_embed(aux_w).unsqueeze(1)
