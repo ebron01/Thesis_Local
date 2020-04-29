@@ -372,10 +372,11 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     'timestamp': data['infos'][k]['timestamp'].tolist(),
                      'activity' : data['infos'][k]['activity']
                      }
-            with open(opt.checkpoint_path + '/weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
-                np.save(f, attention_max[k])
+
             # calculate accuracy
             if dis:
+                with open(opt.checkpoint_path + '/weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
+                    np.save(f, attention_max[k])
 
                 entry['aux'] = auxs[k]
                 entry['v_gen_score'] = v_gen_score[k].item()
@@ -458,8 +459,6 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             break
         if num_videos >= 0 and n >= num_videos:
             break
-    with open('attention_weights.json', 'w') as f:
-        json.dump(weights, f)
     # Switch back to training mode
     gen_model.train()
 
