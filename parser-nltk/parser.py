@@ -53,7 +53,7 @@ except Exception as e:
 #         """
 
 grammer = """
-        NP: {<NN.?>+}
+        NP: {<NNP.?>+}
         VP: {<VB.?>*}
         """
 cp = nltk.RegexpParser(grammer)
