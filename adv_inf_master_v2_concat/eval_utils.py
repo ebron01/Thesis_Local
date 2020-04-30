@@ -302,7 +302,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             if dis:
                 seq = torch.mul(seq,utils.generate_paragraph_mask(sent_num, seq))
                 aux_labels = torch.mul(aux_labels, utils.generate_paragraph_mask(sent_num, aux_labels))
-                attention_max = torch.mul(attention_max, utils.generate_paragraph_mask_aux(sent_num, attention_max))
+                if sample_max == 0:
+                    attention_max = torch.mul(attention_max, utils.generate_paragraph_mask_aux(sent_num, attention_max))
 
                 # negatives for evaluating discriminator
                 #TODO: aux_labels added but think about this part
@@ -355,7 +356,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             labels = utils.align_seq(sent_num,labels)
             aux_labels = utils.align_seq(sent_num, aux_labels)
             if dis:
-                attention_max = utils.align_seq(sent_num, attention_max)
+                if sample_max == 0:
+                    attention_max = utils.align_seq(sent_num, attention_max)
             mm_labels = utils.align_seq(sent_num, mm_labels)
             gt = utils.decode_sequence(loader.get_vocab(),labels[:,1:-1].data)
             mm = utils.decode_sequence(loader.get_vocab(), mm_labels[:,1:-1].data)
@@ -372,11 +374,12 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     'timestamp': data['infos'][k]['timestamp'].tolist(),
                      'activity' : data['infos'][k]['activity']
                      }
-            with open(opt.checkpoint_path + '/weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
-                np.save(f, attention_max[k])
+
             # calculate accuracy
             if dis:
-
+                if sample_max == 0:
+                    with open(opt.checkpoint_path + '/weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
+                        np.save(f, attention_max[k])
                 entry['aux'] = auxs[k]
                 entry['v_gen_score'] = v_gen_score[k].item()
                 entry['v_gt_score'] = v_gt_score[k].item()
@@ -458,8 +461,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             break
         if num_videos >= 0 and n >= num_videos:
             break
-    with open('attention_weights.json', 'w') as f:
-        json.dump(weights, f)
+
     # Switch back to training mode
     gen_model.train()
 
