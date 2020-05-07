@@ -199,11 +199,13 @@ class MultiModalGenerator(CaptionModel):
             # mask_gpu = aux_whole > 1
             # mask = mask_gpu.data.cpu().numpy()
             mask = (aux_whole > 1)[:, :self.aux_word_size]
-            for i in range(len(mask)):
-                for j in range(len(mask[i])):
-                    if mask[i][j] == 0:
-                        mask[i][j] = 1
-                        break
+
+            # for i in range(len(mask)):
+            #     for j in range(len(mask[i])):
+            #         if mask[i][j] == 0:
+            #             mask[i][j] = 1
+            #             break
+
             mask = torch.tensor(mask, dtype=torch.float64).cuda().float()
             #aux_w = self.word_embed(aux_whole)
             if self.use_activity_labels: # False by default to avoid cheating
@@ -283,11 +285,13 @@ class MultiModalGenerator(CaptionModel):
                 # aux_w[b] = sum / count
             aux_c = aux_w.unsqueeze(1).cuda()
             mask = (aux_whole > 1)[:, :self.aux_word_size]
-            for i in range(len(mask)):
-                for j in range(len(mask[i])):
-                    if mask[i][j] == 0:
-                        mask[i][j] = 1
-                        break
+
+            # for i in range(len(mask)):
+            #     for j in range(len(mask[i])):
+            #         if mask[i][j] == 0:
+            #             mask[i][j] = 1
+            #             break
+
             mask = torch.tensor(mask, dtype=torch.float64).cuda().float()
             if self.use_activity_labels:
                 if len(activity_labels.size()) == 3:
@@ -471,11 +475,13 @@ class MultiModalGenerator(CaptionModel):
                 # aux_w[b] = sum / count
             aux_c = aux_w.unsqueeze(1).cuda()
             mask = (aux_labels > 1)[:, :self.aux_word_size]
-            for i in range(len(mask)):
-                for j in range(len(mask[i])):
-                    if mask[i][j] == 0:
-                        mask[i][j] = 1
-                        break
+
+            # for i in range(len(mask)):
+            #     for j in range(len(mask[i])):
+            #         if mask[i][j] == 0:
+            #             mask[i][j] = 1
+            #             break
+
             mask = torch.tensor(mask, dtype=torch.float64).cuda().float()
             if t == 0 : # input <bos>
                 it = fc_feats.new_zeros(batch_size, dtype=torch.long)
