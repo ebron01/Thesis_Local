@@ -22,7 +22,7 @@ class Attention(nn.Module):
         nn.init.xavier_normal_(self.linear1.weight)
         nn.init.xavier_normal_(self.linear2.weight)
 
-    def forward(self, hidden_state, encoder_outputs, mask):
+    def forward(self, hidden_state, encoder_outputs):
         """
         Arguments:
             hidden_state {Variable} -- batch_size x dim
@@ -56,7 +56,7 @@ class Attention_aux(nn.Module):
         nn.init.xavier_normal_(self.linear1.weight)
         nn.init.xavier_normal_(self.linear2.weight)
 
-    def forward(self, hidden_state, encoder_outputs, mask):
+    def forward(self, hidden_state, encoder_outputs):
         """
         Arguments:
             hidden_state {Variable} -- batch_size x dim
@@ -71,9 +71,5 @@ class Attention_aux(nn.Module):
         o = self.linear2(F.tanh(self.linear1(inputs)))
         e = o.view(batch_size, seq_len)
         alpha = F.softmax(e, dim=1)
-        #this part masks weights
-        alpha = torch.mul(alpha, mask)
-        #this part normalizes masked weights
-        alpha = alpha / alpha.sum(dim=1).view(batch_size, 1)
         context = torch.bmm(alpha.unsqueeze(1), encoder_outputs).squeeze(1)
         return context, alpha

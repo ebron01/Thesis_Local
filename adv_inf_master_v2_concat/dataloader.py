@@ -114,6 +114,7 @@ class DataLoader(data.Dataset):
         # self.aux_np_actnet = np.load(opt.aux_np_actnet)
         self.aux_np_vp_cc = np.load(opt.aux_np_vp_cc)
         self.aux_word_size = opt.aux_word_size
+        self.aux_cooccur_size = opt.aux_cooccur_size
         # for array in range(len(self.aux_np_actnet)):
         #     for a in range(len(self.aux_np_actnet[array])):
         #         for i in range(len(self.aux_np_actnet[array][a])):
@@ -343,7 +344,7 @@ class DataLoader(data.Dataset):
 
             # this part loads one np/vp word from cc dataset. It checks if there is a zero vector(created for np/vp longer than one word) for np/vp takes next vp/gt from cc caption.
             # aux_label_batch[i, :, 1: self.aux_word_size + 1] = self.aux_np_vp_cc[ix]
-            aux_label_batch[i] = self.aux_np_vp_cc[ix]
+            aux_label_batch[i, :, :self.aux_cooccur_size] = self.aux_np_vp_cc[ix, :, :self.aux_cooccur_size]
             v_ix = self.video_id[ix]
 
             # get visually mismatched (mm) captions and features as inputs to generator and visual discriminator
