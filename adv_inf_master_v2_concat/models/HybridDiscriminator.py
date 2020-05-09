@@ -206,7 +206,7 @@ class MultiModalAttEarlyFusion(nn.Module):
         else:
             return state.transpose(0,1)
 
-    def attention_encoder(self, feats, sent, mode, _):
+    def attention_encoder(self, feats, sent, mode):
         if mode == "video":
             embed = self.frame_embed
             attention = self.video_attention
@@ -217,7 +217,7 @@ class MultiModalAttEarlyFusion(nn.Module):
             embed = self.box_embed
             attention = self.box_attention
         result = embed(feats)
-        result, _ = attention(sent.squeeze(1), result, _)
+        result, _ = attention(sent.squeeze(1), result)
         return result, _
 
     def get_moe_weights(self,seq):
@@ -245,13 +245,13 @@ class MultiModalAttEarlyFusion(nn.Module):
             moe_weights = F.softmax(moe_weights, dim=1)
             _ = []
             if self.use_video:
-                video, _ = self.attention_encoder(fc_feats[:, n], sent_embed, 'video', _)
+                video, _ = self.attention_encoder(fc_feats[:, n], sent_embed, 'video')
                 multi_score.append(self.video_classifier(video,sent_embed))
             if self.use_img:
-                image, _ = self.attention_encoder(img_feats[:, n], sent_embed, 'img', _)
+                image, _ = self.attention_encoder(img_feats[:, n], sent_embed, 'img')
                 multi_score.append(self.img_classifier(image,sent_embed))
             if self.use_box:
-                box, _ = self.attention_encoder(box_feats[:, n], sent_embed, 'box', _)
+                box, _ = self.attention_encoder(box_feats[:, n], sent_embed, 'box')
                 multi_score.append(self.box_classifier(box,sent_embed))
             if self.use_activity_labels:
                 if len(activity_labels.size()) == 3:
