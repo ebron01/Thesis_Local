@@ -367,7 +367,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         # print and store actual decoded sentence
         sents = utils.decode_sequence(loader.get_vocab(), seq)
         if dis:
-            auxs = utils.decode_sequence(loader.get_vocab(), aux_labels)
+            auxs = utils.decode_sequence_aux(loader.get_vocab(), aux_labels)
         for k, sent in enumerate(sents):
             entry = {'video_id': data['infos'][k]['id'], 'caption': sent.encode('ascii', 'ignore'),
                      'gt' : gt[k].encode('ascii','ignore'), 'mm' : mm[k].encode('ascii','ignore'),

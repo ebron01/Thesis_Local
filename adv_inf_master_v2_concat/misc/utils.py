@@ -62,6 +62,31 @@ def decode_sequence(ix_to_word, seq,add_punct=False):
         out.append(txt)
     return out
 
+def decode_sequence_aux(ix_to_word, seq,add_punct=False):
+    N, D = seq.size()
+    out = []
+    for i in range(N):
+        txt = ''
+        for j in range(D):
+            ix = seq[i,j]
+            if ix > 0 :
+                if j >= 1:
+                    txt = txt + ' '
+                if ix // (10 ** 4) != 0:
+                    first = ix // (10 ** 4)
+                    second = ix % (10 ** 4)
+                    two_words = ix_to_word[str(first.item())] + ' ' + ix_to_word[str(second.item())]
+                    txt = txt + two_words
+                else:
+                    txt = txt + ix_to_word[str(ix.item())]
+            else:
+                break
+        if add_punct: # for bert
+            txt = txt + '.'
+        txt = unicode(txt.encode('ascii', 'ignore'))
+        out.append(txt)
+    return out
+
 def to_contiguous(tensor):
     if tensor.is_contiguous():
         return tensor

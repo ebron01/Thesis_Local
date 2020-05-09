@@ -9,10 +9,10 @@ from copy import deepcopy
 import numpy as np
 
 
-exp_name = 'result_concat_aux_attent_concat_visualized_best_gen48_dis11'
+exp_name = 'result_concat_aux_attent_concat_visualized_mmu'
 weight_path = '/home/luchy/Desktop/results/%s/weights'% exp_name
 plot_path = '/home/luchy/Desktop/results/%s/plots'%exp_name
-date = ''
+date = '_6May'
 if not os.path.exists(plot_path):
     os.mkdir(plot_path)
 
@@ -44,6 +44,11 @@ for key in attention.keys():
     attention_weights.update({key.rsplit('_', 1)[0]: {}})
 
 attention_weights_sent = deepcopy(attention_weights)
+
+val_vid_keys = ['v_2Iakg-Z-iXM', 'v_fJNauQt9Di0', 'v_7qBA7XPDsC4', 'v_sAAARH12tdc',
+                'v_YzcgGHmfaKE', 'v_5y9Lw8--ulU', 'v_2SYTRqm4Ym4', 'v_Ti1ZaH0VGfg',
+                'v_ywsH9kD033I', 'v_XbkGlZTlixw', 'v_hzuQYOG0a_g', 'v_5SNtTQZnN4g']
+
 vid_key = 'v_5SNtTQZnN4g'
 count = 0
 for key in attention.keys():
