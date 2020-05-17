@@ -36,6 +36,8 @@ turi/midframeextractor/mid/*
 turi/reference_data_all.model/*
 turi/conceptualcaptions_0_2.sframe/*
 turi/env2/*
+turi/10closest_updated_query_mid_new_val1.json
+turi/query_mid_closest10_new_val1.json
 
 glove/*.bin
 glove/corpus.txt
