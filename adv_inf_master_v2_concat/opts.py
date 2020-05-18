@@ -23,7 +23,7 @@ def parse_opt():
     # parser.add_argument('--aux_np_actnet', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/actnet_gt_np_vp_oneword.npy',
     #                     help='contains gt actnet with one word nps and vps created with parser.py')
     parser.add_argument('--aux_np_vp_cc', type=str,
-                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_concat.npy',
+                        default='/data/shared/ActivityNet/advinf_activitynet/inputs/cc_np_vp_cooccur.npy',
                         help='contains cc with all nps and vps for closest caption created with parser_cc.py')
 
 
@@ -197,7 +197,7 @@ def parse_opt():
 
 
     # Evaluation/Checkpointing
-    parser.add_argument('--val_id', type=str, default='result_concat_aux_attent_concat_visualized_weights_masked',
+    parser.add_argument('--val_id', type=str, default='result_concat_aux_attent_concat_visualized_weights_cooccur_masked',
                         help='id to use to save captions for validation')
     parser.add_argument('--val_videos_use', type=int, default=-1,
                     help='how many videos to use when periodically evaluating the validation loss? (-1 = all)')
@@ -205,7 +205,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_concat_aux_attent_concat_visualized_weights_masked',
+    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_concat_aux_attent_concat_visualized_weights_cooccur_masked',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
@@ -253,7 +253,7 @@ def parse_opt():
     #                     help='train with gan (1 = yes, 0 = no)?')
 
     # misc
-    parser.add_argument('--id', type=str, default='result_concat_aux_attent_concat_visualized_weights_masked',
+    parser.add_argument('--id', type=str, default='result_concat_aux_attent_concat_visualized_weights_cooccur_masked',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')
@@ -263,6 +263,9 @@ def parse_opt():
                         help='use aux features for aux_word_size word_embeddings')
     parser.add_argument('--aux_word_size', type=int, default=15,
                         help='use aux features for 15 word_embeddings')
+    parser.add_argument('--aux_cooccur_size', type=int, default=10,
+                        help='use aux cooccur words for 10 word_embeddings, np_vp_cooccur has 15')
+
 
     args = parser.parse_args()
 

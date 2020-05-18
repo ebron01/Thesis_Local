@@ -470,7 +470,7 @@ class MultiModalGenerator(CaptionModel):
                     count += 1
                 # aux_w[b] = sum / count
             aux_c = aux_w.unsqueeze(1).cuda()
-            mask = (aux_c > 1)[:, :self.aux_word_size]
+            mask = (aux_labels > 1)[:, :self.aux_word_size]
             for i in range(len(mask)):
                 for j in range(len(mask[i])):
                     if mask[i][j] == 0:
