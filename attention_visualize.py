@@ -9,15 +9,15 @@ from copy import deepcopy
 import numpy as np
 
 
-exp_name = 'result_concat_aux_attent_concat_visualized_mmu'
+exp_name = 'result_concat_aux_attent_concat_visualized_weights_cooccur'
 weight_path = '/home/luchy/Desktop/results/%s/weights'% exp_name
 plot_path = '/home/luchy/Desktop/results/%s/plots'%exp_name
-date = '_6May'
+date = '_gen49_dis10_10May'
 if not os.path.exists(plot_path):
     os.mkdir(plot_path)
 
 generated_captions_path = '/home/luchy/PycharmProjects/Thesis_Local/adv_inf_master_v2_concat/densevid_eval/caption_%s%s.json'%(exp_name,date)
-cc_np_vp_path = '/home/luchy/PycharmProjects/Thesis_Local/adv_inf_master_v2_gen/parsers/parser_cc.json'
+cc_np_vp_path = '/home/luchy/PycharmProjects/Thesis_Local/adv_inf_master_v2_gen/parsers/cc_np_vp_cooccur_words.json'
 
 generated_captions = json.load(open(generated_captions_path, 'r'))
 cc_np_vp = json.load(open(cc_np_vp_path, 'r'))
@@ -84,7 +84,7 @@ attention_weights_sent_word = deepcopy(attention_weights_sent)
 for g in range(len(generated_captions[vid_key])):
     sent_len = len(generated_captions[vid_key][g].split())
     # total = np.sum(vid_length[g]) #This is true
-    total = len(vid_length[g])
+    total = 10 #len(vid_length[g]) for cooccur it is 10
     attention_weights_sent_word[vid_key][g] = attention_weights_sent[vid_key][g][:sent_len, :total]
     attention_weights_sent_noword[vid_key][g] = attention_weights_sent[vid_key][g][:sent_len, total:]
 
@@ -190,13 +190,13 @@ def showAttention():
         #     noword.append(1-attention[i].sum())
 
         caption = generated_captions[vid_key][sent_num].split()
-        sent_cc_np_vp = cc_np_vp[vid_key][sent_num]
+        sent_cc_np_vp = cc_np_vp[vid_key][sent_num][:10]
         sent_cc_np_vp.append('no word')
 
         # Set up figure with colorbar
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        plt.title('Masked Attention Results for ' + str(vid_key) + ' Event ' + str(sent_num))
+        plt.title('Attention Results for ' + str(vid_key) + ' Event ' + str(sent_num))
 
         cax = ax.matshow(attention.T, cmap='magma_r', vmin=0, vmax=1) #cmap='bone'
         divider = make_axes_locatable(ax)
