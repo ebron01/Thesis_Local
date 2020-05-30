@@ -207,7 +207,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         response = sc.api_call(
             "chat.postMessage",
                 channel="#advinf",
-                text='iteration' + str(n)
+                text='val iteration' + str(n)
         )
         json.dumps(response)
 

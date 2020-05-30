@@ -10,6 +10,11 @@ import json
 import os
 
 from six.moves import cPickle
+from slackclient import SlackClient
+import json
+
+slack_token = "xoxp-1086129891559-1100862096098-1086137403783-011e0e52b6dd62116d7fa4c39b5a90be"
+sc = SlackClient(slack_token)
 
 import opts
 import models
@@ -142,6 +147,7 @@ def train(opt):
     g_loss_history = histories.get('g_loss_history', {})
     d_loss_history = histories.get('d_loss_history', {})
     print('learning_rate', opt.learning_rate)
+    g_epoch_num = 0
     """ START TRAINING """
     while True:
         gc.collect()
@@ -210,6 +216,15 @@ def train(opt):
             # Evaluate & Save Model #
             #########################
             if wrapped:
+                # this sends iteration information in slack
+                response = sc.api_call(
+                    "chat.postMessage",
+                    channel="#advinf",
+                    text='train epoch ' + str(g_epoch_num) + ' done. Eval started.'
+                )
+                g_epoch_num += 1
+                json.dumps(response)
+
                 # evaluate model on dev set
                 eval_kwargs = {'split': 'val',
                                'dataset': opt.input_json,
