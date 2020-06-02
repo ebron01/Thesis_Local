@@ -134,6 +134,8 @@ def parse_opt():
                         help='weight to lang discriminator reward')
     parser.add_argument('--par_weight', type=float, default=1.0,
                         help='weight to paragraph discriminator reward')
+    parser.add_argument('--sim_weight', type=float, default=0.1,
+                        help='weight to caption similarity discriminator reward')
     parser.add_argument('--ce_weight', type=float, default=0,
                         help='add ce loss during self-critical training')
 
@@ -197,7 +199,7 @@ def parse_opt():
 
 
     # Evaluation/Checkpointing
-    parser.add_argument('--val_id', type=str, default='result_concat_aux_attent_concat_visualized_weights_np',
+    parser.add_argument('--val_id', type=str, default='attent_visualized_Hybrid_scratch',
                         help='id to use to save captions for validation')
     parser.add_argument('--val_videos_use', type=int, default=-1,
                     help='how many videos to use when periodically evaluating the validation loss? (-1 = all)')
@@ -205,7 +207,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_concat_aux_attent_concat_visualized_weights_np',
+    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/attent_visualized_Hybrid_scratch',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
@@ -253,7 +255,7 @@ def parse_opt():
     #                     help='train with gan (1 = yes, 0 = no)?')
 
     # misc
-    parser.add_argument('--id', type=str, default='result_concat_aux_attent_concat_visualized_weights_np',
+    parser.add_argument('--id', type=str, default='attent_visualized_Hybrid_scratch',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')

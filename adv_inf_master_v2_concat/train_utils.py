@@ -33,7 +33,7 @@ def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
 def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
                         temperature=1.0,gen_weight=0.5, mm_weight=0.5,neg_weight=0.5,
-                        use_vis=True,use_lang=True,use_pair=True,grad_clip=0.1):
+                        use_vis=True,use_lang=True,use_pair=True, use_sim=True, grad_clip=0.1):
     #eklendi
     # for i in range(1000):
     #     print (i)
@@ -63,6 +63,7 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     dis_v_loss = 0
     dis_l_loss = 0
     dis_p_loss = 0
+    dis_s_loss = 0
     accuracies = {}
     wrapped = data['bounds']['wrapped']
 
@@ -210,6 +211,41 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         dis_optimizer.step()
         torch.cuda.synchronize()
 
+    if use_sim:
+        dis_optimizer.zero_grad()
+        # gen
+        label.fill_(0)
+        s_gen_score = dis_model(gen_labels, aux_labels[:, :, :-2], mode='sim')
+        s_gen_score = utils.align_seq(sent_num, s_gen_score)
+        s_loss_1 = gan_crit(s_gen_score, label)
+        s_loss_1.backward()
+        dis_s_loss += s_loss_1.item()
+
+        # negative sample
+        # p_neg_score = dis_model( neg_pair_labels[:,:,1:-1], mode='par')
+        # p_neg_score = utils.align_seq(sent_num, p_neg_score)
+        # p_loss_3 = neg_weight * gan_crit(p_neg_score, label)
+        # p_loss_3.backward()
+        # dis_p_loss += p_loss_3.item()
+
+        # gt
+        label.fill_(1)
+        #this is irrelevant for label and aux comparison
+        # s = 0
+        # for n in sent_num:
+        #     label[s] = 0 # first sentence is assigned score 0
+        #     s+=n
+        s_gt_score = dis_model(labels[:, :, 1:-1], aux_labels[:, :, :-2], mode='sim')
+        s_gt_score = utils.align_seq(sent_num, s_gt_score)
+        s_loss_2 = gan_crit(s_gt_score, label)
+        s_loss_2.backward()
+        dis_s_loss += s_loss_2.item()
+
+        # update discriminator
+        utils.clip_gradient(dis_optimizer, grad_clip)
+        dis_optimizer.step()
+        torch.cuda.synchronize()
+
     # calculate accuracy (ground truth scores higher than negative inputs)
     with torch.no_grad():
         if use_vis:
@@ -227,5 +263,9 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
             p_neg_accuracy = torch.gt(p_gt_score, p_neg_score).cpu().numpy().mean()
             accuracies['dis_p_gen_accuracy'] = p_gen_accuracy
             accuracies['dis_p_neg_accuracy'] = p_neg_accuracy
+        if use_sim:
+            s_gen_accuracy = torch.gt(s_gt_score, s_gen_score).cpu().numpy().mean()
+            accuracies['dis_s_gen_accuracy'] = s_gen_accuracy
 
-    return [dis_v_loss, dis_l_loss, dis_p_loss], accuracies, wrapped, sent_num
+
+    return [dis_v_loss, dis_l_loss, dis_p_loss, dis_s_loss], accuracies, wrapped, sent_num

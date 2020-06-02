@@ -52,6 +52,7 @@ class HybridDiscriminator(nn.Module):
         self.lang = LanguageModel(opt)
         self.visual = MultiModalAttEarlyFusion(opt)
         self.par = ParagraphModel(opt)
+        self.sim = CaptionSimilarity(opt)
 
     def forward(self, *args, **kwargs):
         mode = kwargs.get('mode', 'visual')
@@ -67,6 +68,9 @@ class HybridDiscriminator(nn.Module):
 
     def forward_par(self, seq):
         return self.par(seq)
+
+    def forward_sim(self, seq, aux):
+        return self.sim(seq, aux)
 
     def use_context(self):
         self.context = True
@@ -438,3 +442,99 @@ class ParagraphModel(nn.Module):
             p_score = self.classifier(torch.cat((sents[i],sents[j]),dim=2)).squeeze(1).squeeze(1)
             p_scores[:, i + 1] = p_score
         return p_scores
+
+class CaptionSimilarity(nn.Module):
+    def __init__(self, opt):
+        super(CaptionSimilarity, self).__init__()
+        self.vocab_size = opt.vocab_size
+        self.seq_length = opt.seq_length
+
+        self.rnn_type = opt.rnn_type
+        self.rnn_size = opt.d_rnn_size
+        if self.rnn_type.lower() == 'lstm':
+            self.rnn_cell = nn.LSTM
+        elif self.rnn_type.lower() == 'gru':
+            self.rnn_cell = nn.GRU
+        self.num_layers = opt.num_layers
+        self.drop_prob_lm = opt.drop_prob_lm
+
+        self.input_encoding_size = opt.d_input_encoding_size
+
+        self.glove = opt.glove_npy
+        if self.glove is not None:
+            self.input_encoding_size = 300
+        self.word_embed = nn.Embedding(self.vocab_size + 2, self.input_encoding_size)
+        self.bidirectional = opt.d_bidirectional
+        self.sent_rnn = self.rnn_cell(self.input_encoding_size, self.rnn_size,
+                                      self.num_layers, dropout=self.drop_prob_lm, batch_first=True,
+                                      bidirectional=self.bidirectional)
+        self.classifier = Classifier(4 * self.rnn_size) if self.bidirectional else Classifier(2 * self.rnn_size)
+        self.dropout = nn.Dropout(self.drop_prob_lm)
+        self.init_weights()
+
+    def get_hidden_state(self, state):
+        if self.rnn_type == "lstm":
+            return_state = state[0].transpose(0, 1).contiguous()
+        else:
+            return_state = state.transpose(0, 1).contiguous()
+        if self.bidirectional:
+            return_state = return_state.view(return_state.size(0), 1, -1)
+        return return_state
+
+    def init_weights(self):
+        initrange = 0.1
+        if self.glove is not None:
+            self.word_embed.load_state_dict({'weight': torch.from_numpy(np.load(self.glove))})
+        else:
+            self.word_embed.weight.data.uniform_(-initrange, initrange)
+
+    def init_hidden(self, bsz):
+        weight = next(self.parameters())
+        num_layers = self.num_layers * 2 if self.bidirectional else self.num_layers
+        if self.rnn_type == 'lstm':
+            return (weight.new_zeros(num_layers, bsz, self.rnn_size),
+                    weight.new_zeros(num_layers, bsz, self.rnn_size))
+        else:
+            return weight.new_zeros(num_layers, bsz, self.rnn_size)
+
+    def pairwise_score(self, bsz, seq, ix1, ix2, p_scores, use):
+        new_scores2 = self.classifier(torch.cat((seq[ix1], seq[ix2]), dim=2)).squeeze(1)
+        for i in range(bsz):
+            if use[i]:
+                p_scores[i, ix2] = p_scores[i, ix2] + new_scores2[i]
+
+    def forward(self, seq, aux):
+        batch_size = seq.size(0)
+        sent_size = seq.size(1)
+        sent_num = [0] * batch_size
+        s_scores = seq.new_zeros(batch_size, sent_size).float()
+        sents = []
+        auxs = []
+        max_sent_size = sent_size
+
+        for n in range(sent_size):
+            if seq[:, n, :].sum() == 0:
+                max_sent_size = n
+                break
+
+            # first embed sentence with lstm
+            state = self.init_hidden(batch_size)
+            sent = self.dropout(self.word_embed(seq[:, n]))
+            aux_ = self.dropout(self.word_embed(aux[:, n]))
+            output, state = self.sent_rnn(sent, state)
+            output_a, state_a = self.sent_rnn(aux_, state)
+
+            # get number of sentences per video, so we don't consider 0-padded sentences
+            sents.append(self.get_hidden_state(state))
+            auxs.append(self.get_hidden_state(state_a))
+            for i in range(batch_size):
+                if seq[i, n].sum() != 0:
+                    sent_num[i] += 1
+        if max_sent_size == 1:
+            max_sent_size += 1
+        for i in range(max_sent_size - 1):
+            # j = i + 1
+            # use = [(sent_num[k] > i and sent_num[k] > j) for k in range(batch_size)]
+            s_score = self.classifier(torch.cat((sents[i], auxs[i]), dim=2)).squeeze(1).squeeze(1)
+            s_scores[:, i] = s_score
+        return s_scores
