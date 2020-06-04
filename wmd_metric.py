@@ -35,12 +35,10 @@ def removestopwords(captions):
     captions = captions.translate(str.maketrans('','',string.punctuation))
     line = captions.lower().split()
     line = [w for w in line if w not in stop_words]
-
     return line
 
 start_embeddings = datetime.now()
 print('cell started at : ' + str(start_embeddings))
-
 # this part loads a word2vec model
 print('Loading model')
 # model= KeyedVectors.load_word2vec_format('/media/luchy/HDD/wmd/GoogleNews-vectors-negative300.bin', binary=True)
@@ -52,54 +50,67 @@ model.init_sims(replace=True)  # Normalizes the vectors in the word2vec class.
 start_embeddings = datetime.now()
 print ('normalizing vectors')
 print('cell started at : ' + str(start_embeddings))
-
-experiment_name = 'concat_mmu'
-caption_file_name = 'caption_result_concat_mmu_19Mart_d19.json'
-
-caption_dir = 'adv_inf_master_v2_concat/densevid_eval/'
-generated_captions = caption_dir + caption_file_name
 gt = '/data/shared/ActivityNet/activitynet_annotations/ActivityNet_val_1.json'
-np_save_path = '/home/luchy/Desktop/results/WMD_Scores/'
-
-generated_captions = json.load(open(generated_captions, 'r'))
-generated_captions = generated_captions['results']
 gt = json.load(open(gt, 'r'))
 
 gt_sentences = {}
 for key in gt.keys():
     gt_sentences.update({key: gt[key]['sentences']})
 
-generated_sentences = {}
-for key in generated_captions.keys():
-    captions = []
-    for i in range(len(generated_captions[key])):
-        captions.append(generated_captions[key][i]['sentence'])
-    generated_sentences.update({key: captions})
+caption_file_names = os.listdir('/home/luchy/PycharmProjects/Thesis_Local/adv_inf_master_v2_concat/densevid_eval')
+caption_dir = 'adv_inf_master_v2_concat/densevid_eval/'
+np_save_path = '/home/luchy/Desktop/results/WMD_Scores/'
 
-#control for consistency of created event captions
-for key in generated_captions.keys():
-    if key in gt_sentences.keys():
-        if len(gt_sentences[key]) != len(generated_sentences[key]):
-            generated_sentences[key] = generated_sentences[key][:(len(generated_sentences[key]) // 2)]
-            # print (key, len(gt_sentences[key]), len(generated_sentences[key]))
 
-WMD_average_npy = np.zeros(len(generated_captions.keys()), dtype=float)
-for k, key in enumerate(generated_captions.keys()):
-    if key in gt_sentences.keys():
-        distances = 0
-        for i in range(len(gt_sentences[key])):
-            base = removestopwords(gt_sentences[key][i])
-            captions = removestopwords(generated_sentences[key][i])
-            if key == 'v_92fD8Cy2zL0':
-                captions = ['video', 'cuts', 'sitting', 'getting', 'nails', 'done', 'another', 'woman', 'wearing', 'surgical', 'mask']
-            distances += model.wmdistance(base, captions)
-        WMD_average_npy[k] = (distances / len(generated_sentences[key]))
+for cap in caption_file_names:
+    if cap.startswith('caption'):
+        caption_file_name = cap
+    else:
+        continue
+    files = os.listdir(np_save_path)
+    if caption_file_name.strip('caption_').strip('.json') + 'custom' + '.npy' in files:
+        continue
+    if caption_file_name == 'caption_val_result_concat_sum_aux_full_sent0F3KEZ.json':
+        continue
 
-np.save(np_save_path + experiment_name + 'custom', WMD_average_npy)
-#np.save(np_save_path + experiment_name, WMD_average_npy)
+    # experiment_name = 'concat_mmu'
+    # caption_file_name = 'caption_result_concat_mmu_19Mart_d19.json'
 
-with open('/home/luchy/Desktop/results/WMD_Scores/all_average_scores_custom.txt', 'a') as f:
-#with open('/home/luchy/Desktop/results/WMD_Scores/all_average_scores.txt', 'a') as f:
-    f.write('WMD Average score for experiment ' + experiment_name + ' is: ' + str(WMD_average_npy.sum() / len(generated_captions.keys())) + ' (' + caption_file_name +')')
-    f.write('\n')
+    generated_captions = caption_dir + caption_file_name
+    generated_captions = json.load(open(generated_captions, 'r'))
+    generated_captions = generated_captions['results']
+
+    generated_sentences = {}
+    for key in generated_captions.keys():
+        captions = []
+        for i in range(len(generated_captions[key])):
+            captions.append(generated_captions[key][i]['sentence'])
+        generated_sentences.update({key: captions})
+
+    #control for consistency of created event captions
+    for key in generated_captions.keys():
+        if key in gt_sentences.keys():
+            if len(gt_sentences[key]) != len(generated_sentences[key]):
+                generated_sentences[key] = generated_sentences[key][:(len(generated_sentences[key]) // 2)]
+                # print (key, len(gt_sentences[key]), len(generated_sentences[key]))
+
+    WMD_average_npy = np.zeros(len(generated_captions.keys()), dtype=float)
+    for k, key in enumerate(generated_captions.keys()):
+        if key in gt_sentences.keys():
+            distances = 0
+            for i in range(len(gt_sentences[key])):
+                base = removestopwords(gt_sentences[key][i])
+                captions = removestopwords(generated_sentences[key][i])
+                if key == 'v_92fD8Cy2zL0':
+                    captions = ['video', 'cuts', 'sitting', 'getting', 'nails', 'done', 'another', 'woman', 'wearing', 'surgical', 'mask']
+                distances += model.wv.wmdistance(base, captions)
+            WMD_average_npy[k] = (distances / len(generated_sentences[key]))
+
+    np.save(np_save_path + caption_file_name.strip('caption_').strip('.json') + 'custom', WMD_average_npy)
+    #np.save(np_save_path + experiment_name, WMD_average_npy)
+
+    with open('/home/luchy/Desktop/results/WMD_Scores/all_average_scores_custom_3Jun.txt', 'a') as f:
+    #with open('/home/luchy/Desktop/results/WMD_Scores/all_average_scores.txt', 'a') as f:
+        f.write('WMD Average score for experiment ' + caption_file_name.strip('caption_').strip('.json') + ' is: ' + str(WMD_average_npy.sum() / len(generated_captions.keys())) + ' (' + caption_file_name +')')
+        f.write('\n')
 print('Done')
