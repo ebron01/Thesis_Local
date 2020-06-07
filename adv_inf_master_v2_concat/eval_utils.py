@@ -176,7 +176,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
     vis_weight = eval_kwargs.get('vis_weight', 0.8)
     lang_weight = eval_kwargs.get('lang_weight', 0.2)
     pair_weight = eval_kwargs.get('pair_weight', 1.0)
-    sim_weight = eval_kwargs.get('sim_weight', 0.1)
+    sim_weight = eval_kwargs.get('sim_weight', 0.8)
 
     div = {'gt': [], 'gen': []}
     dis = dis_model is not None
