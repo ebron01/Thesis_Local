@@ -71,6 +71,19 @@ for ix in range(len(video_id)):
 #                     break
 # except :
 #     print('done')
+
+# not_parsed_keys = {}
+# try:
+#     for key in not_parsed_sentences_dict.keys():
+#         if 'concap' in key:
+#             for k in not_parsed_sentences_dict[key].keys():
+#                list = []
+#                if not_parsed_sentences_dict[key][k]['order'] == 0 :
+#                     list.append(not_parsed_sentences_dict[key][k]['caption'])
+#                     not_parsed_keys.update({key : k})
+#                     break
+# except :
+#     print('done')
 #
 # # parsed_cc = {}
 # # for v in vid_id:
@@ -99,18 +112,35 @@ for ix in range(len(video_id)):
 #         concat_event.append(not_p_cc[i])
 #     not_parsed_cc.update({v: concat_event})
 
+# not_parsed_cc_keys = {}
+# for v in vid_id:
+#     not_p_cc = {}
+#     for p in not_parsed_keys.keys():
+#         if v in p:
+#             # parsed_cc.append(p)
+#             not_p_cc.update({p.rsplit('_', 3)[1]: not_parsed_keys[p]})
+#     concat_event = []
+#     for i in sorted(not_p_cc.keys()):
+#         concat_event.append(not_p_cc[i])
+#     not_parsed_cc_keys.update({v: concat_event})
+
 # with open('parser_cc.json', 'w') as f:
 #     json.dump(parsed_cc, f)
 
 # with open('not_parsed_cc.json', 'w') as f:
 #     json.dump(not_parsed_cc, f)
 
+# with open('not_parsed_cc_keys.json', 'w') as f:
+#     json.dump(not_parsed_cc_keys, f)
 
 with open('parser_cc.json', 'r') as f:
     parsed_cc = json.load(f)
 
 with open('not_parsed_cc.json', 'r') as f:
     not_parsed_cc = json.load(f)
+
+with open('not_parsed_cc_keys.json', 'r') as f:
+    not_parsed_cc_keys = json.load(f)
 
 # aux_normal_parsed_phrases = []
 # for key in vid_id:
@@ -169,7 +199,31 @@ with open('not_parsed_cc.json', 'r') as f:
 #         aux_normal_not_parsed_phrases.append(event_phrases)
 #     else:
 #         aux_normal_not_parsed_phrases.append([])
-#
+
+aux_normal_not_parsed_phrase_keys = []
+for key in vid_id:
+    if key in not_parsed_cc_keys.keys():
+        event_phrases = []
+        for event in not_parsed_cc_keys[key]:
+            p_ = []
+            p_.append(event)
+            # for phrases in event[0].encode('utf-8').split():
+            #     if phrases not in ['<', '>', 'unk']:
+            #         try:
+            #             p_.append(word_to_ix[str(phrases)])
+            #         except:
+            #             p_.append(8472)
+            #             continue
+            event_phrases.append(p_)
+        aux_normal_not_parsed_phrase_keys.append(event_phrases)
+    else:
+        aux_normal_not_parsed_phrase_keys.append([])
+
+with open('aux_normal_not_parsed_phrase_keys.json', 'w') as f:
+    json.dump(aux_normal_not_parsed_phrase_keys, f)
+
+print('Done')
+
 # num_words_full_sent = 30
 # aux_not_parsed = np.zeros((len(aux_normal_not_parsed_phrases), num_sentences, num_words_full_sent), dtype=np.int32)
 #
