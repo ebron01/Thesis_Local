@@ -128,6 +128,7 @@ def train(opt):
 
     # hybrid discriminator weight
     v_weight = opt.visual_weight
+    v_weight_concap = opt.visual_weight_concap
     l_weight = opt.lang_weight
     p_weight = opt.par_weight
 
@@ -282,22 +283,24 @@ def train(opt):
             start = time.time()
             losses, accuracies, wrapped,sent_num = train_discriminator(dis_model,gen_model,dis_optimizer,gan_crit,dis_loader,
                                                                        temperature=temperature,gen_weight=opt.d_gen_weight,mm_weight=opt.d_mm_weight,
-                                                                       use_vis=(v_weight >0), use_lang=(l_weight > 0), use_pair=(p_weight>0))
-            dis_v_loss, dis_l_loss, dis_p_loss = losses
+                                                                       use_vis_concap=(v_weight_concap >0), use_vis=(v_weight >0), use_lang=(l_weight > 0), use_pair=(p_weight>0))
+            dis_v_loss, dis_v_loss_concap, dis_l_loss, dis_p_loss = losses
             end = time.time()
 
             # Print Info
             if d_iter % opt.losses_print_every == 0:
-                print("d_iter {} (d_epoch {}), v_loss = {:.8f}, l_loss = {:.8f}, p_loss={:.8f}, time/batch = {:.3f}, num_sent = {} {}" \
-                    .format(d_iter, d_epoch, dis_v_loss, dis_l_loss, dis_p_loss, end - start,sum(sent_num),sent_num))
+                print("d_iter {} (d_epoch {}), v_loss = {:.8f}, v_loss_concap = {:.8f}, l_loss = {:.8f}, p_loss={:.8f}, time/batch = {:.3f}, num_sent = {} {}" \
+                    .format(d_iter, d_epoch, dis_v_loss, dis_v_loss_concap,  dis_l_loss, dis_p_loss, end - start,sum(sent_num),sent_num))
                 # print ('accuracies: ', accuracies)
-                print("accuracies: dis_v_gen_accuracy : %.6f | dis_v_mm_accuracy : %.6f | dis_l_gen_accuracy : %.6f | dis_l_neg_accuracy : %.6f |"
-                "dis_p_gen_accuracy : %.6f | dis_p_neg_accuracy : %.6f"% (accuracies['dis_v_gen_accuracy'], accuracies['dis_v_mm_accuracy'], accuracies['dis_l_gen_accuracy'], \
-                                                                         accuracies['dis_l_neg_accuracy'], accuracies['dis_p_gen_accuracy'], accuracies['dis_p_neg_accuracy']))
+                print("accuracies: dis_v_gen_accuracy : %.6f | dis_v_mm_accuracy : %.6f | dis_v_gen_accuracy_concap : %.6f | dis_v_mm_accuracy_concap0 : %.6f | dis_l_gen_accuracy : %.6f | dis_l_neg_accuracy : %.6f |"
+                "dis_p_gen_accuracy : %.6f | dis_p_neg_accuracy : %.6f"% (accuracies['dis_v_gen_accuracy'], accuracies['dis_v_mm_accuracy'], \
+                                                                          accuracies['dis_v_gen_accuracy_concap'], accuracies['dis_v_mm_accuracy_concap'], \
+                                                                          accuracies['dis_l_gen_accuracy'], accuracies['dis_l_neg_accuracy'], \
+                                                                          accuracies['dis_p_gen_accuracy'], accuracies['dis_p_neg_accuracy']))
 
             # Log Losses
             if d_iter % opt.losses_log_every == 0:
-                d_loss_history[d_iter] = {'dis_v_loss': dis_v_loss, 'dis_l_loss': dis_l_loss, 'dis_p_loss': dis_p_loss, 'd_epoch': d_epoch}
+                d_loss_history[d_iter] = {'dis_v_loss': dis_v_loss, 'dis_v_loss_concap': dis_v_loss_concap, 'dis_l_loss': dis_l_loss, 'dis_p_loss': dis_p_loss, 'd_epoch': d_epoch}
                 for type, accuracy in accuracies.items():
                     d_loss_history[d_iter][type] = accuracy
 
@@ -326,6 +329,7 @@ def train(opt):
 
                 # save the best discriminator
                 current_d_score = v_weight * (val_result['v_gen_accuracy'] + val_result['v_mm_accuracy']) + \
+                                  v_weight_concap * (val_result['v_gen_accuracy_concap'] + val_result['v_mm_accuracy_concap']) + \
                                   l_weight  * (val_result['l_gen_accuracy'] + val_result['l_neg_accuracy']) + \
                                   p_weight * (val_result['p_gen_accuracy'] + val_result['p_neg_accuracy'])
                 if best_d_val_score is None or current_d_score > best_d_val_score:

@@ -9,6 +9,8 @@ def parse_opt():
                         help='path to the directory containing the preprocessed fc video features')
     parser.add_argument('--input_img_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/resnet152/',
                         help='path to the directory containing the image features')
+    parser.add_argument('--input_img_concap_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/resnet152_concap/',
+                        help='path to the directory containing the image features for Conceptual Caption images')
     parser.add_argument('--input_box_dir', type=str, default='/data/shared/ActivityNet/advinf_activitynet/feats/bottomup/',
                     help='path to the directory containing the boxes of att img feats (img)')
     parser.add_argument('--input_label_h5', type=str, default='/data/shared/ActivityNet/advinf_activitynet/inputs/video_data_dense_label_orj.h5',
@@ -93,8 +95,12 @@ def parse_opt():
                         help='use video features (c3d/resnext101-64f) specified in input_fc_dir for discriminator')
     parser.add_argument('--use_img', type=int, default=1,
                         help='use resnet features specified in input_img_dir')
+    parser.add_argument('--use_img_concap', type=int, default=1,
+                        help='use resnet features specified in input_img_dir_concap')
     parser.add_argument('--d_use_img', type=int, default=1,
                         help='use resnet features specified in input_img_dir for discriminator')
+    parser.add_argument('--d_use_img_concap', type=int, default=1,
+                        help='use resnet features specified in input_img_concap_dir for discriminator')
     parser.add_argument('--use_box', type=int, default=1,
                         help='use bottomup features sepcified in input_box_dir')
     parser.add_argument('--d_use_box', type=int, default=1,
@@ -130,6 +136,8 @@ def parse_opt():
     # video disc option
     parser.add_argument('--visual_weight', type=float, default=0.8, #default=1.0
                         help='weight to visual discriminator reward')
+    parser.add_argument('--visual_weight_concap', type=float, default=0.5, #default=1.0
+                        help='weight to visual discriminator for concap images reward')
     parser.add_argument('--lang_weight', type=float, default=0.2, #default=1.0
                         help='weight to lang discriminator reward')
     parser.add_argument('--par_weight', type=float, default=1.0,
@@ -152,7 +160,7 @@ def parse_opt():
                     help='If use box, do we normalize box feature')
 
     # Optimization: General
-    parser.add_argument('--g_pre_nepoch', type=int, default=50,
+    parser.add_argument('--g_pre_nepoch', type=int, default=1,
                     help='number of epochs to pre-train generator with cross entropy')
     parser.add_argument('--batch_size', type=int, default=16,
                     help='minibatch size')
@@ -197,7 +205,7 @@ def parse_opt():
 
 
     # Evaluation/Checkpointing
-    parser.add_argument('--val_id', type=str, default='result_concat_aux_attent_concat_visualized_weights_np',
+    parser.add_argument('--val_id', type=str, default='attent_visualized_Hybrid_vis_05',
                         help='id to use to save captions for validation')
     parser.add_argument('--val_videos_use', type=int, default=-1,
                     help='how many videos to use when periodically evaluating the validation loss? (-1 = all)')
@@ -205,7 +213,7 @@ def parse_opt():
                     help='How often do we want to print losses? (0 = disable)')
     parser.add_argument('--save_checkpoint_every', type=int, default=1,
                     help='how often to save a model checkpoint in iterations? the code already saves checkpoint every epoch (0 = dont save; 1 = every epoch)')
-    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/result_concat_aux_attent_concat_visualized_weights_np',
+    parser.add_argument('--checkpoint_path', type=str, default='/home/luchy/Desktop/results/attent_visualized_Hybrid_vis_05',
                     help='directory to store checkpointed models')
     parser.add_argument('--losses_log_every', type=int, default=25,
                     help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
@@ -253,7 +261,7 @@ def parse_opt():
     #                     help='train with gan (1 = yes, 0 = no)?')
 
     # misc
-    parser.add_argument('--id', type=str, default='result_concat_aux_attent_concat_visualized_weights_np',
+    parser.add_argument('--id', type=str, default='attent_visualized_Hybrid_vis_05',
                     help='an id identifying this run/job. used in cross-val and appended when writing progress files')
     parser.add_argument('--train_only', type=int, default=0,
                     help='if true then use 80k, else use 110k')

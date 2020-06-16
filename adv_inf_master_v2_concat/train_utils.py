@@ -33,7 +33,7 @@ def train_generator(gen_model, gen_optimizer, crit, loader, grad_clip=0.1):
 
 def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
                         temperature=1.0,gen_weight=0.5, mm_weight=0.5,neg_weight=0.5,
-                        use_vis=True,use_lang=True,use_pair=True,grad_clip=0.1):
+                        use_vis_concap=True, use_vis=True,use_lang=True,use_pair=True,grad_clip=0.1):
     #eklendi
     # for i in range(1000):
     #     print (i)
@@ -55,12 +55,13 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
     sent_num = data['sent_num']
     torch.cuda.synchronize()
     tmp = [data['fc_feats'],data['mm_fc_feats'], data['img_feats'], data['box_feats'], data['att_feats'], data['labels'], data['aux_labels'], data['mm_labels'],
-           data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
+           data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities'], data['img_feats_concap']]
     tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
     fc_feats, mm_fc_feats, img_feats, box_feats, att_feats, labels, aux_labels, mm_labels, att_masks, activities, \
-    mm_img_feats, mm_box_feats, mm_activities = tmp
+    mm_img_feats, mm_box_feats, mm_activities, img_feats_concap = tmp
     label = torch.zeros(sum(sent_num)).cuda()
     dis_v_loss = 0
+    dis_v_loss_concap = 0
     dis_l_loss = 0
     dis_p_loss = 0
     accuracies = {}
@@ -143,6 +144,40 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
         dis_optimizer.step()
         torch.cuda.synchronize()
 
+    # update visual discriminator with [gt (real), gt mismatch (fake), gen mismatch (fake)]
+    if use_vis_concap:
+        dis_optimizer.zero_grad()
+
+        # mismatch_gt
+        v_mm_score_concap = dis_model(img_feats_concap, img_feats, box_feats, activities, mm_labels[:, :, 1:-1], mode="visual_concap")
+        v_mm_score_concap = utils.align_seq(sent_num, v_mm_score_concap)
+        v_loss_3_concap = mm_weight * gan_crit(v_mm_score_concap, label)
+        v_loss_3_concap.backward()
+        dis_v_loss_concap += v_loss_3_concap.item()
+
+        # mismatch_gen
+        v_mm_gen_score_concap = dis_model(img_feats_concap, img_feats, box_feats, activities, mm_gen_labels, mode="visual_concap")
+        v_mm_gen_score_concap = utils.align_seq(sent_num, v_mm_gen_score_concap)
+        v_loss_1_concap = gen_weight * gan_crit(v_mm_gen_score_concap, label)
+        v_loss_1_concap.backward()
+        dis_v_loss_concap += v_loss_1_concap.item()
+
+        # gt
+        label.fill_(1)
+        v_gt_score_concap = dis_model(img_feats_concap, img_feats, box_feats, activities, labels[:, :, 1:-1], mode="visual_concap")
+        # v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, aux_labels)
+        v_gt_score_concap = utils.align_seq(sent_num, v_gt_score_concap)
+        #added for 'Assertion `input >= 0. && input <= 1.` failed.' fault.
+        v_gt_score_concap = torch.clamp(torch.sigmoid(v_gt_score_concap), 0, 1)
+        v_loss_2_concap = gan_crit(v_gt_score_concap, label)
+        v_loss_2_concap.backward()
+        dis_v_loss_concap += v_loss_2_concap.item()
+
+        # update discriminator
+        utils.clip_gradient(dis_optimizer, grad_clip)
+        dis_optimizer.step()
+        torch.cuda.synchronize()
+
     # update language discriminator with [gt (real), gen(fake), neg (fake)]
     if use_lang:
         dis_optimizer.zero_grad()
@@ -217,6 +252,13 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
             v_mm_accuracy = torch.gt(v_gt_score, v_mm_score).cpu().numpy().mean()
             accuracies['dis_v_gen_accuracy'] = v_gen_accuracy
             accuracies['dis_v_mm_accuracy'] = v_mm_accuracy
+
+        if use_vis_concap:
+            v_gen_accuracy_concap = torch.gt(v_gt_score_concap, v_mm_gen_score_concap).cpu().numpy().mean()
+            v_mm_accuracy_concap = torch.gt(v_gt_score_concap, v_mm_score_concap).cpu().numpy().mean()
+            accuracies['dis_v_gen_accuracy_concap'] = v_gen_accuracy_concap
+            accuracies['dis_v_mm_accuracy_concap'] = v_mm_accuracy_concap
+
         if use_lang:
             l_gen_accuracy = torch.gt(l_gt_score, l_gen_score).cpu().numpy().mean()
             l_neg_accuracy = torch.gt(l_gt_score, l_neg_score).cpu().numpy().mean()
@@ -228,4 +270,4 @@ def train_discriminator(dis_model, gen_model, dis_optimizer, gan_crit, loader,
             accuracies['dis_p_gen_accuracy'] = p_gen_accuracy
             accuracies['dis_p_neg_accuracy'] = p_neg_accuracy
 
-    return [dis_v_loss, dis_l_loss, dis_p_loss], accuracies, wrapped, sent_num
+    return [dis_v_loss, dis_v_loss_concap, dis_l_loss, dis_p_loss], accuracies, wrapped, sent_num

@@ -11,14 +11,17 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from .Attention import Attention
 
+
 def concat_scores(scores):
     return torch.cat([score.unsqueeze(1) for score in scores], 1)
+
 
 def make_one_hot_encoding(seq,vocab_size):
     sent_onehot = torch.zeros(seq.size(0),vocab_size).cuda()
     sent_onehot.scatter_(1,seq,1)
     sent_onehot[:,0] = 0
     return sent_onehot
+
 
 class NonLinearLayer(nn.Module):
     def __init__(self, in_size, out_size, dropout):
@@ -44,6 +47,7 @@ class Classifier(nn.Module):
     def forward(self,emb):
         return self.main(emb)
 
+
 class HybridDiscriminator(nn.Module):
     def __init__(self,opt):
         super(HybridDiscriminator,self).__init__()
@@ -51,6 +55,7 @@ class HybridDiscriminator(nn.Module):
         self.visual = None
         self.lang = LanguageModel(opt)
         self.visual = MultiModalAttEarlyFusion(opt)
+        self.visual_concap = MultiModalAttEarlyFusionConcap(opt)
         self.par = ParagraphModel(opt)
 
     def forward(self, *args, **kwargs):
@@ -61,6 +66,9 @@ class HybridDiscriminator(nn.Module):
 
     def forward_visual(self, fc_feats, img_feats, box_feats, activity_labels, seq):
         return self.visual(fc_feats, img_feats, box_feats, activity_labels, seq)
+
+    def forward_visual_concap(self, img_feats_concap, img_feats, box_feats, activity_labels, seq):
+        return self.visual_concap(img_feats_concap, img_feats, box_feats, activity_labels, seq)
 
     def forward_lang(self, seq):
         return self.lang(seq)
@@ -73,6 +81,7 @@ class HybridDiscriminator(nn.Module):
     def get_moe_weights(self,seq):
         return self.visual.get_moe_weights(seq)
 
+
 # low rank bilinear pooling
 class JointEmbedVideoModel2(nn.Module):
     def __init__(self, rnn_size):
@@ -84,6 +93,7 @@ class JointEmbedVideoModel2(nn.Module):
 
     def forward(self,visual,sent):
         return self.classify(visual * sent)
+
 
 class MultiModalAttEarlyFusion(nn.Module):
     def __init__(self, opt):
@@ -265,6 +275,7 @@ class MultiModalAttEarlyFusion(nn.Module):
         scores = concat_scores(scores)
         return scores
 
+
 class LanguageModel(nn.Module):
     def __init__(self,opt):
         super(LanguageModel, self).__init__()
@@ -348,6 +359,7 @@ class LanguageModel(nn.Module):
             score = self.classify(sent_embed).squeeze(1).squeeze(1)
             scores.append(score)
         return concat_scores(scores)
+
 
 class ParagraphModel(nn.Module):
     def __init__(self,opt):
@@ -439,9 +451,10 @@ class ParagraphModel(nn.Module):
             p_scores[:, i + 1] = p_score
         return p_scores
 
-class MultiModalAttEarlyFusion_img(nn.Module):
+
+class MultiModalAttEarlyFusionConcap(nn.Module):
     def __init__(self, opt):
-        super(MultiModalAttEarlyFusion, self).__init__()
+        super(MultiModalAttEarlyFusionConcap, self).__init__()
         self.vocab_size = opt.vocab_size
         self.seq_length = opt.seq_length
 
@@ -457,17 +470,24 @@ class MultiModalAttEarlyFusion_img(nn.Module):
         self.input_encoding_size = opt.d_input_encoding_size
         self.use_mean = opt.use_mean
 
-        # video features
-        self.use_video = opt.d_use_video
-        self.fc_feat_size = opt.fc_feat_size
-        if self.use_video:
-            self.frame_embed = nn.Linear(self.fc_feat_size, self.rnn_size)
-            self.video_attention = Attention(self.rnn_size)
-            self.video_classifier = JointEmbedVideoModel2(self.rnn_size)
+        # # video features
+        # self.use_video = opt.d_use_video
+        # self.fc_feat_size = opt.fc_feat_size
+        # if self.use_video:
+        #     self.frame_embed = nn.Linear(self.fc_feat_size, self.rnn_size)
+        #     self.video_attention = Attention(self.rnn_size)
+        #     self.video_classifier = JointEmbedVideoModel2(self.rnn_size)
+
+        # img features for concap
+        self.use_img_concap = opt.d_use_img_concap
+        self.img_feat_size = opt.img_feat_size
+        if self.use_img_concap:
+            self.img_embed_concap = nn.Linear(self.img_feat_size, self.rnn_size)
+            self.img_attention_concap = Attention(self.rnn_size)
+            self.img_classifier_concap = JointEmbedVideoModel2(self.rnn_size)
 
         # img features
         self.use_img = opt.d_use_img
-        self.img_feat_size = opt.img_feat_size
         if self.use_img:
             self.img_embed = nn.Linear(self.img_feat_size, self.rnn_size)
             self.img_attention = Attention(self.rnn_size)
@@ -502,7 +522,7 @@ class MultiModalAttEarlyFusion_img(nn.Module):
             self.word_embed = nn.Embedding(self.vocab_size + 2, self.input_encoding_size)
 
         # nonlinear layer used for late fusion
-        self.moe_fc = nn.Linear(self.rnn_size, self.use_video + self.use_img +
+        self.moe_fc = nn.Linear(self.rnn_size, self.use_img_concap + self.use_img +
                                                self.use_box + self.use_activity_labels)
 
         self.dropout = nn.Dropout(self.drop_prob_lm)
@@ -514,11 +534,16 @@ class MultiModalAttEarlyFusion_img(nn.Module):
 
     def init_weights(self):
         initrange = 0.1
-        if self.use_video:
+        # if self.use_video:
+        #     if self.use_mean:
+        #         self.video_encode.weight.data.uniform_(-initrange, initrange)
+        #     else:
+        #         self.frame_embed.weight.data.uniform_(-initrange, initrange)
+        if self.use_img_concap:
             if self.use_mean:
-                self.video_encode.weight.data.uniform_(-initrange, initrange)
+                self.img_encode_concap.weight.data.uniform_(-initrange, initrange)
             else:
-                self.frame_embed.weight.data.uniform_(-initrange, initrange)
+                self.img_embed_concap.weight.data.uniform_(-initrange, initrange)
         if self.use_img:
             if self.use_mean:
                 self.img_encode.weight.data.uniform_(-initrange, initrange)
@@ -561,9 +586,12 @@ class MultiModalAttEarlyFusion_img(nn.Module):
             return state.transpose(0,1)
 
     def attention_encoder(self, feats, sent, mode):
-        if mode == "video":
-            embed = self.frame_embed
-            attention = self.video_attention
+        # if mode == "video":
+        #     embed = self.frame_embed
+        #     attention = self.video_attention
+        if mode == "img_concap":
+            embed = self.img_embed_concap
+            attention = self.img_attention_concap
         elif mode == "img":
             embed = self.img_embed
             attention = self.img_attention
@@ -582,7 +610,7 @@ class MultiModalAttEarlyFusion_img(nn.Module):
             moe_weights = F.softmax(moe_weights, dim=1)
             return moe_weights
 
-    def forward(self, fc_feats, img_feats, box_feats, activity_labels, seq):
+    def forward(self, img_feats_concap, img_feats, box_feats, activity_labels, seq):
 
         batch_size = seq.size(0)
         sent_size = seq.size(1)
@@ -597,9 +625,12 @@ class MultiModalAttEarlyFusion_img(nn.Module):
             # mixture weight
             moe_weights = self.moe_fc(sent_embed)
             moe_weights = F.softmax(moe_weights, dim=1)
-            if self.use_video:
-                video, _ = self.attention_encoder(fc_feats[:, n], sent_embed, 'video')
-                multi_score.append(self.video_classifier(video,sent_embed))
+            # if self.use_video:
+            #     video, _ = self.attention_encoder(fc_feats[:, n], sent_embed, 'video')
+            #     multi_score.append(self.video_classifier(video,sent_embed))
+            if self.use_img_concap:
+                image_concap, _ = self.attention_encoder(img_feats_concap[:, n], sent_embed, 'img_concap')
+                multi_score.append(self.img_classifier_concap(image_concap,sent_embed))
             if self.use_img:
                 image, _ = self.attention_encoder(img_feats[:, n], sent_embed, 'img')
                 multi_score.append(self.img_classifier(image,sent_embed))
@@ -618,3 +649,4 @@ class MultiModalAttEarlyFusion_img(nn.Module):
             scores.append(score)
         scores = concat_scores(scores)
         return scores
+

@@ -89,6 +89,8 @@ parser.add_argument('--verbose_video', type=int, default=1,
 # weights for hybrid discriminator
 parser.add_argument('--vis_weight', type=float, default=0.8,
                 help='weight for visual discriminator in adversarial inference')
+parser.add_argument('--visual_weight_concap', type=float, default=0.5,
+                help='weight for visual discriminator in adversarial inference for Conceptual Captions')
 parser.add_argument('--lang_weight', type=float, default=0.2,
                 help='weight for lang discriminator in adversarial inference')
 parser.add_argument('--pair_weight', type=float, default=1.0,

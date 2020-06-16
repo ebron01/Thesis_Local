@@ -174,6 +174,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
     predictions = []
 
     vis_weight = eval_kwargs.get('vis_weight', 0.8)
+    vis_weight_concap = eval_kwargs.get('vis_weight_concap', 0.5)
     lang_weight = eval_kwargs.get('lang_weight', 0.2)
     pair_weight = eval_kwargs.get('pair_weight', 1.0)
 
@@ -183,10 +184,13 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         assert gan_crit is not None
         dis_model.eval()
         scores = {'v_gen_scores' : [], 'v_gt_scores' : [], 'v_mm_scores' : [], 'v_mm_gen_scores' : [],
+                  'v_gen_scores_concap': [], 'v_gt_scores_concap': [], 'v_mm_scores_concap': [], 'v_mm_gen_scores_concap': [],
                   'l_gen_scores' : [], 'l_gt_scores' : [], 'l_neg_scores': [],
                   'p_gen_scores' : [], 'p_gt_scores' : [], 'p_neg_scores': []}
         v_gen_accuracy = []
         v_mm_accuracy = []
+        v_gen_accuracy_concap = []
+        v_mm_accuracy_concap = []
         l_gen_accuracy = []
         l_neg_accuracy = []
         p_gen_accuracy = []
@@ -197,10 +201,10 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         n = n + loader.batch_size
 
         tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['aux_labels'], data['mm_labels'],
-               data['masks'], data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
+               data['masks'], data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities'], data['img_feats_concap']]
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
         fc_feats, img_feats, box_feats, mm_fc_feats, att_feats, labels, aux_labels, mm_labels, masks, att_masks, activities, \
-        mm_img_feats, mm_box_feats, mm_activities = tmp
+        mm_img_feats, mm_box_feats, mm_activities, img_feats_concap = tmp
         sent_num = data['sent_num']
 
         torch.manual_seed(1234)
@@ -233,6 +237,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 best_seq = None
                 for s in range(max(sent_num)):
                     v_score_list = np.zeros((loader.batch_size, num_samples))
+                    v_score_list_concap = np.zeros((loader.batch_size, num_samples))
                     l_score_list = np.zeros((loader.batch_size, num_samples))
                     p_score_list = np.zeros((loader.batch_size, num_samples))
                     prob_score_list = np.zeros((loader.batch_size, num_samples))
@@ -242,6 +247,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     for i in range(num_samples):
                         fc_feats_s = fc_feats[:, s]
                         img_feats_s = img_feats[:, s]
+                        img_feats_s_concap = img_feats_concap[:, s]
                         box_feats_s = box_feats[:, s]
                         aux_labels_s = aux_labels[:, s]
                         start = time.time()
@@ -256,6 +262,10 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                             v_score = dis_model(fc_feats_s.unsqueeze(1), img_feats_s.unsqueeze(1), box_feats_s.unsqueeze(1),
                                                 activities, seq.unsqueeze(1)).squeeze()
                             v_score_list[:, i] = v_score
+
+                            v_score_concap = dis_model(img_feats_s_concap.unsqueeze(1), img_feats_s.unsqueeze(1), box_feats_s.unsqueeze(1),
+                                                activities, seq.unsqueeze(1), mode="visual_concap").squeeze()
+                            v_score_list_concap[:, i] = v_score_concap
 
                             vis_time = time.time()
                            # print('vis_time:', vis_time - sample_time)
@@ -274,7 +284,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                                 pair_time = time.time()
                                 # print('pair_time:', pair_time - lang_time)
 
-                            score_list[:,i] = vis_weight * v_score_list[:, i] + lang_weight * l_score_list[:, i] + pair_weight * p_score_list[:,i]
+                            score_list[:,i] = vis_weight * v_score_list[:, i] + vis_weight_concap * v_score_list_concap[:, i] + lang_weight * l_score_list[:, i] + pair_weight * p_score_list[:,i]
 
                         sample_list[:, i] = seq.cpu().numpy()
                         context_list[:, i] = context.squeeze(1)
@@ -316,22 +326,28 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
                 v_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, seq.cuda())
                 v_gen_score = utils.align_seq(sent_num, v_gen_score)
+                v_gen_score_concap = dis_model(img_feats_concap, img_feats, box_feats, activities, seq.cuda(), mode="visual_concap")
+                v_gen_score_concap = utils.align_seq(sent_num, v_gen_score_concap)
                 l_gen_score = dis_model(seq.cuda(), mode='lang')
                 l_gen_score = utils.align_seq(sent_num, l_gen_score)
                 p_gen_score = dis_model(seq.cuda(), mode='par')
                 p_gen_score = utils.align_seq(sent_num,p_gen_score)
                 scores['v_gen_scores'].extend(v_gen_score)
+                scores['v_gen_scores_concap'].extend(v_gen_score_concap)
                 scores['l_gen_scores'].extend(l_gen_score)
                 scores['p_gen_scores'].extend(p_gen_score)
 
 
                 v_gt_score = dis_model(fc_feats, img_feats, box_feats, activities, labels[:,:,1:-1])
                 v_gt_score = utils.align_seq(sent_num, v_gt_score)
+                v_gt_score_concap = dis_model(img_feats_concap, img_feats, box_feats, activities, labels[:,:,1:-1], mode="visual_concap")
+                v_gt_score_concap = utils.align_seq(sent_num, v_gt_score_concap)
                 l_gt_score = dis_model(labels[:,:,1:-1], mode='lang')
                 l_gt_score = utils.align_seq(sent_num, l_gt_score)
                 p_gt_score = dis_model(labels[:,:,1:-1], mode='par')
                 p_gt_score = utils.align_seq(sent_num, p_gt_score)
                 scores['v_gt_scores'].extend(v_gt_score)
+                scores['v_gt_scores_concap'].extend(v_gt_score_concap)
                 scores['l_gt_scores'].extend(l_gt_score)
                 scores['p_gt_scores'].extend(p_gt_score)
 
@@ -340,12 +356,20 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 v_mm_score = utils.align_seq(sent_num, v_mm_score)
                 v_mm_gen_score = dis_model(fc_feats, img_feats, box_feats, activities, mm_seq.cuda())
                 v_mm_gen_score = utils.align_seq(sent_num, v_mm_gen_score)
+
+                v_mm_score_concap = dis_model(img_feats_concap, img_feats, box_feats, activities, mm_labels[:,:,1:-1])
+                v_mm_score_concap = utils.align_seq(sent_num, v_mm_score_concap)
+                v_mm_gen_score_concap = dis_model(img_feats_concap, img_feats, box_feats, activities, mm_seq.cuda())
+                v_mm_gen_score_concap = utils.align_seq(sent_num, v_mm_gen_score_concap)
+
                 l_neg_score = dis_model(neg_lang_labels, mode='lang')
                 l_neg_score = utils.align_seq(sent_num, l_neg_score)
                 p_neg_score = dis_model(neg_pair_labels, mode='par')
                 p_neg_score = utils.align_seq(sent_num, p_neg_score)
                 scores['v_mm_scores'].extend(v_mm_score)
                 scores['v_mm_gen_scores'].extend(v_mm_gen_score)
+                scores['v_mm_scores_concap'].extend(v_mm_score_concap)
+                scores['v_mm_gen_scores_concap'].extend(v_mm_gen_score_concap)
                 scores['l_neg_scores'].extend(l_neg_score)
                 scores['p_neg_scores'].extend(p_neg_score)
 
@@ -371,8 +395,9 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     'timestamp': data['infos'][k]['timestamp'].tolist(),
                      'activity' : data['infos'][k]['activity']
                      }
-            with open('weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
-                np.save(f, attention_max[k])
+            if dis:
+                with open('weights/' + str(data['infos'][k]['id'] + '_' + str(k) + '.npy'), 'w') as f:
+                    np.save(f, attention_max[k])
             # calculate accuracy
             if dis:
 
@@ -381,6 +406,11 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                 entry['v_gt_score'] = v_gt_score[k].item()
                 entry['v_mm_score'] = v_mm_score[k].item()
                 entry['v_mm_gen_score'] = v_mm_gen_score[k].item()
+                entry['v_gen_score_concap'] = v_gen_score_concap[k].item()
+                entry['v_gt_score_concap'] = v_gt_score_concap[k].item()
+                entry['v_mm_score_concap'] = v_mm_score_concap[k].item()
+                entry['v_mm_gen_score_concap'] = v_mm_gen_score_concap[k].item()
+
                 ga = 0
                 ma = 0
                 if entry['v_gt_score'] > entry['v_mm_gen_score']:
@@ -389,6 +419,15 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
                     ma = 1
                 v_gen_accuracy.append(ga)
                 v_mm_accuracy.append(ma)
+
+                ga = 0
+                ma = 0
+                if entry['v_gt_score_concap'] > entry['v_mm_gen_score_concap']:
+                    ga = 1
+                if entry['v_gt_score_concap'] > entry['v_mm_score_concap']:
+                    ma = 1
+                v_gen_accuracy_concap.append(ga)
+                v_mm_accuracy_concap.append(ma)
 
                 entry['l_gen_score'] = l_gen_score[k].item()
                 entry['l_gt_score'] = l_gt_score[k].item()
@@ -420,8 +459,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
 
             if verbose:
                 if dis:
-                    print_str = 'video %s: activity: %s; caption: %s; cc: %s; gt: %s; mm: %s; v_gen_score: %5f; v_gt_score: %5f; v_mm_score %5f' \
-                                % (entry['video_id'], entry['activity'], entry['caption'], entry['aux'], entry['gt'], entry['mm'], entry['v_gen_score'], entry['v_gt_score'], entry['v_mm_score'])
+                    print_str = 'video %s: activity: %s; caption: %s; cc: %s; gt: %s; mm: %s; v_gen_score: %5f; v_gt_score: %5f; v_mm_score %5f; v_gen_score_concap: %5f; v_gt_score_concap: %5f; v_mm_score_concap %5f' \
+                                % (entry['video_id'], entry['activity'], entry['caption'], entry['aux'], entry['gt'], entry['mm'], entry['v_gen_score'], entry['v_gt_score'], entry['v_mm_score'], entry['v_gen_score_concap'], entry['v_gt_score_concap'], entry['v_mm_score_concap'])
                     print_str = '%s; l_gen_score: %5f; l_gt_score: %5f; p_gen_score: %5f; p_gt_score: %5f;' \
                                 % (print_str, entry['l_gen_score'], entry['l_gt_score'], entry['p_gen_score'], entry['p_gt_score'])
                     print(print_str)
@@ -440,6 +479,8 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             if dis:
                 v_gen_accuracy.pop()
                 v_mm_accuracy.pop()
+                v_gen_accuracy_concap.pop()
+                v_mm_accuracy_concap.pop()
                 l_gen_accuracy.pop()
             cur_id = predictions[-1]['video_id']
             if cur_id != img_id:
@@ -457,8 +498,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             break
         if num_videos >= 0 and n >= num_videos:
             break
-    with open('attention_weights.json', 'w') as f:
-        json.dump(weights, f)
+
     # Switch back to training mode
     gen_model.train()
 
@@ -480,6 +520,12 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         for mode in ['gen', 'gt', 'mm']:
             dis_infos['v_%s_avg' % mode] = np.mean(scores['v_%s_scores' % mode])
             dis_infos['v_%s_std' % mode] = np.std(scores['v_%s_scores' % mode])
+
+        dis_infos['v_gen_accuracy_concap'] = np.mean(v_gen_accuracy_concap)
+        dis_infos['v_mm_accuracy_concap'] = np.mean(v_mm_accuracy_concap)
+        for mode in ['gen', 'gt', 'mm']:
+            dis_infos['v_%s_avg_concap' % mode] = np.mean(scores['v_%s_scores_concap' % mode])
+            dis_infos['v_%s_std_concap' % mode] = np.std(scores['v_%s_scores_concap' % mode])
 
         dis_infos['l_gen_accuracy'] = np.mean(l_gen_accuracy)
         dis_infos['l_neg_accuracy'] = np.mean(l_neg_accuracy)

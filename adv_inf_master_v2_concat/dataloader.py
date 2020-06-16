@@ -80,6 +80,9 @@ class DataLoader(data.Dataset):
         self.use_img = getattr(opt, 'use_img', 0) or getattr(opt, 'd_use_img', 0)
         if self.use_img:
             self.input_img_dir = self.opt.input_img_dir
+        self.use_img_concap = getattr(opt, 'use_img_concap', 0) or getattr(opt, 'd_use_img_concap', 0)
+        if self.use_img_concap:
+            self.input_img_concap_dir = self.opt.input_img_concap_dir
         self.use_box = getattr(opt, 'use_box', 0) or getattr(opt, 'd_use_box', 0)
         if self.use_box:
             self.input_box_dir = self.opt.input_box_dir
@@ -254,6 +257,11 @@ class DataLoader(data.Dataset):
             if not self.use_img:
                 return None
             tmp_fc_all = np.load(os.path.join(self.input_img_dir, id + '.npy'))
+        elif mode == 'img_concap':
+            if not self.use_img_concap:
+                return None
+            tmp_fc_all = np.load(os.path.join(self.input_img_concap_dir, id + '.npy'))
+            return tmp_fc_all
         else:
             raise AttributeError("mode %s not found" % mode)
         for i in range(sent_num):
@@ -300,6 +308,9 @@ class DataLoader(data.Dataset):
         sent_num_batch = np.zeros(batch_size, dtype='int')
         fc_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.fc_feat_size], dtype = 'float32')
         img_batch = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.img_feat_size], dtype = 'float32')
+
+        img_batch_concap = np.zeros([batch_size, self.max_sent_num, self.max_seg, self.opt.img_feat_size], dtype='float32')
+
         box_batch = np.zeros([batch_size, self.max_sent_num, self.nbox, self.opt.box_feat_size], dtype = 'float32')
 
         # negative inputs for discriminator
@@ -328,9 +339,20 @@ class DataLoader(data.Dataset):
             fc_batch[i,:sent_num] = tmp_fcs[0]
             img_batch[i,:sent_num] = tmp_fcs[1]
             box_batch[i,:sent_num] = tmp_fcs[2]
+            if tmp_fcs[3].shape[0] > 10:
+                # print(tmp_fcs[3].shape[0])
+                tmp_fcs[3] = tmp_fcs[3][:10]
+                # print('sent_num longer than 10 ' + vid_id)
+            if tmp_fcs[3].shape[0] == 0:
+                tmp_fcs[3] = np.load(os.path.join(self.input_img_concap_dir, 'v_QOlSCBRmfWY.npy'))
+                # print('shape 0 : ' + vid_id)
+            try:
+                img_batch_concap[i, :sent_num] = tmp_fcs[3][:sent_num]
+            except:
+                print(vid_id)
+                img_batch_concap[i, :sent_num] = tmp_fcs[3][:sent_num]
             sent_num_batch[i] = sent_num
             label_batch[i, :, 1: self.seq_length + 1] = self.labels[ix]
-
 
             ##this part loads one word from gt label.
             # aux_label_batch[i, :, 1:2] = self.labels[ix][:, :1]
@@ -396,6 +418,7 @@ class DataLoader(data.Dataset):
 
         data['fc_feats'] = np.array(fc_batch)
         data['img_feats'] = np.array(img_batch)
+        data['img_feats_concap'] = np.array(img_batch_concap)
         data['box_feats'] = np.array(box_batch)
         data['labels'] = np.array(label_batch)
         data['aux_labels'] = np.array(aux_label_batch)
@@ -426,7 +449,7 @@ class DataLoader(data.Dataset):
         """This function returns a tuple that is further passed to collate_fn
         """
         return [self.get_seg_batch(index,"video"), self.get_seg_batch(index,"img"),
-                self.get_box_batch(index)], index
+                self.get_box_batch(index), self.get_seg_batch(index,"img_concap")], index
 
     def __len__(self):
         return len(self.info['videos'])
