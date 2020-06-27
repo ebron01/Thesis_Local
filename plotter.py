@@ -6,12 +6,19 @@ SSD_dir = '/home/luchy/Desktop/results'
 HDD_dir = '/media/luchy/HDD/results'
 HDD = os.listdir(HDD_dir)
 SSD = os.listdir(SSD_dir)
+plot_save_dir = 'plots_4Jun'
+
+if not os.path.isdir(os.path.join(SSD_dir, plot_save_dir)):
+    os.mkdir(os.path.join(SSD_dir, plot_save_dir))
+
+# HDD = []
+# SSD = ['attent_visualized_Hybrid_scratch_02_hypersearch']
 
 file_dirs = {'HDD': HDD, 'SSD': SSD}
 for key in file_dirs:
     for file in file_dirs[key]:
-        if file != 'attent_visualized_Hybrid_scratch':
-            continue
+        # if file != 'attent_visualized_Hybrid_scratch':
+        #     continue
         if file == 'plots' or file == 'plots_3Jun':
             continue
         try:
@@ -23,11 +30,11 @@ for key in file_dirs:
             print(e)
             continue
         if key == 'HDD':
-            save_file_gen = os.path.join(HDD_dir, 'plots_3Jun',file) + '_gen'
-            save_file_dis = os.path.join(HDD_dir, 'plots_3Jun', file) + '_dis'
+            save_file_gen = os.path.join(HDD_dir, plot_save_dir, file) + '_gen'
+            save_file_dis = os.path.join(HDD_dir, plot_save_dir, file) + '_dis'
         else:
-            save_file_gen = os.path.join(SSD_dir, 'plots_3Jun',file) + '_gen1'
-            save_file_dis = os.path.join(SSD_dir, 'plots_3Jun', file) + '_dis1'
+            save_file_gen = os.path.join(SSD_dir, plot_save_dir, file) + '_gen1'
+            save_file_dis = os.path.join(SSD_dir, plot_save_dir, file) + '_dis1'
         plot_label_gen = 'Generator losses plot for %s generator'% file
         plot_label_dis = 'Discriminator losses for %s discriminator'% file
 
@@ -65,13 +72,13 @@ for key in file_dirs:
         g_val_epoch_loss_plot = []
         for key in g_val_epoch_loss.keys():
             g_val_epoch_loss_plot.append(g_val_epoch_loss[key])
-        import numpy as np
-        g_loss_epoch_plot1 = np.load(os.path.join(SSD_dir, file, 'gen_histories.npy'))
-        a = {index: v for index, v in np.ndenumerate(g_loss_epoch_plot1)}
-        g_loss_epoch_plot1 = a[()]
-        g_loss_epoch_plot = []
-        for key in g_loss_epoch_plot1.keys():
-            g_loss_epoch_plot.append(g_loss_epoch_plot1[key])
+        # import numpy as np
+        # g_loss_epoch_plot1 = np.load(os.path.join(SSD_dir, file, 'gen_histories.npy'))
+        # a = {index: v for index, v in np.ndenumerate(g_loss_epoch_plot1)}
+        # g_loss_epoch_plot1 = a[()]
+        # g_loss_epoch_plot = []
+        # for key in g_loss_epoch_plot1.keys():
+        #     g_loss_epoch_plot.append(g_loss_epoch_plot1[key])
         x_for_v = range(len(g_val_epoch_loss_plot))
         x_for_t = range(len(g_loss_epoch_plot))
         # plt.plot(iter, iter_loss, '-b', label='g_loss')

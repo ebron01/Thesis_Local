@@ -296,7 +296,8 @@ def train(opt):
                 "dis_p_gen_accuracy : %.6f | dis_p_neg_accuracy : %.6f | dis_s_gen_accuracy : %.6f"% (accuracies['dis_v_gen_accuracy'], accuracies['dis_v_mm_accuracy'], accuracies['dis_l_gen_accuracy'], \
                                                                          accuracies['dis_l_neg_accuracy'], accuracies['dis_p_gen_accuracy'], accuracies['dis_p_neg_accuracy'], \
                                                                          accuracies['dis_s_gen_accuracy']))
-
+            if d_iter % 200 == 0:
+                print('learning rate ', str(opt.current_lr))
             # Log Losses
             if d_iter % opt.losses_log_every == 0:
                 d_loss_history[d_iter] = {'dis_v_loss': dis_v_loss, 'dis_l_loss': dis_l_loss, 'dis_p_loss': dis_p_loss, 'dis_s_loss': dis_s_loss, 'd_epoch': d_epoch}
