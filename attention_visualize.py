@@ -8,11 +8,10 @@ import json
 from copy import deepcopy
 import numpy as np
 
-
-exp_name = 'result_concat_aux_attent_concat_visualized_mmu'
-weight_path = '/home/luchy/Desktop/results/%s/weights'% exp_name
-plot_path = '/home/luchy/Desktop/results/%s/plots'%exp_name
-date = '_6May'
+exp_name = 'result_concat_aux_attent_concat_visualized_weights_masked'
+weight_path = '/media/luchy/HDD/results/%s/weights'% exp_name
+plot_path = '/home/luchy/Desktop/AttentionGraphs/plots_7Tem'
+date = '_gen31_dis7_2May'
 if not os.path.exists(plot_path):
     os.mkdir(plot_path)
 
@@ -32,9 +31,13 @@ for key in generated_captions_results.keys():
     generated_captions.update({key: captions})
 
 files = os.listdir(weight_path)
-
+print(len(files))
 attention = {}
+count = 0
 for file in files:
+    if count % 100 == 0:
+        print count
+    count += 1
     attention[file.strip('.npy')] = np.load(os.path.join(weight_path, file))
 
 attention_weights = {}
@@ -44,12 +47,7 @@ for key in attention.keys():
     attention_weights.update({key.rsplit('_', 1)[0]: {}})
 
 attention_weights_sent = deepcopy(attention_weights)
-
-val_vid_keys = ['v_2Iakg-Z-iXM', 'v_fJNauQt9Di0', 'v_7qBA7XPDsC4', 'v_sAAARH12tdc',
-                'v_YzcgGHmfaKE', 'v_5y9Lw8--ulU', 'v_2SYTRqm4Ym4', 'v_Ti1ZaH0VGfg',
-                'v_ywsH9kD033I', 'v_XbkGlZTlixw', 'v_hzuQYOG0a_g', 'v_5SNtTQZnN4g']
-
-vid_key = 'v_5SNtTQZnN4g'
+vid_key = 'v_fJNauQt9Di0'
 count = 0
 for key in attention.keys():
     if vid_key not in key:
@@ -175,6 +173,8 @@ def showasfigure():
         plt.clf()
 
 def showAttention():
+    color_map = plt.cm.get_cmap('magma_r')
+    reversed_color_map = color_map.reversed()
     for sent_num in range(len(attention_weights_sent[vid_key])):
         attent_alternatif = attention_weights_sent_alternatif[vid_key][sent_num]
 
@@ -191,14 +191,15 @@ def showAttention():
 
         caption = generated_captions[vid_key][sent_num].split()
         sent_cc_np_vp = cc_np_vp[vid_key][sent_num]
-        sent_cc_np_vp.append('no word')
+        sent_cc_np_vp.append('no bias')
 
         # Set up figure with colorbar
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        plt.title('Masked Attention Results for ' + str(vid_key) + ' Event ' + str(sent_num))
+        #plt.title('Masked Attention Results for ' + str(vid_key) + ' Event ' + str(sent_num))
 
-        cax = ax.matshow(attention.T, cmap='magma_r', vmin=0, vmax=1) #cmap='bone'
+        #cax = ax.matshow(attention.T, cmap='magma_r', vmin=0, vmax=1) #cmap='bone'
+        cax = ax.matshow(attention.T, cmap=reversed_color_map, vmin=0, vmax=1)  # cmap='bone'
         divider = make_axes_locatable(ax)
         cax1 = divider.append_axes("right", size=0.11, pad=0.3) #"4%"
         fig.colorbar(cax, cax=cax1)
