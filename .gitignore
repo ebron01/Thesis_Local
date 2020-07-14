@@ -79,3 +79,4 @@ adv_inf_master_v2_gen/parsers/cc_not_parsed_paragraph_closest1.json
 adv_inf_master_v2_concat/weights/*
 **.idea
 .DS_Store
+word2vec_custom.model

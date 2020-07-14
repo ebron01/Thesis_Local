@@ -18,6 +18,12 @@ from six.moves import cPickle
 import time
 import opts
 
+from slackclient import SlackClient
+import json
+
+slack_token = "xoxp-1086129891559-1100862096098-1086137403783-011e0e52b6dd62116d7fa4c39b5a90be"
+sc = SlackClient(slack_token)
+
 def extend_paragraph(sent_num,par_score):
     new_score = par_score.new(sum(sent_num)).zero_()
     m = 0
@@ -197,6 +203,14 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
         data = loader.get_batch(split)
         n = n + loader.batch_size
 
+        #this sends iteration information in slack
+        response = sc.api_call(
+            "chat.postMessage",
+                channel="#advinf",
+                text='val iteration' + str(n)
+        )
+        json.dumps(response)
+
         tmp = [data['fc_feats'], data['img_feats'], data['box_feats'], data['mm_fc_feats'], data['att_feats'], data['labels'], data['aux_labels'], data['mm_labels'],
                data['masks'], data['att_masks'], data['activities'], data['mm_img_feats'], data['mm_box_feats'], data['mm_activities']]
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
@@ -217,6 +231,7 @@ def eval_split(gen_model, crit, loader, dis_model=None, gan_crit=None, classifie
             gen_seq = utils.align_seq(sent_num, gen_seq)
             loss = crit(gen_seq, utils.align_seq(sent_num, labels)[:, 1:], utils.align_seq(sent_num, masks)[:, 1:]).item()
             losses.append(loss)
+
 
             # use greedy max for inference
             if sample_max:
